@@ -2,8 +2,8 @@ import db from "@/drizzle/src/index";
 import { inventory } from "@/drizzle/src/db/schema";
 
 export const getInventory = async () => {
-  const inventory = await db.select().from(inventory);
-  return inventory;
+  const allInventory = await db.select().from(inventory);
+  return allInventory;
 };
 
 export const getInventoryById = async (id) => {

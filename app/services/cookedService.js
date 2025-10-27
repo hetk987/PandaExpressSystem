@@ -2,8 +2,8 @@ import db from "@/drizzle/src/index";
 import { cooked } from "@/drizzle/src/db/schema";
 
 export const getCooked = async () => {
-  const cooked = await db.select().from(cooked);
-  return cooked;
+  const allCooked = await db.select().from(cooked);
+  return allCooked;
 };
 
 export const getCookedById = async (id) => {

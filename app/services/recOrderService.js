@@ -2,8 +2,8 @@ import db from "@/drizzle/src/index";
 import { recOrderJunc } from "@/drizzle/src/db/schema";
 
 export const getRecOrderJuncs = async () => {
-  const recOrderJuncs = await db.select().from(recOrderJunc);
-  return recOrderJuncs;
+  const allRecOrderJuncs = await db.select().from(recOrderJunc);
+  return allRecOrderJuncs;
 };
 
 export const getRecOrderJuncById = async (id) => {

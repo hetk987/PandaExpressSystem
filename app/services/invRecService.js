@@ -3,8 +3,8 @@ import db from "@/drizzle/src/index";
 import { invRecJunc } from "@/drizzle/src/db/schema";
 
 export const getInvRecJuncs = async () => {
-  const invRecJuncs = await db.select().from(invRecJunc);
-  return invRecJuncs;
+  const allInvRecJuncs = await db.select().from(invRecJunc);
+  return allInvRecJuncs;
 };
 
 export const getInvRecJuncById = async (id) => {

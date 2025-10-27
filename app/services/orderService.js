@@ -2,8 +2,8 @@ import db from "@/drizzle/src/index";
 import { orders } from "@/drizzle/src/db/schema";
 
 export const getOrders = async () => {
-  const orders = await db.select().from(orders);
-  return orders;
+  const allOrders = await db.select().from(orders);
+  return allOrders;
 };
 
 export const getOrderById = async (id) => {
@@ -17,7 +17,10 @@ export const createOrder = async (order) => {
 };
 
 export const updateOrder = async (id, order) => {
-  const updatedOrder = await db.update(orders).set(order).where(eq(orders.id, id));
+  const updatedOrder = await db
+    .update(orders)
+    .set(order)
+    .where(eq(orders.id, id));
   return updatedOrder;
 };
 

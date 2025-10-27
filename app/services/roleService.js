@@ -2,8 +2,8 @@ import db from "@/drizzle/src/index";
 import { roles } from "@/drizzle/src/db/schema";
 
 export const getRoles = async () => {
-  const roles = await db.select().from(roles);
-  return roles;
+  const allRoles = await db.select().from(roles);
+  return allRoles;
 };
 
 export const getRoleById = async (id) => {
