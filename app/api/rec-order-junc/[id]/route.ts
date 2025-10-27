@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRecOrderJuncById, updateRecOrderJunc, deleteRecOrderJunc } from '@/app/services/recOrderServices';
+import { getRecOrderJuncById, updateRecOrderJunc, deleteRecOrderJunc } from '@/app/services/recOrderService';
 
 export async function GET(
     request: NextRequest,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCookedById, updateCooked, deleteCooked } from '@/app/services/cookedServices';
+import { getCookedById, updateCooked, deleteCooked } from '@/app/services/cookedService';
 
 export async function GET(
     request: NextRequest,

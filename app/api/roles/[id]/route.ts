@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRoleById, updateRole, deleteRole } from '@/app/services/roleServices';
+import { getRoleById, updateRole, deleteRole } from '@/app/services/roleService';
 
 export async function GET(
     request: NextRequest,

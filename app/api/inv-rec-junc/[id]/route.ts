@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getInvRecJuncById, updateInvRecJunc, deleteInvRecJunc } from '@/app/services/invRecServices';
+import { getInvRecJuncById, updateInvRecJunc, deleteInvRecJunc } from '@/app/services/invRecService';
 
 export async function GET(
     request: NextRequest,

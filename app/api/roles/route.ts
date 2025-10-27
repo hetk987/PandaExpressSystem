@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRoles, createRole } from '@/app/services/roleServices';
+import { getRoles, createRole } from '@/app/services/roleService';
 
 export async function GET() {
     try {

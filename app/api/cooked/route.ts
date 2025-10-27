@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCooked, createCooked } from '@/app/services/cookedServices';
+import { getCooked, createCooked } from '@/app/services/cookedService';
 
 export async function GET() {
     try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getInventoryById, updateInventory, deleteInventory } from '@/app/services/inventoryServices';
+import { getInventoryById, updateInventory, deleteInventory } from '@/app/services/inventoryService';
 
 export async function GET(
     request: NextRequest,

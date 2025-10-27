@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderById, updateOrder, deleteOrder } from '@/app/services/orderServices';
+import { getOrderById, updateOrder, deleteOrder } from '@/app/services/orderService';
 
 export async function GET(
     request: NextRequest,

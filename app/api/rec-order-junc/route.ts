@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRecOrderJuncs, createRecOrderJunc } from '@/app/services/recOrderServices';
+import { getRecOrderJuncs, createRecOrderJunc } from '@/app/services/recOrderService';
 
 export async function GET() {
     try {
