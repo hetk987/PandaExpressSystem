@@ -9,12 +9,17 @@ import {
 export function AppSidebar() {
   return (
     <Sidebar>
-      <SidebarHeader />
-      <SidebarContent>
-        <SidebarGroup />
-        <SidebarGroup />
-      </SidebarContent>
-      <SidebarFooter />
+      <SidebarHeader>
+            <h1>Panda Express</h1>
+        </SidebarHeader>
+        <SidebarContent>
+            <SidebarGroup>
+                <p>Hey</p>
+            </SidebarGroup>
+            <SidebarGroup>
+                <p>Hi</p>
+            </SidebarGroup>
+        </SidebarContent>
     </Sidebar>
   )
 }
