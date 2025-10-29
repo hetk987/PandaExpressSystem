@@ -40,6 +40,15 @@ export const employees = pgTable("employees", {
     check("employees_is_employed_check", sql`is_employed = ANY (ARRAY[true, false])`),
 ]);
 
+export const mealTypes = pgTable("meal_types", {
+    name: text("type_name").primaryKey().notNull(),
+    sides: integer("sides").notNull(),
+    entrees: integer("entrees").notNull(),
+    drinks: integer("drinks").notNull(),
+    price: real("price").notNull(),
+    image: text("image_file_path"),
+});
+
 export const orders = pgTable("orders", {
     tax: real().notNull(),
     totalCost: real("total_cost").notNull(),
