@@ -10,14 +10,23 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-            <h1>Panda Express</h1>
+            <a href="/home">Panda Express</a>
         </SidebarHeader>
         <SidebarContent>
             <SidebarGroup>
-                <p>Hey</p>
+                <a href="/home/build">Build Your Own</a>
             </SidebarGroup>
             <SidebarGroup>
-                <p>Hi</p>
+                <a href="/home/entree">Entrees</a>
+            </SidebarGroup>
+            <SidebarGroup>
+                <a href="/home/side">Sides</a>
+            </SidebarGroup>
+            <SidebarGroup>
+                <a href="/home/drink">Drinks</a>
+            </SidebarGroup>
+            <SidebarGroup>
+                <a href="/home/appetizer">Appetizers</a>
             </SidebarGroup>
         </SidebarContent>
     </Sidebar>
