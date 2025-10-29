@@ -28,3 +28,8 @@ export const deleteOrder = async (id) => {
   const deletedOrder = await db.delete(orders).where(eq(orders.id, id));
   return deletedOrder;
 };
+
+export const getIncompleteOrders = async () => {
+  const incompleteOrders = await db.select().from(orders).where(eq(orders.isCompleted, false));
+  return incompleteOrders;
+};
