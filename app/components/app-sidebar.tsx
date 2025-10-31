@@ -75,8 +75,9 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     tooltip={item.title}
-                    className="text-white hover:text-black"
+                    className="text-white hover:text-black border rounded-md"
                     isActive={pathname.startsWith(item.href)}
+                    size="lg"
                   >
                     <a href={item.href}>
                       <item.icon />
