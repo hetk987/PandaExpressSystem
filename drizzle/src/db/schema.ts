@@ -4,13 +4,6 @@ import { sql } from "drizzle-orm"
 export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
 
 
-export const teamMembers = pgTable("team_members", {
-    studentName: text("student_name").primaryKey().notNull(),
-    section: integer(),
-    favoriteMovie: text("favorite_movie"),
-    favoriteHoliday: date("favorite_holiday"),
-});
-
 export const roles = pgTable("roles", {
     name: text().notNull(),
     canDiscount: boolean("can_discount").notNull(),
