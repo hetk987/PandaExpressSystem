@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </main>
         </SidebarProvider>
 
-        <footer className="fixed bottom-0 w-full bg-dark-red p-4 text-white z-50 flex flex-row justify-between">
+        <footer className="fixed bottom-0 w-full bg-dark-red p-4 min-h-15 text-white flex flex-row justify-between">
             <a href="/">Quit</a>
 
             <div className="flex h-5 items-center space-x-4">
