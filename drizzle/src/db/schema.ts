@@ -46,6 +46,7 @@ export const orders = pgTable("orders", {
     id: integer().primaryKey().notNull(),
     orderTime: text("order_time").notNull(),
     cashierId: integer("cashier_id").notNull(),
+    isCompleted: boolean("is_completed").notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.cashierId],
