@@ -12,8 +12,8 @@ import {
 
 const MealCard = (props: {
     name: string,
-    image: string,
-    key: number
+    image?: string,
+    key?: number
 }) => {
   return (
     <Item
@@ -22,17 +22,20 @@ const MealCard = (props: {
         className="shadow-sm bg-red-500 p-0 overflow-hidden rounded-lg"
         >
         <ItemHeader className="p-0 bg-white">
-            <Image
-            src={props.image}
-            alt={props.name}
-            width={128}
-            height={128}
-            className="aspect-square w-full object-cover"
-            />
+            {props.image ?
+              <Image
+                src={props.image}
+                alt={props.name}
+                width={128}
+                height={128}
+                className="aspect-square w-full object-cover"
+              />
+            : <p className="">+</p>
+          }
         </ItemHeader>
 
         <ItemContent className="bg-red-500 text-white flex items-center justify-center p-3 pt-0">
-            <ItemTitle className="text-md font-semibold text-center">{props.name}</ItemTitle>
+            <ItemTitle className="text-md font-semibold text-center min-h-10">{props.name}</ItemTitle>
         </ItemContent>
     </Item>
   );
