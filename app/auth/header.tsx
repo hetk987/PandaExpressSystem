@@ -1,4 +1,3 @@
-// Header.tsx
 import React from 'react';
 import { useAuth } from './auth-context';
 
