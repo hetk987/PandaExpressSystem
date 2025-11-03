@@ -53,7 +53,7 @@ export default function Build({
                     </a>
                 ))}
             </div>
-            <div className="flex flex-col w-100 bg-red-50">
+            <div className="flex flex-col w-70 bg-red-50 p-10">
                 <p>{mealtype?.name}</p>
                 <MealCard name="Entree 1"/>
             </div>

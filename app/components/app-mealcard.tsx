@@ -30,7 +30,7 @@ const MealCard = (props: {
                 height={128}
                 className="aspect-square w-full object-cover"
               />
-            : <p className="">+</p>
+            : <div className="aspect-square w-full object-cover flex justify-center items-center"><p className="font-extrabold text-3xl">+</p></div>
           }
         </ItemHeader>
 
