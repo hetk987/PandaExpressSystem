@@ -4,13 +4,6 @@ import { sql } from "drizzle-orm"
 export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
 
 
-export const teamMembers = pgTable("team_members", {
-    studentName: text("student_name").primaryKey().notNull(),
-    section: integer(),
-    favoriteMovie: text("favorite_movie"),
-    favoriteHoliday: date("favorite_holiday"),
-});
-
 export const roles = pgTable("roles", {
     name: text().notNull(),
     canDiscount: boolean("can_discount").notNull(),
@@ -40,12 +33,22 @@ export const employees = pgTable("employees", {
     check("employees_is_employed_check", sql`is_employed = ANY (ARRAY[true, false])`),
 ]);
 
+export const mealTypes = pgTable("meal_types", {
+    name: text("type_name").primaryKey().notNull(),
+    sides: integer("sides").notNull(),
+    entrees: integer("entrees").notNull(),
+    drinks: integer("drinks").notNull(),
+    price: real("price").notNull(),
+    image: text("image_file_path"),
+});
+
 export const orders = pgTable("orders", {
     tax: real().notNull(),
     totalCost: real("total_cost").notNull(),
     id: integer().primaryKey().notNull(),
     orderTime: text("order_time").notNull(),
     cashierId: integer("cashier_id").notNull(),
+    isCompleted: boolean("is_completed").notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.cashierId],
