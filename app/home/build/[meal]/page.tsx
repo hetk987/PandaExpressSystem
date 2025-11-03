@@ -20,7 +20,6 @@ export default function Build({
 
     // fetch recipes
     useEffect(() => {
-
         const fetchData = async () => {
             try {
                 let response = await fetch(`/api/recipes`);
@@ -53,7 +52,7 @@ export default function Build({
                     </a>
                 ))}
             </div>
-            <div className="flex flex-col w-70 bg-red-50 p-10">
+            <div className="flex flex-col w-70 p-10">
                 <p>{mealtype?.name}</p>
                 <MealCard name="Entree 1"/>
             </div>
