@@ -20,6 +20,8 @@ export type Order = {
     totalCost: number;
     orderTime: string;
     cashierId: number;
+    orderInfo?: OrderInfo;
+    isCompleted: boolean;
 }
 
 export type Inventory = {
@@ -76,4 +78,37 @@ export type Recipe = {
 }
 
 export type RecipeType = "Side" | "Entree" | "Drink";
+
+// Order Info JSON Structure Types
+export type RecipeSelection = {
+    recipeId: number;
+    recipeName: string;
+g};
+
+export type MealSelections = {
+    entrees: RecipeSelection[];
+    sides: RecipeSelection[];
+    drinks: RecipeSelection[];
+};
+
+export type MealOrder = {
+    mealType: string;
+    mealTypeId: string;
+    quantity: number;
+    price: number;
+    selections: MealSelections;
+};
+
+export type IndividualItem = {
+    recipeId: number;
+    recipeName: string;
+    recipeType: RecipeType;
+    quantity: number;
+    price: number;
+};
+
+export type OrderInfo = {
+    meals: MealOrder[];
+    individualItems: IndividualItem[];
+};
 
