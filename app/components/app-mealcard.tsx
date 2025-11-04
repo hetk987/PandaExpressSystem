@@ -14,12 +14,13 @@ const MealCard = (props: {
     name: string,
     image?: string,
     key?: number
+    className?: string
 }) => {
   return (
     <Item
         key={props.name}
         variant="outline"
-        className="shadow-md bg-red-500 p-0 overflow-hidden rounded-lg"
+        className={`shadow-md bg-red-500 p-0 overflow-hidden rounded-lg ${props.className}`}
         >
         <ItemHeader className="p-0 bg-white">
             {props.image ?
