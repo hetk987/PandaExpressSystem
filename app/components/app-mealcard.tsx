@@ -19,7 +19,7 @@ const MealCard = (props: {
     <Item
         key={props.name}
         variant="outline"
-        className="shadow-sm bg-red-500 p-0 overflow-hidden rounded-lg"
+        className="shadow-md bg-red-500 p-0 overflow-hidden rounded-lg"
         >
         <ItemHeader className="p-0 bg-white">
             {props.image ?
