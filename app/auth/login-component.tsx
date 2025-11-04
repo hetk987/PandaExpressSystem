@@ -3,38 +3,45 @@
 import React, { useState } from "react";
 import { useAuth } from "./auth-context";
 
-const VALID_PIN = "1234"; // TODO Should change this to be based on the database.
-
 const LoginComponent = () => {
     const { login } = useAuth();
-    const [pin, setPin] = useState("");
+    const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (pin === VALID_PIN) {
-            login("Employee"); // TODO make this the employee name from the database corresponding to the pin
+        try {
+            const response = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.error || "Login failed");
+                return;
+            }
+
+            login(data.name); // you can also store data.roleId for permissions
             setError("");
-        } else {
-            setError("Invalid PIN. Please try again.");
+        } catch {
+            setError("Network error");
         }
 
-        setPin("");
+        setPassword("");
     };
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="flex flex-col items-center space-y-3"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-3">
             <input
                 type="password"
-                placeholder="Enter PIN"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="border px-3 py-2 rounded-md text-black text-center tracking-widest w-40"
-                maxLength={4}
             />
             <button
                 type="submit"
@@ -42,7 +49,7 @@ const LoginComponent = () => {
             >
                 Log In
             </button>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-red-500">{error}</p>}
         </form>
     );
 };
