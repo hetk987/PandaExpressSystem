@@ -83,7 +83,7 @@ export type RecipeType = "Side" | "Entree" | "Drink";
 export type RecipeSelection = {
     recipeId: number;
     recipeName: string;
-g};
+};
 
 export type MealSelections = {
     entrees: RecipeSelection[];
