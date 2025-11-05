@@ -6,8 +6,8 @@ This document describes the JSON structure used for the `orderInfo` field in the
 
 The `orderInfo` JSONB field stores complete order information, including:
 
-- **Meals**: Meal types with selected entrees, sides, and drinks
-- **Individual Items**: Standalone recipes (sides, entrees, or drinks) ordered separately
+-   **Meals**: Meal types with selected entrees, sides, and drinks
+-   **Individual Items**: Standalone recipes (sides, entrees, or drinks) ordered separately
 
 **Note**: Pricing calculations (subtotal, tax, totalCost) and notes are stored in separate fields on the `orders` table.
 
@@ -17,80 +17,78 @@ The `orderInfo` JSONB field stores complete order information, including:
 
 ```json
 {
-  "meals": [
-    {
-      "mealType": "Kids Meal",
-      "mealTypeId": "Kids Meal",
-      "quantity": 2,
-      "price": 8.99,
-      "selections": {
-        "entrees": [
-          {
-            "recipeId": 5,
-            "recipeName": "Chicken Nuggets"
-          }
-        ],
-        "sides": [
-          {
-            "recipeId": 12,
-            "recipeName": "French Fries"
-          }
-        ],
-        "drinks": [
-          {
-            "recipeId": 20,
-            "recipeName": "Apple Juice"
-          }
-        ]
-      }
-    },
-    {
-      "mealType": "Combo Meal",
-      "mealTypeId": "Combo Meal",
-      "quantity": 1,
-      "price": 12.99,
-      "selections": {
-        "entrees": [
-          {
-            "recipeId": 3,
-            "recipeName": "Burger"
-          }
-        ],
-        "sides": [
-          {
-            "recipeId": 12,
-            "recipeName": "French Fries"
-          },
-          {
-            "recipeId": 15,
-            "recipeName": "Onion Rings"
-          }
-        ],
-        "drinks": [
-          {
-            "recipeId": 18,
-            "recipeName": "Coca Cola"
-          }
-        ]
-      }
-    }
-  ],
-  "individualItems": [
-    {
-      "recipeId": 25,
-      "recipeName": "Caesar Salad",
-      "recipeType": "Side",
-      "quantity": 1,
-      "price": 4.99
-    },
-    {
-      "recipeId": 30,
-      "recipeName": "Water",
-      "recipeType": "Drink",
-      "quantity": 2,
-      "price": 0.0
-    }
-  ]
+    "meals": [
+        {
+            "mealType": "Kids Meal",
+            "quantity": 2,
+            "price": 8.99,
+            "selections": {
+                "entrees": [
+                    {
+                        "recipeId": 5,
+                        "recipeName": "Chicken Nuggets"
+                    }
+                ],
+                "sides": [
+                    {
+                        "recipeId": 12,
+                        "recipeName": "French Fries"
+                    }
+                ],
+                "drinks": [
+                    {
+                        "recipeId": 20,
+                        "recipeName": "Apple Juice"
+                    }
+                ]
+            }
+        },
+        {
+            "mealType": "Combo Meal",
+            "quantity": 1,
+            "price": 12.99,
+            "selections": {
+                "entrees": [
+                    {
+                        "recipeId": 3,
+                        "recipeName": "Burger"
+                    }
+                ],
+                "sides": [
+                    {
+                        "recipeId": 12,
+                        "recipeName": "French Fries"
+                    },
+                    {
+                        "recipeId": 15,
+                        "recipeName": "Onion Rings"
+                    }
+                ],
+                "drinks": [
+                    {
+                        "recipeId": 18,
+                        "recipeName": "Coca Cola"
+                    }
+                ]
+            }
+        }
+    ],
+    "individualItems": [
+        {
+            "recipeId": 25,
+            "recipeName": "Caesar Salad",
+            "recipeType": "Side",
+            "quantity": 1,
+            "price": 4.99
+        },
+        {
+            "recipeId": 30,
+            "recipeName": "Water",
+            "recipeType": "Drink",
+            "quantity": 2,
+            "price": 0.0
+        }
+    ]
 }
 ```
 
@@ -101,7 +99,6 @@ The `orderInfo` JSONB field stores complete order information, including:
   "meals": [
     {
       "mealType": "<meal type name>",
-      "mealTypeId": "<meal type name>",
       "quantity": <number>,
       "price": <number>,
       "selections": {
@@ -142,34 +139,33 @@ The `orderInfo` JSONB field stores complete order information, including:
 
 ### Root Level
 
-- **`meals`** (array): Array of meal type orders
-- **`individualItems`** (array): Array of standalone recipe items
+-   **`meals`** (array): Array of meal type orders
+-   **`individualItems`** (array): Array of standalone recipe items
 
 ### Meal Object
 
-- **`mealType`** (string): Display name of the meal type
-- **`mealTypeId`** (string): Identifier for the meal type (matches `mealTypes.name`)
-- **`quantity`** (number): Number of this meal type ordered
-- **`price`** (number): Price per meal
-- **`selections`** (object): Selected recipes for this meal
-  - **`entrees`** (array): Selected entree recipes
-  - **`sides`** (array): Selected side recipes
-  - **`drinks`** (array): Selected drink recipes
+-   **`mealType`** (string): Display name of the meal type
+-   **`quantity`** (number): Number of this meal type ordered
+-   **`price`** (number): Price per meal
+-   **`selections`** (object): Selected recipes for this meal
+    -   **`entrees`** (array): Selected entree recipes
+    -   **`sides`** (array): Selected side recipes
+    -   **`drinks`** (array): Selected drink recipes
 
 ### Selection Object (within meals)
 
-- **`recipeId`** (number): ID of the recipe (matches `recipes.id`)
-- **`recipeName`** (string): Display name of the recipe
+-   **`recipeId`** (number): ID of the recipe (matches `recipes.id`)
+-   **`recipeName`** (string): Display name of the recipe
 
 **Note**: Recipe prices can be retrieved from the `recipes` table if needed.
 
 ### Individual Item Object
 
-- **`recipeId`** (number): ID of the recipe (matches `recipes.id`)
-- **`recipeName`** (string): Display name of the recipe
-- **`recipeType`** (string): Type of recipe - "Side", "Entree", or "Drink"
-- **`quantity`** (number): Number of this item ordered
-- **`price`** (number): Price per item
+-   **`recipeId`** (number): ID of the recipe (matches `recipes.id`)
+-   **`recipeName`** (string): Display name of the recipe
+-   **`recipeType`** (string): Type of recipe - "Side", "Entree", or "Drink"
+-   **`quantity`** (number): Number of this item ordered
+-   **`price`** (number): Price per item
 
 ## Alternative: Compact Structure
 
@@ -177,27 +173,27 @@ If you prefer a more compact structure that relies on database relationships:
 
 ```json
 {
-  "meals": [
-    {
-      "mealTypeId": "Kids Meal",
-      "quantity": 2,
-      "selectedRecipeIds": {
-        "entrees": [5],
-        "sides": [12],
-        "drinks": [20]
-      }
-    }
-  ],
-  "individualItems": [
-    {
-      "recipeId": 25,
-      "quantity": 1
-    },
-    {
-      "recipeId": 30,
-      "quantity": 2
-    }
-  ]
+    "meals": [
+        {
+            "mealType": "Kids Meal",
+            "quantity": 2,
+            "selectedRecipeIds": {
+                "entrees": [5],
+                "sides": [12],
+                "drinks": [20]
+            }
+        }
+    ],
+    "individualItems": [
+        {
+            "recipeId": 25,
+            "quantity": 1
+        },
+        {
+            "recipeId": 30,
+            "quantity": 2
+        }
+    ]
 }
 ```
 
@@ -221,6 +217,18 @@ If you prefer a more compact structure that relies on database relationships:
 
 ## Database Schema Reference
 
-- **Meal Types**: `mealTypes` table (name, sides, entrees, drinks, price)
-- **Recipes**: `recipes` table (id, name, type, pricePerServing)
-- **Recipe Types**: Enum values - "Side", "Entree", "Drink"
+-   **Meal Types**: `mealTypes` table (name, sides, entrees, drinks, price)
+-   **Recipes**: `recipes` table (id, name, type, pricePerServing)
+-   **Recipe Types**: Enum values - "Side", "Entree", "Drink"
+
+## Meal Types Catalog
+
+The following meal types are available (no numeric ID; `mealType` is the key):
+
+| Name         | Sides | Entrees | Drinks | Price | Image Path                 |
+| ------------ | :---: | :-----: | :----: | ----: | -------------------------- |
+| Bowl         |   1   |    1    |   0    |   8.4 | /images/bowl.png           |
+| Plate        |   1   |    2    |   0    |  10.1 | /images/plate.png          |
+| Bigger Plate |   1   |    3    |   0    |  11.7 | /images/bigger_plate.png   |
+| A La Carte   |   0   |    0    |   0    |   0.0 | /images/alacarte_small.png |
+| Drink        |   0   |    0    |   1    |   2.2 | /images/drink.png          |

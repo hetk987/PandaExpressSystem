@@ -20,7 +20,7 @@ export type Order = {
     totalCost: number;
     orderTime: string;
     cashierId: number;
-    orderInfo?: OrderInfo;
+    orderInfo: OrderInfo;
     isCompleted: boolean;
 }
 
@@ -83,7 +83,7 @@ export type RecipeType = "Side" | "Entree" | "Drink";
 export type RecipeSelection = {
     recipeId: number;
     recipeName: string;
-g};
+};
 
 export type MealSelections = {
     entrees: RecipeSelection[];
@@ -93,7 +93,6 @@ export type MealSelections = {
 
 export type MealOrder = {
     mealType: string;
-    mealTypeId: string;
     quantity: number;
     price: number;
     selections: MealSelections;
