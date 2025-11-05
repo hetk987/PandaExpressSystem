@@ -41,10 +41,9 @@ export default function Build({
                     setMealtypes(data);
                 }
 
-                const start = mealtype && mealtype?.entrees > 0 ? "Entree" : "Side";
-                setCurrentMenu(start);
+                setCurrentMenu("Entree");
                 setSelection({
-                    type: start,
+                    type: "Entree",
                     num: 0
                 });
 
@@ -56,8 +55,12 @@ export default function Build({
         fetchData();
     }, []);
 
+    const mealName = useMemo(
+        () => meal.replaceAll('%20', ' '), [meal]
+    );
+
     const mealtype = useMemo(
-        () => mealtypes.find(t => t.name === meal), [meal, mealtypes]
+        () => mealtypes.find(t => t.name === meal.replaceAll('%20', ' ')), [mealName, mealtypes]
     );
 
     const entrees = useMemo(
@@ -84,7 +87,7 @@ export default function Build({
             </div>
             <div className="w-70">
                 <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{meal}</h2>
+                    <h2 className=" text-3xl font-bold ">{mealName}</h2>
                 </div>
                 <div className="flex flex-col p-10 gap-10 mb-10">
                     {entrees?.map((e, i) => (
