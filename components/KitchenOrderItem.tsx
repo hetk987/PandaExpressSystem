@@ -24,6 +24,33 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                 <CardContent className="px-4 py-3">
                     <div className="border-b-2 border-black pb-3 mb-3">
                         <div className="space-y-2">
+                            {order.orderInfo.meals.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className="flex justify-between items-start gap-2"
+                                >
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">
+                                            {item.quantity}x {item.mealType}
+                                        </div>
+                                        {item.selections.entrees.map((entree, j) => (
+                                            <div className="text-xs text-muted-foreground" key={j}>
+                                                {entree.recipeName}
+                                            </div>
+                                        ))}
+                                        {item.selections.sides.map((side, j) => (
+                                            <div className="text-xs text-muted-foreground" key={j}>
+                                                {side.recipeName}
+                                            </div>
+                                        ))}
+                                        {item.selections.drinks.map((drink, j) => (
+                                            <div className="text-xs text-muted-foreground" key={j}>
+                                                {drink.recipeName}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                             {order.orderInfo.individualItems.map((item) => (
                                 <div
                                     key={item.recipeId}
@@ -32,9 +59,6 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                                     <div className="flex-1">
                                         <div className="font-bold text-lg">
                                             {item.quantity}x {item.recipeName}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {item.recipeType}
                                         </div>
                                     </div>
                                 </div>

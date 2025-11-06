@@ -2,7 +2,8 @@
 
 import { KitchenOrderItem } from "@/components/KitchenOrderItem";
 import type { Order } from "@/lib/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { DrawerDemo } from "../components/app-kitchen-drawer";
 
 // Temporary mock data for testing
 const TEMP_ORDERS: Order[] = [
@@ -14,7 +15,21 @@ const TEMP_ORDERS: Order[] = [
         cashierId: 5,
         isCompleted: false,
         orderInfo: {
-            meals: [],
+            meals: [
+                {
+                    mealType: "Plate",
+                    quantity: 3,
+                    price: 8.50,
+                    selections: {
+                        entrees: [
+                            {recipeId: 1, recipeName: "Sugar Chicken"},
+                            {recipeId: 1, recipeName: "Sugar Chicken"}
+                        ],
+                        sides: [{recipeId: 3, recipeName: "Chow Mein"}],
+                        drinks: [{recipeId: 4, recipeName: "Diet Pepsi"}]
+                    }
+                }
+            ],
             individualItems: [
                 {
                     recipeId: 1,
@@ -145,7 +160,7 @@ const TEMP_ORDERS: Order[] = [
 ];
 
 export default function KitchenPage() {
-    const [openOrders] = useState<Order[]>(TEMP_ORDERS);
+    const [openOrders, setOpenOrders] = useState<Order[]>(TEMP_ORDERS);
 
     // Uncomment below to fetch from API instead of using temporary data
     // useEffect(() => {
@@ -160,12 +175,17 @@ export default function KitchenPage() {
     return (
         <div className="min-h-screen bg-white">
             {/* Header */}
-            <div className="border-b border-black bg-white px-6 py-4">
-                <h1 className="text-2xl font-mono font-bold">KITCHEN ORDERS</h1>
-                <p className="text-sm text-gray-600 font-mono mt-1">
-                    Active Orders: {openOrders.length}
-                </p>
+            <div className="border-b border-black bg-white px-6 py-4 flex flex-row justify-between">
+                <div>
+                    <h1 className="text-2xl font-mono font-bold">KITCHEN ORDERS</h1>
+                    <p className="text-sm text-gray-600 font-mono mt-1">
+                        Active Orders: {openOrders.length}
+                    </p>
+                </div>
+                <DrawerDemo />
             </div>
+
+            
 
             {/* Orders Grid */}
             <div className="p-6">
