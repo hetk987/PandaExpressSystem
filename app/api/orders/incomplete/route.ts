@@ -6,6 +6,10 @@ export async function GET() {
         const incompleteOrders = await getIncompleteOrders();
         return NextResponse.json(incompleteOrders, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch incomplete orders' }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json(
+            { error: 'Failed to fetch incomplete orders', details: errorMessage },
+            { status: 500 }
+        );
     }
 }
