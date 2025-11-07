@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/types";
 
 export function KitchenOrderItem({ order }: { order: Order }) {
+
     return (
         <div className="w-full max-w-md mx-auto">
             <Card className="border-2 border-black">

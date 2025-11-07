@@ -1,8 +1,8 @@
 "use client";
 
 import { KitchenOrderItem } from "@/components/KitchenOrderItem";
-import type { Order } from "@/lib/types";
-import { useState, useEffect } from "react";
+import type { Order, Cooked } from "@/lib/types";
+import { useState, useEffect, useMemo } from "react";
 import { DrawerDemo } from "../components/app-kitchen-drawer";
 
 // Temporary mock data for testing
@@ -161,6 +161,7 @@ const TEMP_ORDERS: Order[] = [
 
 export default function KitchenPage() {
     const [openOrders, setOpenOrders] = useState<Order[]>(TEMP_ORDERS);
+    const [cooked, setCooked] = useState<Cooked[]>([]);
 
     // Uncomment below to fetch from API instead of using temporary data
     // useEffect(() => {
@@ -171,6 +172,23 @@ export default function KitchenPage() {
     //     };
     //     fetchOpenOrders();
     // }, []);
+
+    useEffect(() => {
+        const fetchOpenOrders = async () => {
+            // let response = await fetch("/api/cooked");
+            // let data = await response.json();
+            // setCooked(data);
+
+            const response = await fetch("/api/orders/incomplete");
+            const data = await response.json();
+            setOpenOrders(data);
+        };
+        fetchOpenOrders();
+    }, []);
+
+    const orderItems = useMemo(
+        () => null, []
+    );
 
     return (
         <div className="min-h-screen bg-white">
@@ -184,8 +202,6 @@ export default function KitchenPage() {
                 </div>
                 <DrawerDemo />
             </div>
-
-            
 
             {/* Orders Grid */}
             <div className="p-6">
