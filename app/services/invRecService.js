@@ -1,6 +1,7 @@
 import db from "@/drizzle/src/index";
 
 import { invRecJunc } from "@/drizzle/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const getInvRecJuncs = async () => {
     const allInvRecJuncs = await db.select().from(invRecJunc);
@@ -16,11 +17,13 @@ export const getInvRecJuncById = async (id) => {
 };
 
 export const getInvRecJuncByRecipeId = async (recipeId) => {
-    const invRecJunc = await db
+    console.log("YO YO YO");
+    const output = await db
         .select()
         .from(invRecJunc)
         .where(eq(invRecJunc.recipeId, recipeId));
-    return invRecJunc;
+    console.log(output);
+    return output;
 };
 
 export const createInvRecJunc = async (invRecJunc) => {

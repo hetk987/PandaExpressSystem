@@ -1,5 +1,8 @@
 import db from "@/drizzle/src/index";
 import { recipes } from "@/drizzle/src/db/schema";
+import { getInvRecJuncByRecipeId } from "@/app/services/invRecService";
+import { consumeInventory } from "@/app/services/inventoryService";
+import { eq } from "drizzle-orm";
 
 export const getRecipes = async () => {
   const allRecipes = await db.select().from(recipes);
@@ -30,7 +33,10 @@ export const deleteRecipe = async (id) => {
 };
 
 export const cookIngredients = async (recipeId) => {
+  console.log("COOKING INGREDIENTS");
   const invRecJuncs = await getInvRecJuncByRecipeId(recipeId);
+  console.log("INV REC JUNCS");
+  console.log(invRecJuncs);
   if (!invRecJuncs) {
     throw new Error("Inventory recipe junction not found");
   }

@@ -1,5 +1,7 @@
 import db from "@/drizzle/src/index";
 import { cooked } from "@/drizzle/src/db/schema";
+import { getRecipeById, cookIngredients } from "@/app/services/recipeService";
+import { eq } from "drizzle-orm";
 
 export const getCooked = async () => {
     const allCooked = await db.select().from(cooked);
@@ -15,24 +17,26 @@ export const getCookedById = async (id) => {
 };
 
 export const getCookedByRecipeId = async (recipeId) => {
-    const getCookedByRecipeId = await db
+    const output = await db
         .select()
         .from(cooked)
         .where(eq(cooked.recipeId, recipeId));
-    return getCookedByRecipeId;
+    return output;
 };
 
-export const createCooked = async (cooked) => {
-    const createdCooked = await db.insert(cooked).values(cooked);
-    return createdCooked;
-};
+export const createCooked = async (newCooked) => {
+    const insertData = {
+        recipeId: newCooked.recipeId,
+        currentStock: newCooked.currentStock,
+    };
 
-export const updateCooked = async (id, cooked) => {
-    const updatedCooked = await db
-        .update(cooked)
-        .set(cooked)
-        .where(eq(cooked.id, id));
-    return updatedCooked;
+    const [created] = await db.insert(cooked).values(insertData).returning({
+        id: cooked.id,
+        recipeId: cooked.recipeId,
+        currentStock: cooked.currentStock,
+    });
+
+    return created;
 };
 
 export const cookRecipe = async (recipeId) => {
@@ -41,20 +45,41 @@ export const cookRecipe = async (recipeId) => {
         throw new Error("Recipe not found");
     }
     await cookIngredients(recipeId);
-    if ((cookedByRecipeId = await getCookedByRecipeId(recipeId))) {
-        const updatedCookedReturn = await updateCooked(cookedByRecipeId.id, {
-            currentStock: cookedByRecipeId.currentStock + recipe.quantity,
+    console.log("COOKED INGREDIENTS COOKED");
+    const cookedByRecipeId = await getCookedByRecipeId(recipeId);
+    console.log("COOKED BY RECIPE ID");
+    console.log(cookedByRecipeId);
+    if (cookedByRecipeId.length > 0) {
+        console.log("COOKED BY RECIPE ID");
+        console.log(cookedByRecipeId);
+        const updatedCooked = await updateCooked(cookedByRecipeId[0].id, {
+            currentStock:
+                cookedByRecipeId[0].currentStock + recipe[0].ordersPerBatch,
         });
-        return updatedCookedReturn;
+        console.log("UPDATED COOKED");
+        console.log(updatedCooked);
+        return updatedCooked[0];
     } else {
-        const newCookedReturn = await createCooked({
+        const newCooked = await createCooked({
             recipeId,
-            currentStock: recipe.quantity,
+            currentStock: recipe[0].ordersPerBatch,
         });
-        return newCookedReturn;
+        return newCooked[0];
     }
 };
 
+export const updateCooked = async (id, newCooked) => {
+    const updatedCooked = await db
+        .update(cooked)
+        .set(newCooked)
+        .where(eq(cooked.id, id))
+        .returning({
+            id: cooked.id,
+            recipeId: cooked.recipeId,
+            currentStock: cooked.currentStock,
+        });
+    return updatedCooked;
+};
 export const deleteCooked = async (id) => {
     const deletedCooked = await db.delete(cooked).where(eq(cooked.id, id));
     return deletedCooked;
