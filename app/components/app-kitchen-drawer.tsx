@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Minus, Plus } from "lucide-react"
+import { Cooked, Recipe } from "@/lib/types"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +14,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
-import { CarouselSpacing } from "./app-kitchen-carousel"
+import { KitchenCarousel } from "./app-kitchen-carousel"
 
 const data = [
   {
@@ -58,7 +58,9 @@ const data = [
   },
 ]
 
-export function DrawerDemo() {
+export const KitchenDrawer = (props: {
+    cooked: Cooked[]
+}) => {
   const [goal, setGoal] = React.useState(350)
 
   function onClick(adjustment: number) {
@@ -77,7 +79,7 @@ export function DrawerDemo() {
             <DrawerDescription>Click Food To Cook</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-0 flex justify-center pr-20 pl-20">
-            <CarouselSpacing/>
+            <KitchenCarousel cooked={props.cooked}/>
           </div>
           <DrawerFooter>
             <DrawerClose asChild >

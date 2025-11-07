@@ -111,3 +111,4 @@ export type OrderInfo = {
     individualItems: IndividualItem[];
 };
 
+export type RecipeQuantityMap = Record<number, number>;

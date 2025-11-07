@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import {
   Carousel,
   CarouselContent,
@@ -11,26 +12,30 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
-import { Cooked, Recipe } from "@/lib/types"
+import { Cooked, Recipe, Inventory } from "@/lib/types"
 
-export function CarouselSpacing() {
-    const [cooked, setCooked] = useState<Cooked[]>([]);
+export const KitchenCarousel = (props: {
+    cooked: Cooked[]
+}) => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [inventory, setInventory] = useState<Inventory[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
           try {
-              let response = await fetch(`/api/cooked`);
-              if (response.ok) {
-                  const data = await response.json();
-                  setCooked(data);
-              }
+            // cooked
+            let response = await fetch(`/api/recipes`);
+            if (response.ok) {
+                const data = await response.json();
+                setRecipes(data);
+            }
 
-              response = await fetch(`/api/recipes`);
-              if (response.ok) {
-                  const data = await response.json();
-                  setRecipes(data);
-              }
+            // inventory
+            response = await fetch(`/api/inventory`);
+            if (response.ok) {
+                const data = await response.json();
+                setInventory(data);
+            }
           } catch (error) {
               console.error("Failed to fetch links");
           } 
@@ -38,6 +43,8 @@ export function CarouselSpacing() {
 
       fetchData();
     }, []);
+
+    // Need function, given recipe, determine all inventory and quantity
 
   return (
     <Carousel className="w-full">
@@ -47,11 +54,16 @@ export function CarouselSpacing() {
             <div className="p-1">
               <Card className="h-50">
                 <CardContent className="flex aspect-square items-center justify-center p-3 h-full">
-                    <div className="flex flex-col justify-around">
+                    <div className="flex flex-col justify-around w-full">
                         <div className="text-lg font-semibold min-h-25">{recipe.name}</div>
-                        <div className="min-h-13">
-                            <p>Stock: {cooked.find(c => c.id === recipe.id)?.currentStock ?? 0}</p>
+                        <div className="min-h-13 flex flex-row justify-between w-full">
+                          <div>
+                            <p>Stock: {props.cooked.find(c => c.id === recipe.id)?.currentStock ?? 0}</p>
                             <p>Cooks: {recipe.ordersPerBatch}</p>
+                          </div>
+                          <Button className="w-20 mt-2">
+                            Cook
+                          </Button>
                         </div>
                     </div>
                 </CardContent>

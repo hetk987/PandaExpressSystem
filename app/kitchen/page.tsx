@@ -3,7 +3,8 @@
 import { KitchenOrderItem } from "@/components/KitchenOrderItem";
 import type { Order, Cooked } from "@/lib/types";
 import { useState, useEffect, useMemo } from "react";
-import { DrawerDemo } from "../components/app-kitchen-drawer";
+import { KitchenDrawer} from "../components/app-kitchen-drawer";
+import { extractRecipeQuantities } from "@/lib/utils";
 
 // Temporary mock data for testing
 const TEMP_ORDERS: Order[] = [
@@ -163,31 +164,22 @@ export default function KitchenPage() {
     const [openOrders, setOpenOrders] = useState<Order[]>(TEMP_ORDERS);
     const [cooked, setCooked] = useState<Cooked[]>([]);
 
-    // Uncomment below to fetch from API instead of using temporary data
-    // useEffect(() => {
-    //     const fetchOpenOrders = async () => {
-    //         const response = await fetch("/api/orders/incomplete");
-    //         const data = await response.json();
-    //         setOpenOrders(data);
-    //     };
-    //     fetchOpenOrders();
-    // }, []);
-
     useEffect(() => {
         const fetchOpenOrders = async () => {
-            // let response = await fetch("/api/cooked");
-            // let data = await response.json();
-            // setCooked(data);
+            let response = await fetch("/api/cooked");
+            let data = await response.json();
+            setCooked(data);
 
-            const response = await fetch("/api/orders/incomplete");
-            const data = await response.json();
-            setOpenOrders(data);
+            // response = await fetch("/api/orders/incomplete");
+            // data = await response.json();
+            // setOpenOrders(data);
         };
         fetchOpenOrders();
     }, []);
 
+    // flatten orders to check contents
     const orderItems = useMemo(
-        () => null, []
+        () => openOrders.map(order => extractRecipeQuantities(order.orderInfo)), [openOrders]
     );
 
     return (
@@ -200,7 +192,7 @@ export default function KitchenPage() {
                         Active Orders: {openOrders.length}
                     </p>
                 </div>
-                <DrawerDemo />
+                <KitchenDrawer cooked={cooked}/>
             </div>
 
             {/* Orders Grid */}
