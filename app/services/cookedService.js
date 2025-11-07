@@ -7,16 +7,19 @@ export const getCooked = async () => {
 };
 
 export const getCookedById = async (id) => {
-    const cooked = await db.select().from(cooked).where(eq(cooked.id, id));
-    return cooked;
+    const getCookedById = await db
+        .select()
+        .from(cooked)
+        .where(eq(cooked.id, id));
+    return getCookedById;
 };
 
 export const getCookedByRecipeId = async (recipeId) => {
-    const cooked = await db
+    const getCookedByRecipeId = await db
         .select()
         .from(cooked)
         .where(eq(cooked.recipeId, recipeId));
-    return cooked;
+    return getCookedByRecipeId;
 };
 
 export const createCooked = async (cooked) => {
@@ -38,17 +41,17 @@ export const cookRecipe = async (recipeId) => {
         throw new Error("Recipe not found");
     }
     await cookIngredients(recipeId);
-    if ((cooked = await getCookedByRecipeId(recipeId))) {
-        const updatedCooked = await updateCooked(cooked.id, {
-            currentStock: cooked.currentStock + recipe.quantity,
+    if ((cookedByRecipeId = await getCookedByRecipeId(recipeId))) {
+        const updatedCookedReturn = await updateCooked(cookedByRecipeId.id, {
+            currentStock: cookedByRecipeId.currentStock + recipe.quantity,
         });
-        return updatedCooked;
+        return updatedCookedReturn;
     } else {
-        const newCooked = await createCooked({
+        const newCookedReturn = await createCooked({
             recipeId,
             currentStock: recipe.quantity,
         });
-        return newCooked;
+        return newCookedReturn;
     }
 };
 
