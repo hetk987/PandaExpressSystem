@@ -11,7 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from "@/components/ui/sidebar"
+} from "@/app/components/ui/sidebar"
 import { 
   Home, 
   Utensils, 

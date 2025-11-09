@@ -1,9 +1,9 @@
 "use client"
 
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider } from "@/app/components/ui/sidebar"
 import { AppSidebar } from "../components/app-sidebar"
-import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/app/components/ui/sheet"
+import { Button } from "@/app/components/ui/button"
 import { CreditCard, IdCard, Smartphone } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"

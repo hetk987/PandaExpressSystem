@@ -8,7 +8,7 @@ import {
   ItemGroup,
   ItemHeader,
   ItemTitle,
-} from "@/components/ui/item"
+} from "@/app/components/ui/item"
 
 const MealCard = (props: {
     name: string,
