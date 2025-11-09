@@ -1,5 +1,6 @@
-import { pgTable, text, integer, date, check, boolean, foreignKey, real, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, text, integer, date, check, boolean, foreignKey, real, pgEnum, jsonb } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
+import type { OrderInfo } from "@/lib/types"
 
 export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
 
@@ -48,6 +49,7 @@ export const orders = pgTable("orders", {
     id: integer().primaryKey().notNull(),
     orderTime: text("order_time").notNull(),
     cashierId: integer("cashier_id").notNull(),
+    orderInfo: jsonb("order_info").$type<OrderInfo>(),
     isCompleted: boolean("is_completed").notNull(),
 }, (table) => [
     foreignKey({
