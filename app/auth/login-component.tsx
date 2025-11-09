@@ -25,7 +25,7 @@ const LoginComponent = () => {
                 return;
             }
 
-            login(data.name); // you can also store data.roleId for permissions
+            login(data.name);
             setError("");
         } catch {
             setError("Network error");
