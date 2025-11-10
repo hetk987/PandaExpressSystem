@@ -7,7 +7,7 @@ export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
 export const orders = pgTable("orders", {
 	tax: real().notNull(),
 	totalCost: real().notNull(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "orders_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	orderTime: text().notNull(),
 	cashierId: integer().notNull(),
 	isCompleted: boolean().notNull(),
@@ -22,7 +22,7 @@ export const orders = pgTable("orders", {
 
 export const inventory = pgTable("inventory", {
 	name: text().notNull(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "inventory_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	batchPurchaseCost: real().notNull(),
 	currentStock: integer().notNull(),
 	estimatedUsedPerDay: integer().notNull(),
@@ -30,7 +30,7 @@ export const inventory = pgTable("inventory", {
 
 export const expenses = pgTable("expenses", {
 	cost: real().notNull(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "expenses_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	itemId: integer().notNull(),
 	expenseTime: text().notNull(),
 }, (table) => [
@@ -54,7 +54,7 @@ export const cooked = pgTable("cooked", {
 ]);
 
 export const invRecJunc = pgTable("inv_rec_junc", {
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "inv_rec_junc_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	inventoryId: integer().notNull(),
 	recipeId: integer().notNull(),
 	inventoryQuantity: integer().notNull(),
@@ -73,7 +73,7 @@ export const invRecJunc = pgTable("inv_rec_junc", {
 
 export const recOrderJunc = pgTable("rec_order_junc", {
 	quantity: integer().notNull(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "rec_order_junc_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	recipeId: integer().notNull(),
 	orderId: integer().notNull(),
 }, (table) => [
@@ -92,7 +92,7 @@ export const recOrderJunc = pgTable("rec_order_junc", {
 export const recipes = pgTable("recipes", {
 	name: text().notNull(),
 	image: text(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	pricePerServing: real().notNull(),
 	ordersPerBatch: integer().notNull(),
 	type: recipeType(),
@@ -104,7 +104,7 @@ export const employees = pgTable("employees", {
 	hours: integer().notNull(),
 	password: text().notNull(),
 	isEmployed: boolean().notNull(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "employees_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	roleId: integer().notNull(),
 }, (table) => [
 	foreignKey({
@@ -119,7 +119,7 @@ export const roles = pgTable("roles", {
 	name: text().notNull(),
 	canDiscount: boolean().notNull(),
 	canRestock: boolean().notNull(),
-	id: integer().primaryKey().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "roles_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	canEditEmployees: boolean().notNull(),
 }, (table) => [
 	check("roles_canDiscount_check", sql`"canDiscount" = ANY (ARRAY[true, false])`),

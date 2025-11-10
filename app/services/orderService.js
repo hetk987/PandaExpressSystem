@@ -13,7 +13,7 @@ export const getOrderById = async (id) => {
 };
 
 export const createOrder = async (order) => {
-  const createdOrder = await db.insert(orders).values(order);
+  const [createdOrder] = await db.insert(orders).values(order).returning();
   return createdOrder;
 };
 

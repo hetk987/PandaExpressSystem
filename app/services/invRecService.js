@@ -26,16 +26,20 @@ export const getIngredientsByRecipeId = async (recipeId) => {
     return output;
 };
 
-export const createInvRecJunc = async (invRecJunc) => {
-    const createdInvRecJunc = await db.insert(invRecJunc).values(invRecJunc);
+export const createInvRecJunc = async (invRecJuncData) => {
+    const [createdInvRecJunc] = await db
+        .insert(invRecJunc)
+        .values(invRecJuncData)
+        .returning();
     return createdInvRecJunc;
 };
 
-export const updateInvRecJunc = async (id, invRecJunc) => {
-    const updatedInvRecJunc = await db
+export const updateInvRecJunc = async (id, invRecJuncData) => {
+    const [updatedInvRecJunc] = await db
         .update(invRecJunc)
-        .set(invRecJunc)
-        .where(eq(invRecJunc.id, id));
+        .set(invRecJuncData)
+        .where(eq(invRecJunc.id, id))
+        .returning();
     return updatedInvRecJunc;
 };
 

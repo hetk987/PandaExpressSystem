@@ -46,7 +46,7 @@ export type Cooked = {
 }
 
 export type MealType = {
-    name: string;
+    typeName: string;
     sides: number;
     entrees: number;
     drinks: number;
