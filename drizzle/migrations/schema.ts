@@ -1,4 +1,4 @@
-import { pgTable, foreignKey, real, integer, serial, text, boolean, jsonb, check, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, real, integer, text, boolean, jsonb, check, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
@@ -14,10 +14,10 @@ export const orders = pgTable("orders", {
 	orderInfo: jsonb(),
 }, (table) => [
 	foreignKey({
-		columns: [table.cashierId],
-		foreignColumns: [employees.id],
-		name: "orders_cashierId_fkey"
-	}),
+			columns: [table.cashierId],
+			foreignColumns: [employees.id],
+			name: "orders_cashierId_fkey"
+		}),
 ]);
 
 export const inventory = pgTable("inventory", {
@@ -35,22 +35,22 @@ export const expenses = pgTable("expenses", {
 	expenseTime: text().notNull(),
 }, (table) => [
 	foreignKey({
-		columns: [table.itemId],
-		foreignColumns: [inventory.id],
-		name: "expenses_itemId_fkey"
-	}),
+			columns: [table.itemId],
+			foreignColumns: [inventory.id],
+			name: "expenses_itemId_fkey"
+		}),
 ]);
 
 export const cooked = pgTable("cooked", {
-	id: serial().primaryKey(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "cooked_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	recipeId: integer().notNull(),
 	currentStock: integer().notNull(),
 }, (table) => [
 	foreignKey({
-		columns: [table.recipeId],
-		foreignColumns: [recipes.id],
-		name: "cooked_recipeId_fkey"
-	}),
+			columns: [table.recipeId],
+			foreignColumns: [recipes.id],
+			name: "cooked_recipeId_fkey"
+		}),
 ]);
 
 export const invRecJunc = pgTable("inv_rec_junc", {
@@ -60,15 +60,15 @@ export const invRecJunc = pgTable("inv_rec_junc", {
 	inventoryQuantity: integer().notNull(),
 }, (table) => [
 	foreignKey({
-		columns: [table.inventoryId],
-		foreignColumns: [inventory.id],
-		name: "inv_rec_junc_inventoryId_fkey"
-	}),
+			columns: [table.inventoryId],
+			foreignColumns: [inventory.id],
+			name: "inv_rec_junc_inventoryId_fkey"
+		}),
 	foreignKey({
-		columns: [table.recipeId],
-		foreignColumns: [recipes.id],
-		name: "inv_rec_junc_recipeId_fkey"
-	}),
+			columns: [table.recipeId],
+			foreignColumns: [recipes.id],
+			name: "inv_rec_junc_recipeId_fkey"
+		}),
 ]);
 
 export const recOrderJunc = pgTable("rec_order_junc", {
@@ -78,15 +78,15 @@ export const recOrderJunc = pgTable("rec_order_junc", {
 	orderId: integer().notNull(),
 }, (table) => [
 	foreignKey({
-		columns: [table.recipeId],
-		foreignColumns: [recipes.id],
-		name: "rec_order_junc_recipeId_fkey"
-	}),
+			columns: [table.recipeId],
+			foreignColumns: [recipes.id],
+			name: "rec_order_junc_recipeId_fkey"
+		}),
 	foreignKey({
-		columns: [table.orderId],
-		foreignColumns: [orders.id],
-		name: "rec_order_junc_orderId_fkey"
-	}),
+			columns: [table.orderId],
+			foreignColumns: [orders.id],
+			name: "rec_order_junc_orderId_fkey"
+		}),
 ]);
 
 export const recipes = pgTable("recipes", {
@@ -108,10 +108,10 @@ export const employees = pgTable("employees", {
 	roleId: integer().notNull(),
 }, (table) => [
 	foreignKey({
-		columns: [table.roleId],
-		foreignColumns: [roles.id],
-		name: "employees_roleId_fkey"
-	}),
+			columns: [table.roleId],
+			foreignColumns: [roles.id],
+			name: "employees_roleId_fkey"
+		}),
 	check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
 ]);
 
