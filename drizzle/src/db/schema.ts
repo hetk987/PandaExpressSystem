@@ -1,6 +1,5 @@
-import { pgTable, text, integer, date, check, boolean, foreignKey, real, pgEnum, jsonb } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, real, integer, text, boolean, jsonb, check, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
-import type { OrderInfo } from "@/lib/types"
 
 export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
 
@@ -132,7 +131,45 @@ export const recipes = pgTable("recipes", {
     name: text().notNull(),
     image: text(),
     id: integer().primaryKey().notNull(),
-    pricePerServing: real("pricePerServing").notNull(),
-    ordersPerBatch: integer("ordersPerBatch").notNull(),
+    pricePerServing: real("price_per_serving").notNull(),
+    ordersPerBatch: integer("orders_per_batch").notNull(),
     type: recipeType(),
+});
+
+export const employees = pgTable("employees", {
+    name: text().notNull(),
+    salary: real().notNull(),
+    hours: integer().notNull(),
+    password: text().notNull(),
+    isEmployed: boolean().notNull(),
+    id: integer().primaryKey().notNull(),
+    roleId: integer().notNull(),
+}, (table) => [
+    foreignKey({
+        columns: [table.roleId],
+        foreignColumns: [roles.id],
+        name: "employees_roleId_fkey"
+    }),
+    check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
+]);
+
+export const roles = pgTable("roles", {
+    name: text().notNull(),
+    canDiscount: boolean().notNull(),
+    canRestock: boolean().notNull(),
+    id: integer().primaryKey().notNull(),
+    canEditEmployees: boolean().notNull(),
+}, (table) => [
+    check("roles_canDiscount_check", sql`"canDiscount" = ANY (ARRAY[true, false])`),
+    check("roles_canRestock_check", sql`"canRestock" = ANY (ARRAY[true, false])`),
+    check("roles_canEditEmployees_check", sql`"canEditEmployees" = ANY (ARRAY[true, false])`),
+]);
+
+export const mealTypes = pgTable("meal_types", {
+    typeName: text().primaryKey().notNull(),
+    sides: integer().notNull(),
+    entrees: integer().notNull(),
+    drinks: integer().notNull(),
+    price: real().notNull(),
+    imageFilePath: text(),
 });

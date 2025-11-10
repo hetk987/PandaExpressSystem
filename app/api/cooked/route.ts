@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCooked, createCooked } from '@/app/services/cookedService';
+import { Cooked } from '@/lib/types';
 
 export async function GET() {
     try {
@@ -16,7 +17,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
-        let body;
+        let body: Cooked;
         try {
             body = await request.json();
         } catch {
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+        console.log(body);
 
         const newCooked = await createCooked(body);
         return NextResponse.json(newCooked, { status: 201 });

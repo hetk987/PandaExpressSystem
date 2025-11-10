@@ -5,8 +5,29 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1761574567921,
-      "tag": "0000_aberrant_forge",
+      "when": 1762532614658,
+      "tag": "0000_lumpy_talos",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762532733456,
+      "tag": "0001_woozy_franklin_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762534368916,
+      "tag": "0002_soft_wind_dancer",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762534806140,
+      "tag": "0003_white_franklin_storm",
       "breakpoints": true
     }
   ]

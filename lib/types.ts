@@ -40,7 +40,7 @@ export type Expense = {
 }
 
 export type Cooked = {
-    id: number;
+    id?: number;
     recipeId: number;
     currentStock: number;
 }
