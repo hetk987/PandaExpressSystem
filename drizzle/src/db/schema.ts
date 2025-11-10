@@ -22,9 +22,9 @@ export const employees = pgTable("employees", {
     salary: real().notNull(),
     hours: integer().notNull(),
     password: text().notNull(),
-    isEmployed: boolean("is_employed").notNull(),
+    isEmployed: boolean("isEmployed").notNull(),
     id: integer().primaryKey().notNull(),
-    roleId: integer("role_id").notNull(),
+    roleId: integer("roleId").notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.roleId],
