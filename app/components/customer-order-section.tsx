@@ -3,10 +3,12 @@
 import { Button } from "@/app/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card"
 import { ShoppingCart, Utensils, Clock } from "lucide-react"
-
+import { useRouter } from "next/navigation"
 export default function CustomerOrderSection() {
+  const router = useRouter()
   const handleStartOrder = () => {
     // Navigate to order page or trigger order flow
+    router.push("/home/build")
     console.log("Starting new order...")
   }
 

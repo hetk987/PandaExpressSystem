@@ -20,7 +20,7 @@ export type Order = {
     totalCost: number;
     orderTime: string;
     cashierId: number;
-    orderInfo: OrderInfo;
+    orderInfo?: OrderInfo;
     isCompleted: boolean;
 }
 

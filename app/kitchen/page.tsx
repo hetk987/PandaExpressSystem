@@ -1,6 +1,6 @@
 "use client";
 
-import { KitchenOrderItem } from "@/components/KitchenOrderItem";
+import { KitchenOrderItem } from "../components/KitchenOrderItem";
 import type { Order, Cooked } from "@/lib/types";
 import { useState, useEffect, useMemo } from "react";
 import { KitchenDrawer} from "../components/app-kitchen-drawer";
@@ -179,26 +179,26 @@ export default function KitchenPage() {
     }, []);
 
     // flatten orders to check contents
-    const orderItems = useMemo(() => {
-        const dict: Record<number, RecipeQuantityMap> = {};
-        for (const order of openOrders) {
-            dict[order.id] = extractRecipeQuantities(order.orderInfo);
-        }
-        return dict;
-    }, [openOrders]);
+    // const orderItems = useMemo(() => {
+    //     const dict: Record<number, RecipeQuantityMap> = {};
+    //     for (const order of openOrders) {
+    //         dict[order.id] = extractRecipeQuantities(order.orderInfo);
+    //     }
+    //     return dict;
+    // }, [openOrders]);
 
     // check if we can send an order
-    function isReady(order: Order): boolean {
-        const recipes = orderItems[order.id];
-        for (const [recipe, quantity] of Object.entries(recipes)) {
-            const stock = cooked.find(c => c.recipeId === +recipe)?.currentStock;
+    // function isReady(order: Order): boolean {
+    //     const recipes = orderItems[order.id];
+    //     for (const [recipe, quantity] of Object.entries(recipes)) {
+    //         const stock = cooked.find(c => c.recipeId === +recipe)?.currentStock;
 
-            if (!stock || quantity > stock) {
-                return false;
-            }
-        }
-        return true;
-    }
+    //         if (!stock || quantity > stock) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 
     // TODO write function to see if we can cook something
 

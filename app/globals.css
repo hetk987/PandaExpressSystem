@@ -128,6 +128,9 @@
   --color-panda-red: var(--panda-red);
   --color-panda-dark-red: var(--panda-dark-red);
   --color-panda-light-red: var(--panda-light-red);
+  /* Aliases for shorter class names */
+  --color-dark-red: var(--panda-dark-red);
+  --color-bright-red: var(--panda-red);
   --color-neutral-50: var(--neutral-50);
   --color-neutral-100: var(--neutral-100);
   --color-neutral-200: var(--neutral-200);
