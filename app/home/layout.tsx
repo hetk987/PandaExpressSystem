@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
+import Link from "next/link";
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
     const { meals, individualItems, clearCart } = useCart();
@@ -104,7 +105,9 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             </SidebarProvider>
 
             <footer className="fixed bottom-0 w-full bg-dark-red text-white flex flex-row justify-between items-stretch h-16">
-                <a href="/">Quit</a>
+                <Link href="/" className="flex items-center px-6 h-full border-r-2 border-white/80 text-white transition-colors hover:bg-white/10 active:bg-white/20">
+                    Quit
+                </Link>
 
                 <Sheet>
                     <SheetTrigger className="h-full">

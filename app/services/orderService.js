@@ -8,8 +8,9 @@ export const getOrders = async () => {
 };
 
 export const getOrderById = async (id) => {
-    const order = await db.select().from(orders).where(eq(orders.id, id));
-    return order;
+    console.log("id: " + id);
+    const [output] = await db.select().from(orders).where(eq(orders.id, id));
+    return output;
 };
 
 export const createOrder = async (order) => {

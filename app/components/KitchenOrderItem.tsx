@@ -1,10 +1,27 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Order } from "@/lib/types";
+import { toast } from "sonner";
 
 export function KitchenOrderItem({ order }: { order: Order }) {
+    async function completeOrder(id: number): Promise<void> {
+        const response = await fetch(`/api/orders/complete/${id}`, {
+            method: "PUT",
+        });
+        if (response.ok) {
+            toast.success("Order completed successfully");
+        } else {
+            toast.error("Failed to complete order");
+        }
+        window.location.reload();
+    }
 
     return (
         <div className="w-full max-w-md mx-auto">
@@ -34,21 +51,36 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                                         <div className="font-bold text-lg">
                                             {item.quantity}x {item.mealType}
                                         </div>
-                                        {item.selections.entrees.map((entree, j) => (
-                                            <div className="text-xs text-muted-foreground" key={j}>
-                                                {entree.recipeName}
-                                            </div>
-                                        ))}
-                                        {item.selections.sides.map((side, j) => (
-                                            <div className="text-xs text-muted-foreground" key={j}>
-                                                {side.recipeName}
-                                            </div>
-                                        ))}
-                                        {item.selections.drinks.map((drink, j) => (
-                                            <div className="text-xs text-muted-foreground" key={j}>
-                                                {drink.recipeName}
-                                            </div>
-                                        ))}
+                                        {item.selections.entrees.map(
+                                            (entree, j) => (
+                                                <div
+                                                    className="text-xs text-muted-foreground"
+                                                    key={j}
+                                                >
+                                                    {entree.recipeName}
+                                                </div>
+                                            )
+                                        )}
+                                        {item.selections.sides.map(
+                                            (side, j) => (
+                                                <div
+                                                    className="text-xs text-muted-foreground"
+                                                    key={j}
+                                                >
+                                                    {side.recipeName}
+                                                </div>
+                                            )
+                                        )}
+                                        {item.selections.drinks.map(
+                                            (drink, j) => (
+                                                <div
+                                                    className="text-xs text-muted-foreground"
+                                                    key={j}
+                                                >
+                                                    {drink.recipeName}
+                                                </div>
+                                            )
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -87,7 +119,7 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                     {/* Complete Button */}
                     <Button
                         className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800"
-                        onClick={() => console.log("Order completed")}
+                        onClick={async () => await completeOrder(order.id)}
                     >
                         COMPLETE ORDER
                     </Button>

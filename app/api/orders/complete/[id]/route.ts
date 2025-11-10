@@ -5,21 +5,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        console.log("In api/orders/complete/[id]/route.ts");
         const { id: idString } = await params;
         const id = parseInt(idString);
         if (isNaN(id)) {
             return NextResponse.json({ error: 'Invalid ID: must be a number' }, { status: 400 });
         }
-        const order: Order[] = await getOrderById(id) as unknown as Order[];
+        const order: Order = await getOrderById(id) as unknown as Order;
+        console.log("Order: " + JSON.stringify(order));
         if (!order) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
-        if (order[0].isCompleted) {
+        if (order.isCompleted) {
             return NextResponse.json({ error: 'Order already completed' }, { status: 400 });
         }
         const updatedOrder = await updateOrder(id, { isCompleted: true });
-        const mealOrder: MealOrder[] = order[0].orderInfo?.meals as unknown as MealOrder[];
-        const individualItemOrder: IndividualItem[] = order[0].orderInfo?.individualItems as unknown as IndividualItem[];
+        const mealOrder: MealOrder[] = order.orderInfo?.meals as unknown as MealOrder[];
+        const individualItemOrder: IndividualItem[] = order.orderInfo?.individualItems as unknown as IndividualItem[];
 
         for (const meal of mealOrder) {
             for (const recipe of meal.selections.entrees) {
@@ -35,7 +37,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         for (const item of individualItemOrder) {
             await consumeCooked(item.recipeId, item.quantity);
         }
-        return NextResponse.json({ message: 'Order completed successfully' + updatedOrder }, { status: 200 });
+        return NextResponse.json({ message: 'Order completed successfully' + JSON.stringify(updatedOrder) }, { status: 200 });
 
     }
     catch (error) {
