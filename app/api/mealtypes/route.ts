@@ -6,6 +6,7 @@ export async function GET() {
         const all = await getMealTypes();
         return NextResponse.json(all, { status: 200 });
     } catch (error) {
+        console.error('Error fetching meal types:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(
             { error: 'Failed to fetch meal types', details: errorMessage },
@@ -13,6 +14,7 @@ export async function GET() {
         );
     }
 }
+
 
 export async function POST(request: NextRequest) {
     try {
