@@ -5,6 +5,7 @@ import type { Order, Cooked } from "@/lib/types";
 import { useState, useEffect, useMemo } from "react";
 import { KitchenDrawer} from "../components/app-kitchen-drawer";
 import { extractRecipeQuantities } from "@/lib/utils";
+import { RecipeQuantityMap } from "@/lib/types";
 
 // Temporary mock data for testing
 const TEMP_ORDERS: Order[] = [
@@ -178,9 +179,28 @@ export default function KitchenPage() {
     }, []);
 
     // flatten orders to check contents
-    const orderItems = useMemo(
-        () => openOrders.map(order => extractRecipeQuantities(order.orderInfo)), [openOrders]
-    );
+    const orderItems = useMemo(() => {
+        const dict: Record<number, RecipeQuantityMap> = {};
+        for (const order of openOrders) {
+            dict[order.id] = extractRecipeQuantities(order.orderInfo);
+        }
+        return dict;
+    }, [openOrders]);
+
+    // check if we can send an order
+    function isReady(order: Order): boolean {
+        const recipes = orderItems[order.id];
+        for (const [recipe, quantity] of Object.entries(recipes)) {
+            const stock = cooked.find(c => c.recipeId === +recipe)?.currentStock;
+
+            if (!stock || quantity > stock) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // TODO write function to see if we can cook something
 
     return (
         <div className="min-h-screen bg-white">
