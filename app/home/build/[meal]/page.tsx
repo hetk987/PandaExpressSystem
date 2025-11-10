@@ -74,7 +74,7 @@ export default function Build({
     );
 
     const mealtype = useMemo(
-        () => mealtypes.find(t => t.typeName === meal.replaceAll('%20', ' ')), [mealName, mealtypes]
+        () => mealtypes.find(t => t.typeName === mealName), [mealName, mealtypes]
     );
 
     const entrees = useMemo(
