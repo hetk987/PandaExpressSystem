@@ -1,16 +1,19 @@
-import type { Metadata } from "next";
+import type React from "react";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { Toaster } from "sonner";
+import ClientProviders from "./client-providers";
+import { Metadata } from "next";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const _geist = Geist({ subsets: ["latin"] });
+const _geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export const metadata: Metadata = {
+  title: "Panda Express PoS System",
+  description: "Point of Sale System for Panda Express",
+  generator: "v0.app",
+};
 
 export default function RootLayout({
   children,
@@ -20,9 +23,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${_geist.className} ${_geistMono.className} antialiased`}
       >
-        {children}
+        {/* All global client-side providers (Auth, theme, etc.) */}
+        <ClientProviders>
+            {children}
+        </ClientProviders>
+        <Toaster position="top-right" richColors/>
+        
+        {/* Vercel Analytics */}
+        <Analytics />
       </body>
     </html>
   );

@@ -28,3 +28,13 @@ export const deleteRecipe = async (id) => {
   const deletedRecipe = await db.delete(recipes).where(eq(recipes.id, id));
   return deletedRecipe;
 };
+
+export const cookIngredients = async (recipeId) => {
+  const invRecJuncs = await getInvRecJuncByRecipeId(recipeId);
+  if (!invRecJuncs) {
+    throw new Error("Inventory recipe junction not found");
+  }
+  for (const junction of invRecJuncs) {
+    await consumeInventory(junction.inventoryId, junction.inventoryQuantity);
+  }
+};
