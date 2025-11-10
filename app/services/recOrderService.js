@@ -1,5 +1,6 @@
 import db from "@/drizzle/src/index";
 import { recOrderJunc } from "@/drizzle/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const getRecOrderJuncs = async () => {
   const allRecOrderJuncs = await db.select().from(recOrderJunc);
@@ -14,18 +15,20 @@ export const getRecOrderJuncById = async (id) => {
   return recOrderJunc;
 };
 
-export const createRecOrderJunc = async (recOrderJunc) => {
-  const createdRecOrderJunc = await db
+export const createRecOrderJunc = async (recOrderJuncData) => {
+  const [createdRecOrderJunc] = await db
     .insert(recOrderJunc)
-    .values(recOrderJunc);
+    .values(recOrderJuncData)
+    .returning();
   return createdRecOrderJunc;
 };
 
-export const updateRecOrderJunc = async (id, recOrderJunc) => {
-  const updatedRecOrderJunc = await db
+export const updateRecOrderJunc = async (id, recOrderJuncData) => {
+  const [updatedRecOrderJunc] = await db
     .update(recOrderJunc)
-    .set(recOrderJunc)
-    .where(eq(recOrderJunc.id, id));
+    .set(recOrderJuncData)
+    .where(eq(recOrderJunc.id, id))
+    .returning();
   return updatedRecOrderJunc;
 };
 

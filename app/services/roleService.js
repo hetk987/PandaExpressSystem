@@ -1,5 +1,6 @@
 import db from "@/drizzle/src/index";
 import { roles } from "@/drizzle/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const getRoles = async () => {
   const allRoles = await db.select().from(roles);
@@ -12,7 +13,7 @@ export const getRoleById = async (id) => {
 };
 
 export const createRole = async (role) => {
-  const createdRole = await db.insert(roles).values(role);
+  const [createdRole] = await db.insert(roles).values(role).returning();
   return createdRole;
 };
 

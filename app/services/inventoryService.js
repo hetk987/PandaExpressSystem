@@ -1,5 +1,6 @@
 import db from "@/drizzle/src/index";
 import { inventory } from "@/drizzle/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const getInventory = async () => {
     const allInventory = await db.select().from(inventory);
@@ -7,22 +8,25 @@ export const getInventory = async () => {
 };
 
 export const getInventoryById = async (id) => {
-    const inventory = await db
+    const inventoryItem = await db
         .select()
         .from(inventory)
         .where(eq(inventory.id, id));
-    return inventory;
+    return inventoryItem;
 };
 
-export const createInventory = async (inventory) => {
-    const createdInventory = await db.insert(inventory).values(inventory);
+export const createInventory = async (inventoryItem) => {
+    const [createdInventory] = await db
+        .insert(inventory)
+        .values(inventoryItem)
+        .returning();
     return createdInventory;
 };
 
-export const updateInventory = async (id, inventory) => {
+export const updateInventory = async (id, inventoryItem) => {
     const updatedInventory = await db
         .update(inventory)
-        .set(inventory)
+        .set(inventoryItem)
         .where(eq(inventory.id, id));
     return updatedInventory;
 };
@@ -35,15 +39,23 @@ export const deleteInventory = async (id) => {
 };
 
 export const consumeInventory = async (inventoryId, quantity) => {
-    const inventory = await getInventoryById(inventoryId);
-    if (!inventory) {
-        throw new Error("Inventory not found");
+    console.log(inventoryId);
+    console.log(quantity);
+    const inventoryItem = await getInventoryById(inventoryId);
+    if (!inventoryItem) {
+        throw new Error("Inventory not found: " + inventoryId);
     }
-    if (inventory.currentStock < quantity) {
-        throw new Error("Insufficient inventory");
+    console.log(inventoryItem, quantity);
+    if (inventoryItem[0].currentStock < quantity) {
+        throw new Error(
+            "Insufficient inventory: " +
+                inventoryItem[0].name +
+                " " +
+                inventoryItem[0].currentStock +
+                " " +
+                quantity
+        );
     }
-    const updatedInventory = await updateInventory(inventoryId, {
-        currentStock: inventory.currentStock - quantity,
-    });
-    return updatedInventory;
+    inventoryItem[0].currentStock -= quantity;
+    return await updateInventory(inventoryId, inventoryItem[0]);
 };
