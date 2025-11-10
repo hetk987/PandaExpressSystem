@@ -74,7 +74,7 @@ export default function Build({
     );
 
     const mealtype = useMemo(
-        () => mealtypes.find(t => t.name === meal.replaceAll('%20', ' ')), [mealName, mealtypes]
+        () => mealtypes.find(t => t.typeName === mealName), [mealName, mealtypes]
     );
 
     const entrees = useMemo(
@@ -162,7 +162,7 @@ export default function Build({
         await addMealWithToast(
             () => {
                 addMeal({
-                    mealType: mealtype.name,
+                    mealType: mealtype.typeName,
                     quantity: 1,
                     price: mealtype.price,
                     selections: selections

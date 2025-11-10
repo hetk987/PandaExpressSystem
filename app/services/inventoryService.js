@@ -15,8 +15,11 @@ export const getInventoryById = async (id) => {
     return inventoryItem;
 };
 
-export const createInventory = async (inventory) => {
-    const createdInventory = await db.insert(inventory).values(inventory);
+export const createInventory = async (inventoryItem) => {
+    const [createdInventory] = await db
+        .insert(inventory)
+        .values(inventoryItem)
+        .returning();
     return createdInventory;
 };
 

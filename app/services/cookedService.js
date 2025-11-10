@@ -39,7 +39,6 @@ export const createCooked = async (newCooked) => {
     return created;
 };
 
-
 // Cook a recipe and return the cooked item
 // If the recipe is already cooked, update the current stock
 // If the recipe is not cooked, create a new cooked item
@@ -76,4 +75,18 @@ export const updateCooked = async (id, newCooked) => {
             currentStock: cooked.currentStock,
         });
     return updatedCooked;
+};
+
+export const consumeCooked = async (recipeId, quantity) => {
+    const cookedByRecipeId = await getCookedByRecipeId(recipeId);
+    if (!cookedByRecipeId) {
+        throw new Error("Cooked not found");
+    }
+    if (cookedByRecipeId[0].currentStock < quantity) {
+        throw new Error("Insufficient cooked");
+    }
+    const updatedCooked = await updateCooked(cookedByRecipeId[0].id, {
+        currentStock: cookedByRecipeId[0].currentStock - quantity,
+    });
+    return updatedCooked[0];
 };

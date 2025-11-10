@@ -15,7 +15,7 @@ export const getRecipeById = async (id) => {
 };
 
 export const createRecipe = async (recipe) => {
-    const newRecipe = await db.insert(recipes).values(recipe);
+    const [newRecipe] = await db.insert(recipes).values(recipe).returning();
     return newRecipe;
 };
 
