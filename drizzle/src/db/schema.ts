@@ -1,56 +1,17 @@
-import { pgTable, text, integer, date, check, boolean, foreignKey, real, pgEnum, jsonb } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, real, integer, text, boolean, jsonb, check, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
-import type { OrderInfo } from "@/lib/types"
 
 export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
 
 
-export const roles = pgTable("roles", {
-    name: text().notNull(),
-    canDiscount: boolean("canDiscount").notNull(),
-    canRestock: boolean("canRestock").notNull(),
-    id: integer().primaryKey().notNull(),
-    canEditEmployees: boolean("canEditEmployees").notNull(),
-}, (table) => [
-    check("roles_canDiscount_check", sql`canDiscount = ANY (ARRAY[true, false])`),
-    check("roles_canRestock_check", sql`canRestock = ANY (ARRAY[true, false])`),
-    check("roles_canEditEmployees_check", sql`canEditEmployees = ANY (ARRAY[true, false])`),
-]);
-
-export const employees = pgTable("employees", {
-    name: text().notNull(),
-    salary: real().notNull(),
-    hours: integer().notNull(),
-    password: text().notNull(),
-    isEmployed: boolean("isEmployed").notNull(),
-    id: integer().primaryKey().notNull(),
-    roleId: integer("roleId").notNull(),
-}, (table) => [
-    foreignKey({
-        columns: [table.roleId],
-        foreignColumns: [roles.id],
-        name: "employees_roleId_fkey"
-    }),
-    check("employees_isEmployed_check", sql`isEmployed = ANY (ARRAY[true, false])`),
-]);
-
-export const mealTypes = pgTable("meal_types", {
-    name: text("typeName").primaryKey().notNull(),
-    sides: integer("sides").notNull(),
-    entrees: integer("entrees").notNull(),
-    drinks: integer("drinks").notNull(),
-    price: real("price").notNull(),
-    image: text("imageFilePath"),
-});
-
 export const orders = pgTable("orders", {
     tax: real().notNull(),
-    totalCost: real("totalCost").notNull(),
-    id: integer().primaryKey().notNull(),
-    orderTime: text("orderTime").notNull(),
-    cashierId: integer("cashierId").notNull(),
-    orderInfo: jsonb("orderInfo").$type<OrderInfo>(),
-    isCompleted: boolean("isCompleted").notNull(),
+    totalCost: real().notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "orders_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    orderTime: text().notNull(),
+    cashierId: integer().notNull(),
+    isCompleted: boolean().notNull(),
+    orderInfo: jsonb(),
 }, (table) => [
     foreignKey({
         columns: [table.cashierId],
@@ -61,17 +22,17 @@ export const orders = pgTable("orders", {
 
 export const inventory = pgTable("inventory", {
     name: text().notNull(),
-    id: integer().primaryKey().notNull(),
-    batchPurchaseCost: real("batchPurchaseCost").notNull(),
-    currentStock: integer("currentStock").notNull(),
-    estimatedUsedPerDay: integer("estimatedUsedPerDay").notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "inventory_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    batchPurchaseCost: real().notNull(),
+    currentStock: integer().notNull(),
+    estimatedUsedPerDay: integer().notNull(),
 });
 
 export const expenses = pgTable("expenses", {
     cost: real().notNull(),
-    id: integer().primaryKey().notNull(),
-    itemId: integer("itemId").notNull(),
-    expenseTime: text("expenseTime").notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "expenses_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    itemId: integer().notNull(),
+    expenseTime: text().notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.itemId],
@@ -81,9 +42,9 @@ export const expenses = pgTable("expenses", {
 ]);
 
 export const cooked = pgTable("cooked", {
-    id: integer().primaryKey().notNull(),
-    recipeId: integer("recipeId").notNull(),
-    currentStock: integer("currentStock").notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "cooked_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    recipeId: integer().notNull(),
+    currentStock: integer().notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.recipeId],
@@ -93,10 +54,10 @@ export const cooked = pgTable("cooked", {
 ]);
 
 export const invRecJunc = pgTable("inv_rec_junc", {
-    id: integer().primaryKey().notNull(),
-    inventoryId: integer("inventoryId").notNull(),
-    recipeId: integer("recipeId").notNull(),
-    inventoryQuantity: integer("inventoryQuantity").notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "inv_rec_junc_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    inventoryId: integer().notNull(),
+    recipeId: integer().notNull(),
+    inventoryQuantity: integer().notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.inventoryId],
@@ -112,9 +73,9 @@ export const invRecJunc = pgTable("inv_rec_junc", {
 
 export const recOrderJunc = pgTable("rec_order_junc", {
     quantity: integer().notNull(),
-    id: integer().primaryKey().notNull(),
-    recipeId: integer("recipeId").notNull(),
-    orderId: integer("orderId").notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "rec_order_junc_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    recipeId: integer().notNull(),
+    orderId: integer().notNull(),
 }, (table) => [
     foreignKey({
         columns: [table.recipeId],
@@ -131,8 +92,46 @@ export const recOrderJunc = pgTable("rec_order_junc", {
 export const recipes = pgTable("recipes", {
     name: text().notNull(),
     image: text(),
-    id: integer().primaryKey().notNull(),
-    pricePerServing: real("pricePerServing").notNull(),
-    ordersPerBatch: integer("ordersPerBatch").notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    pricePerServing: real().notNull(),
+    ordersPerBatch: integer().notNull(),
     type: recipeType(),
+});
+
+export const employees = pgTable("employees", {
+    name: text().notNull(),
+    salary: real().notNull(),
+    hours: integer().notNull(),
+    password: text().notNull(),
+    isEmployed: boolean().notNull(),
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "employees_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    roleId: integer().notNull(),
+}, (table) => [
+    foreignKey({
+        columns: [table.roleId],
+        foreignColumns: [roles.id],
+        name: "employees_roleId_fkey"
+    }),
+    check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
+]);
+
+export const roles = pgTable("roles", {
+    id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "roles_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+    name: text().notNull(),
+    canDiscount: boolean().notNull(),
+    canRestock: boolean().notNull(),
+    canEditEmployees: boolean().notNull(),
+}, (table) => [
+    check("roles_canDiscount_check", sql`"canDiscount" = ANY (ARRAY[true, false])`),
+    check("roles_canRestock_check", sql`"canRestock" = ANY (ARRAY[true, false])`),
+    check("roles_canEditEmployees_check", sql`"canEditEmployees" = ANY (ARRAY[true, false])`),
+]);
+
+export const mealTypes = pgTable("meal_types", {
+    typeName: text().primaryKey().notNull(),
+    sides: integer().notNull(),
+    entrees: integer().notNull(),
+    drinks: integer().notNull(),
+    price: real().notNull(),
+    imageFilePath: text(),
 });

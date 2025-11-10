@@ -3,34 +3,40 @@ import { orders } from "@/drizzle/src/db/schema";
 import { eq } from "drizzle-orm";
 
 export const getOrders = async () => {
-  const allOrders = await db.select().from(orders);
-  return allOrders;
+    const allOrders = await db.select().from(orders);
+    return allOrders;
 };
 
 export const getOrderById = async (id) => {
-  const order = await db.select().from(orders).where(eq(orders.id, id));
-  return order;
+    console.log("id: " + id);
+    const [output] = await db.select().from(orders).where(eq(orders.id, id));
+    return output;
 };
 
 export const createOrder = async (order) => {
-  const createdOrder = await db.insert(orders).values(order);
-  return createdOrder;
+    console.log("order: " + JSON.stringify(order));
+    const [createdOrder] = await db.insert(orders).values(order).returning();
+    console.log("createdOrder: " + JSON.stringify(createdOrder));
+    return createdOrder;
 };
 
 export const updateOrder = async (id, order) => {
-  const updatedOrder = await db
-    .update(orders)
-    .set(order)
-    .where(eq(orders.id, id));
-  return updatedOrder;
+    const updatedOrder = await db
+        .update(orders)
+        .set(order)
+        .where(eq(orders.id, id));
+    return updatedOrder;
 };
 
 export const deleteOrder = async (id) => {
-  const deletedOrder = await db.delete(orders).where(eq(orders.id, id));
-  return deletedOrder;
+    const deletedOrder = await db.delete(orders).where(eq(orders.id, id));
+    return deletedOrder;
 };
 
 export const getIncompleteOrders = async () => {
-  const incompleteOrders = await db.select().from(orders).where(eq(orders.isCompleted, false));
-  return incompleteOrders;
+    const incompleteOrders = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.isCompleted, false));
+    return incompleteOrders;
 };

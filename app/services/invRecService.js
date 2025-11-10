@@ -1,6 +1,7 @@
 import db from "@/drizzle/src/index";
-
+import { getInventoryById } from "@/app/services/inventoryService";
 import { invRecJunc } from "@/drizzle/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const getInvRecJuncs = async () => {
     const allInvRecJuncs = await db.select().from(invRecJunc);
@@ -8,31 +9,39 @@ export const getInvRecJuncs = async () => {
 };
 
 export const getInvRecJuncById = async (id) => {
-    const invRecJunc = await db
+    const invRecJuncItem = await db
         .select()
         .from(invRecJunc)
         .where(eq(invRecJunc.id, id));
-    return invRecJunc;
+    return invRecJuncItem;
 };
 
-export const getInvRecJuncByRecipeId = async (recipeId) => {
-    const invRecJunc = await db
+export const getIngredientsByRecipeId = async (recipeId) => {
+    const output = await db
         .select()
         .from(invRecJunc)
         .where(eq(invRecJunc.recipeId, recipeId));
-    return invRecJunc;
+        for (const item of output) {
+            item.inventoryName = (await getInventoryById(item.inventoryId))[0].name;
+        }
+    console.log(output);
+    return output;
 };
 
-export const createInvRecJunc = async (invRecJunc) => {
-    const createdInvRecJunc = await db.insert(invRecJunc).values(invRecJunc);
+export const createInvRecJunc = async (invRecJuncData) => {
+    const [createdInvRecJunc] = await db
+        .insert(invRecJunc)
+        .values(invRecJuncData)
+        .returning();
     return createdInvRecJunc;
 };
 
-export const updateInvRecJunc = async (id, invRecJunc) => {
-    const updatedInvRecJunc = await db
+export const updateInvRecJunc = async (id, invRecJuncData) => {
+    const [updatedInvRecJunc] = await db
         .update(invRecJunc)
-        .set(invRecJunc)
-        .where(eq(invRecJunc.id, id));
+        .set(invRecJuncData)
+        .where(eq(invRecJunc.id, id))
+        .returning();
     return updatedInvRecJunc;
 };
 
