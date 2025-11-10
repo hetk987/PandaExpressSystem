@@ -9,15 +9,12 @@ export const getCooked = async () => {
 };
 
 export const getCookedById = async (id) => {
-    const getCookedById = await db
-        .select()
-        .from(cooked)
-        .where(eq(cooked.id, id));
-    return getCookedById;
+    const [output] = await db.select().from(cooked).where(eq(cooked.id, id));
+    return output;
 };
 
 export const getCookedByRecipeId = async (recipeId) => {
-    const output = await db
+    const [output] = await db
         .select()
         .from(cooked)
         .where(eq(cooked.recipeId, recipeId));
@@ -49,23 +46,23 @@ export const cookRecipe = async (recipeId) => {
     }
     await cookIngredients(recipeId);
     const cookedByRecipeId = await getCookedByRecipeId(recipeId); // See if already cooked
-    if (cookedByRecipeId.length > 0) {
-        const updatedCooked = await updateCooked(cookedByRecipeId[0].id, {
+    if (cookedByRecipeId) {
+        const updatedCooked = await updateCooked(cookedByRecipeId.id, {
             currentStock:
-                cookedByRecipeId[0].currentStock + recipe[0].ordersPerBatch,
+                cookedByRecipeId.currentStock + recipe.ordersPerBatch,
         });
-        return updatedCooked[0];
+        return updatedCooked;
     } else {
         const newCooked = await createCooked({
             recipeId,
-            currentStock: recipe[0].ordersPerBatch,
+            currentStock: recipe.ordersPerBatch,
         });
-        return newCooked[0];
+        return newCooked;
     }
 };
 
 export const updateCooked = async (id, newCooked) => {
-    const updatedCooked = await db
+    const [updatedCooked] = await db
         .update(cooked)
         .set(newCooked)
         .where(eq(cooked.id, id))
@@ -82,11 +79,11 @@ export const consumeCooked = async (recipeId, quantity) => {
     if (!cookedByRecipeId) {
         throw new Error("Cooked not found");
     }
-    if (cookedByRecipeId[0].currentStock < quantity) {
+    if (cookedByRecipeId.currentStock < quantity) {
         throw new Error("Insufficient cooked");
     }
-    const updatedCooked = await updateCooked(cookedByRecipeId[0].id, {
-        currentStock: cookedByRecipeId[0].currentStock - quantity,
+    const updatedCooked = await updateCooked(cookedByRecipeId.id, {
+        currentStock: cookedByRecipeId.currentStock - quantity,
     });
-    return updatedCooked[0];
+    return updatedCooked;
 };
