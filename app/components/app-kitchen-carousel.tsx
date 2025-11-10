@@ -13,12 +13,15 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { Cooked, Recipe, Inventory } from "@/lib/types"
+import { cookIngredients } from "../services/recipeService";
+
 
 export const KitchenCarousel = (props: {
     cooked: Cooked[]
 }) => {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [inventory, setInventory] = useState<Inventory[]>([]);
+    // const [needInventory, setNeedInventory]
 
     useEffect(() => {
         const fetchData = async () => {
@@ -44,7 +47,31 @@ export const KitchenCarousel = (props: {
       fetchData();
     }, []);
 
-    // Need function, given recipe, determine all inventory and quantity
+    // given recipe id, determine all inventory and quantity
+    // complete order, remove the cooked items, maybe database side validation if there is enough cooked
+    // cook recipe, remove inventory, maybe database side validation if there is enough inventory
+
+    async function canCook(recipe: Recipe) {
+
+    }
+
+    async function cook(recipe: Recipe) {
+      try {
+        let response = await fetch(`/api/cooked/cook/${recipe.id}`);
+
+        // remove inventory items and add cooked, reload both data
+        if (response.ok) {
+          const data = await response.json();
+          return;
+        }
+
+        // if we failed to cook, throw up a popup with what we need to buy
+
+
+      } catch (error) {
+        console.error("Failed to cook item");
+      }
+    }
 
   return (
     <Carousel className="w-full">

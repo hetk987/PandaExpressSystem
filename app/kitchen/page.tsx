@@ -179,26 +179,33 @@ export default function KitchenPage() {
     }, []);
 
     // flatten orders to check contents
-    // const orderItems = useMemo(() => {
-    //     const dict: Record<number, RecipeQuantityMap> = {};
-    //     for (const order of openOrders) {
-    //         dict[order.id] = extractRecipeQuantities(order.orderInfo);
-    //     }
-    //     return dict;
-    // }, [openOrders]);
+    const orderItems = useMemo(() => {
+        const dict: Record<number, RecipeQuantityMap> = {};
+        for (const order of openOrders) {
+            if (!order.orderInfo) continue;
+            dict[order.id] = extractRecipeQuantities(order.orderInfo);
+        }
+        return dict;
+    }, [openOrders]);
 
     // check if we can send an order
-    // function isReady(order: Order): boolean {
-    //     const recipes = orderItems[order.id];
-    //     for (const [recipe, quantity] of Object.entries(recipes)) {
-    //         const stock = cooked.find(c => c.recipeId === +recipe)?.currentStock;
+    function isReady(order: Order): boolean {
+        const recipes = orderItems[order.id];
+        for (const [recipe, quantity] of Object.entries(recipes)) {
+            const stock = cooked.find(c => c.recipeId === +recipe)?.currentStock;
 
-    //         if (!stock || quantity > stock) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
-    // }
+            if (!stock || quantity > stock) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    async function confirmOrder(order: Order) {
+        if (!isReady(order)) return;
+
+        
+    }
 
     // TODO write function to see if we can cook something
 
