@@ -65,12 +65,11 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-
         const newOrder = await createOrder(body);
         return NextResponse.json(newOrder, { status: 201 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        
+
         // Handle database constraint errors
         if (errorMessage.includes('foreign key') || errorMessage.includes('violates foreign key')) {
             return NextResponse.json(

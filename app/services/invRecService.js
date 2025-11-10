@@ -1,5 +1,5 @@
 import db from "@/drizzle/src/index";
-
+import { getInventoryById } from "@/app/services/inventoryService";
 import { invRecJunc } from "@/drizzle/src/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -9,19 +9,21 @@ export const getInvRecJuncs = async () => {
 };
 
 export const getInvRecJuncById = async (id) => {
-    const invRecJunc = await db
+    const invRecJuncItem = await db
         .select()
         .from(invRecJunc)
         .where(eq(invRecJunc.id, id));
-    return invRecJunc;
+    return invRecJuncItem;
 };
 
 export const getIngredientsByRecipeId = async (recipeId) => {
-    console.log("YO YO YO");
     const output = await db
         .select()
         .from(invRecJunc)
         .where(eq(invRecJunc.recipeId, recipeId));
+        for (const item of output) {
+            item.inventoryName = (await getInventoryById(item.inventoryId))[0].name;
+        }
     console.log(output);
     return output;
 };
