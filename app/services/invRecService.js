@@ -16,7 +16,7 @@ export const getInvRecJuncById = async (id) => {
     return invRecJunc;
 };
 
-export const getInvRecJuncByRecipeId = async (recipeId) => {
+export const getIngredientsByRecipeId = async (recipeId) => {
     console.log("YO YO YO");
     const output = await db
         .select()

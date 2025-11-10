@@ -39,25 +39,22 @@ export const createCooked = async (newCooked) => {
     return created;
 };
 
+
+// Cook a recipe and return the cooked item
+// If the recipe is already cooked, update the current stock
+// If the recipe is not cooked, create a new cooked item
 export const cookRecipe = async (recipeId) => {
     const recipe = await getRecipeById(recipeId);
     if (!recipe) {
         throw new Error("Recipe not found");
     }
     await cookIngredients(recipeId);
-    console.log("COOKED INGREDIENTS COOKED");
-    const cookedByRecipeId = await getCookedByRecipeId(recipeId);
-    console.log("COOKED BY RECIPE ID");
-    console.log(cookedByRecipeId);
+    const cookedByRecipeId = await getCookedByRecipeId(recipeId); // See if already cooked
     if (cookedByRecipeId.length > 0) {
-        console.log("COOKED BY RECIPE ID");
-        console.log(cookedByRecipeId);
         const updatedCooked = await updateCooked(cookedByRecipeId[0].id, {
             currentStock:
                 cookedByRecipeId[0].currentStock + recipe[0].ordersPerBatch,
         });
-        console.log("UPDATED COOKED");
-        console.log(updatedCooked);
         return updatedCooked[0];
     } else {
         const newCooked = await createCooked({
@@ -79,8 +76,4 @@ export const updateCooked = async (id, newCooked) => {
             currentStock: cooked.currentStock,
         });
     return updatedCooked;
-};
-export const deleteCooked = async (id) => {
-    const deletedCooked = await db.delete(cooked).where(eq(cooked.id, id));
-    return deletedCooked;
 };
