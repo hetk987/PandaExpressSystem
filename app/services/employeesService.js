@@ -20,10 +20,15 @@ export const createEmployee = async (employeeData) => {
     return createdEmployee;
 };
 
-export const updateEmployee = async (id, employee) => {
+export const updateEmployee = async (id, employeeData) => {
     const updatedEmployee = await db
         .update(employees)
-        .set(employee)
+        .set(employeeData)
         .where(eq(employees.id, id));
     return updatedEmployee;
+};
+
+export const deleteEmployee = async (id) => {
+    const removedEmployee = await db.delete(employees).where(eq(employees.id, id));
+    return removedEmployee;
 };
