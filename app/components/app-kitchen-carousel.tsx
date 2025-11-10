@@ -85,7 +85,7 @@ export const KitchenCarousel = (props: {
                         <div className="text-lg font-semibold min-h-25">{recipe.name}</div>
                         <div className="min-h-13 flex flex-row justify-between w-full">
                           <div>
-                            <p>Stock: {props.cooked.find(c => c.id === recipe.id)?.currentStock ?? 0}</p>
+                            <p>Stock: {props.cooked.find(c => c.recipeId === recipe.id)?.currentStock ?? 0}</p>
                             <p>Cooks: {recipe.ordersPerBatch}</p>
                           </div>
                           <Button className="w-20 mt-2">

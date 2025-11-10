@@ -7,10 +7,14 @@ import {
     CardTitle,
 } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { Order } from "@/lib/types";
+import { Order, Cooked, RecipeQuantityMap } from "@/lib/types";
+import { extractRecipeQuantities } from "@/lib/utils";
 import { toast } from "sonner";
 
-export function KitchenOrderItem({ order }: { order: Order }) {
+import { useMemo } from "react";
+
+export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cooked[] }) {
+
     async function completeOrder(id: number): Promise<void> {
         const response = await fetch(`/api/orders/complete/${id}`, {
             method: "PUT",
@@ -22,6 +26,26 @@ export function KitchenOrderItem({ order }: { order: Order }) {
         }
         window.location.reload();
     }
+
+    const orderItems = useMemo(() => { 
+        if (!order.orderInfo) return [];
+        return extractRecipeQuantities(order.orderInfo);
+    }, [order]);
+
+    const isReady = useMemo(
+        () => {
+            for (const [recipe, quantity] of Object.entries(orderItems)) {
+                const stock = cooked.find(
+                    (c) => c.recipeId === +recipe
+                )?.currentStock;
+
+                if (!stock || quantity > stock) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    , [orderItems]);
 
     return (
         <div className="w-full max-w-md mx-auto">
@@ -108,21 +132,29 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                         <div className="border-t-2 border-black pt-2 mt-2 flex justify-between font-bold">
                             <span>Total Items:</span>
                             <span>
-                                {order.orderInfo?.individualItems?.reduce(
-                                    (sum, item) => sum + item.quantity,
-                                    0
-                                )}
+                                {
+                                    (order.orderInfo?.individualItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0) + 
+                                    (order.orderInfo?.meals?.reduce((sum, item) => sum + item.quantity, 0) ?? 0)
+                                }
                             </span>
                         </div>
                     </div>
 
                     {/* Complete Button */}
-                    <Button
-                        className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800"
-                        onClick={async () => await completeOrder(order.id)}
-                    >
-                        COMPLETE ORDER
-                    </Button>
+                    {isReady ? 
+                        <Button
+                            className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800"
+                            onClick={async () => await completeOrder(order.id)}
+                        >
+                            COMPLETE ORDER
+                        </Button> :
+                        <Button
+                            className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800" disabled
+                        >
+                            COMPLETE ORDER
+                        </Button>
+                    }
+                    
                 </CardContent>
             </Card>
         </div>
