@@ -1,30 +1,73 @@
-import { Order } from "@/lib/types";
-import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { CardContent } from "@/components/ui/card";
-import { Button } from "./ui/button";
-import { CardFooter } from "@/components/ui/card";
+"use client";
 
-function KitchenOrderItem({ order }: { order: Order }) {
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Order } from "@/lib/types";
+
+export function KitchenOrderItem({ order }: { order: Order }) {
     return (
-        <Card className="w-full">
-            <CardHeader>
-                <CardTitle>Order {order.id}</CardTitle>
-                <CardDescription>
-                    {order.orderTime}
-                </CardDescription>
-                <CardContent>
-                    <p>
-                        Total Cost: {order.totalCost}
-                    </p>
+        <div className="w-full max-w-md mx-auto">
+            <Card className="border-2 border-black">
+                {/* Header - Order Number and Time */}
+                <CardHeader className="border-b-2 border-black pb-2 pt-4 px-4">
+                    <div className="flex justify-between items-start">
+                        <CardTitle className="text-2xl font-bold">
+                            ORDER #{order.id}
+                        </CardTitle>
+                        <span className="text-sm font-mono">
+                            {order.orderTime}
+                        </span>
+                    </div>
+                </CardHeader>
+
+                {/* Items */}
+                <CardContent className="px-4 py-3">
+                    <div className="border-b-2 border-black pb-3 mb-3">
+                        <div className="space-y-2">
+                            {order.orderInfo.individualItems.map((item) => (
+                                <div
+                                    key={item.recipeId}
+                                    className="flex justify-between items-start gap-2"
+                                >
+                                    <div className="flex-1">
+                                        <div className="font-bold text-lg">
+                                            {item.quantity}x {item.recipeName}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {item.recipeType}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Footer Info */}
+                    <div className="space-y-1 text-sm mb-4 font-mono">
+                        <div className="flex justify-between">
+                            <span>Cashier ID:</span>
+                            <span>{order.cashierId}</span>
+                        </div>
+                        <div className="border-t-2 border-black pt-2 mt-2 flex justify-between font-bold">
+                            <span>Total Items:</span>
+                            <span>
+                                {order.orderInfo.individualItems.reduce(
+                                    (sum, item) => sum + item.quantity,
+                                    0
+                                )}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Complete Button */}
+                    <Button
+                        className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800"
+                        onClick={() => console.log("Order completed")}
+                    >
+                        COMPLETE ORDER
+                    </Button>
                 </CardContent>
-            </CardHeader>
-            <CardFooter>
-                <Button>
-                    Complete Order
-                </Button>
-            </CardFooter>
-        </Card>
+            </Card>
+        </div>
     );
 }
-
-export default KitchenOrderItem;

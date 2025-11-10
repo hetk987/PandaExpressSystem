@@ -1,43 +1,71 @@
 "use client"
 
-import { SidebarProvider } from "@/app/components/ui/sidebar"
+import React from "react"
+import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "../components/app-sidebar"
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/app/components/ui/sheet"
 import { Button } from "@/app/components/ui/button"
 import { CreditCard, IdCard, Smartphone } from "lucide-react"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
+import { CartProvider, useCart } from "../providers/cart-provider"
+import { OrderInfo } from "@/lib/types"
+import { toast } from "sonner"
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+function CheckoutContent({ children }: { children: React.ReactNode }) {
+  const { meals, individualItems, clearCart } = useCart()
   const paymentMethods = [
     { id: 1, name: "Card", icon: CreditCard },
     { id: 2, name: "Student Card", icon: IdCard },
     { id: 3, name: "Mobile Pay", icon: Smartphone },
   ]
-  const orderItems = [
-    {
-      id: 1,
-      kind: "meal",
-      name: "Bowl",
-      components: ["Fried Rice", "Orange Chicken"],
-      quantity: 1,
-      price: 9.5,
-    },
-    {
-      id: 2,
-      kind: "ala",
-      name: "Drink - Fountain",
-      quantity: 1,
-      price: 2.49,
-    },
-  ] as Array<
-    | { id: number; kind: "meal"; name: string; components: string[]; quantity: number; price: number }
-    | { id: number; kind: "ala"; name: string; quantity: number; price: number }
-  >
-  const subtotal = orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const tax = +(subtotal * 0.095).toFixed(2)
-  const total = +(subtotal + tax).toFixed(2)
   const [selectedPayment, setSelectedPayment] = useState<number | null>(null)
+
+  // Transform cart data to display format
+  const orderItems = useMemo(() => {
+    const mealItems = meals.map((meal, index) => ({
+      id: `meal-${index}`,
+      kind: "meal" as const,
+      name: meal.mealType,
+      components: [
+        ...meal.selections.entrees.map(e => e.recipeName),
+        ...meal.selections.sides.map(s => s.recipeName),
+        ...meal.selections.drinks.map(d => d.recipeName),
+      ],
+      quantity: meal.quantity,
+      price: meal.price,
+    }))
+    
+    const individualItemDisplay = individualItems.map((item, index) => ({
+      id: `item-${index}`,
+      kind: "ala" as const,
+      name: item.recipeName,
+      quantity: item.quantity,
+      price: item.price,
+    }))
+
+    return [...mealItems, ...individualItemDisplay]
+  }, [meals, individualItems])
+
+  const subtotal = useMemo(() => {
+    const mealsTotal = meals.reduce((sum, meal) => sum + meal.price * meal.quantity, 0)
+    const itemsTotal = individualItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    return mealsTotal + itemsTotal
+  }, [meals, individualItems])
+
+  const tax = useMemo(() => +(subtotal * 0.095).toFixed(2), [subtotal])
+  const total = useMemo(() => +(subtotal + tax).toFixed(2), [subtotal, tax])
+
+  const handlePay = () => {
+    const orderInfo: OrderInfo = {
+      meals: meals,
+      individualItems: individualItems,
+    }
+    console.log(JSON.stringify(orderInfo, null, 2))
+    toast.success("Order placed successfully")
+    clearCart()
+  }
+
   return (
     <div className="flex flex-col">
         <SidebarProvider >
@@ -63,33 +91,39 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
                   <div className="flex flex-col gap-4 p-4">
                     <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
-                      <div className="divide-y divide-white/10">
-                        {orderItems.map((item) => (
-                          <div key={item.id} className="px-4 py-3">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <span className="font-semibold">
-                                  {item.kind === "meal" ? item.name : "Individual A-la-carte"}
-                                </span>
-                                <span className="text-xs text-white/70">{item.quantity}x</span>
+                      {orderItems.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-white/70">
+                          <p>Your cart is empty</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-white/10">
+                          {orderItems.map((item) => (
+                            <div key={item.id} className="px-4 py-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold">
+                                    {item.kind === "meal" ? item.name : "Individual A-la-carte"}
+                                  </span>
+                                  <span className="text-xs text-white/70">{item.quantity}x</span>
+                                </div>
+                                <div className="text-right font-medium">
+                                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
                               </div>
-                              <div className="text-right font-medium">
-                                <span>${(item.price * item.quantity).toFixed(2)}</span>
-                              </div>
+                              {item.kind === "meal" && (
+                                <ul className="mt-1 list-disc list-inside text-sm text-white/85">
+                                  {item.components.map((c) => (
+                                    <li key={c}>{c}</li>
+                                  ))}
+                                </ul>
+                              )}
+                              {item.kind === "ala" && (
+                                <div className="mt-1 text-sm text-white/85">{item.name}</div>
+                              )}
                             </div>
-                            {item.kind === "meal" && (
-                              <ul className="mt-1 list-disc list-inside text-sm text-white/85">
-                                {item.components.map((c) => (
-                                  <li key={c}>{c}</li>
-                                ))}
-                              </ul>
-                            )}
-                            {item.kind === "ala" && (
-                              <div className="mt-1 text-sm text-white/85">{item.name}</div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2 rounded-md bg-white/5 p-4">
@@ -132,7 +166,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </div>
 
                   <SheetFooter className="border-t border-white/20 p-4">
-                    <Button disabled={selectedPayment === null} className="w-full hover:bg-white/90">
+                    <Button 
+                      disabled={selectedPayment === null || orderItems.length === 0} 
+                      onClick={handlePay}
+                      className="w-full hover:bg-white/90"
+                    >
                       Pay ${total.toFixed(2)}
                     </Button>
                   </SheetFooter>
@@ -140,7 +178,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Sheet>
         </footer>
     </div>
+  )
+}
 
-    
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <CartProvider>
+      <CheckoutContent>
+        {children}
+      </CheckoutContent>
+    </CartProvider>
   )
 }

@@ -1,5 +1,6 @@
 import db from "@/drizzle/src/index";
 import { orders } from "@/drizzle/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const getOrders = async () => {
   const allOrders = await db.select().from(orders);

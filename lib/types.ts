@@ -93,7 +93,6 @@ export type MealSelections = {
 
 export type MealOrder = {
     mealType: string;
-    mealTypeId: string;
     quantity: number;
     price: number;
     selections: MealSelections;
