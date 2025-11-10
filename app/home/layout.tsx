@@ -12,7 +12,7 @@ import {
     SheetTrigger,
 } from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
-import { CreditCard, IdCard, Smartphone } from "lucide-react";
+import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
@@ -95,6 +95,11 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             toast.error("Failed to place order");
             console.error("Failed to place order: " + error.error);
         }
+    };
+
+    const handleClearCart = () => {
+        clearCart();    
+        toast.success("Cart cleared successfully");
     };
 
     return (
@@ -222,17 +227,21 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             </div>
                         </div>
 
-                        <SheetFooter className="border-t border-white/20 p-4">
-                            <Button
-                                disabled={
-                                    selectedPayment === null ||
-                                    orderItems.length === 0
-                                }
-                                onClick={handlePay}
-                                className="w-full hover:bg-white/90"
-                            >
-                                Pay ${total.toFixed(2)}
-                            </Button>
+                        <SheetFooter className="flex flex-row justify-between items-center border-t border-white/20 p-4">
+                                <Button onClick={handleClearCart} variant="outline" className="bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60">
+                                    <Trash2 className="size-4" />
+                                    Clear Cart
+                                </Button>
+                                <Button
+                                    disabled={
+                                        selectedPayment === null ||
+                                        orderItems.length === 0
+                                    }
+                                    onClick={handlePay}
+                                    className="cursor-pointer hover:bg-white/90"
+                                    >
+                                    Pay ${total.toFixed(2)}
+                                </Button>
                         </SheetFooter>
                     </SheetContent>
                 </Sheet>
