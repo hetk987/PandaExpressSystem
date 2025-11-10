@@ -5,7 +5,7 @@ import MealCard from "@/app/components/app-mealcard";
 import { useEffect, useMemo, useState } from "react";
 import { RecipeType, Recipe, MealType, RecipeSelection } from "@/lib/types";
 import { useCart } from "@/app/providers/cart-provider";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/app/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAddToCartToast } from "@/app/hooks/use-add-to-cart-toast";
 

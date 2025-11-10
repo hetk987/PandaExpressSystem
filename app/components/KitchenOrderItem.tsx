@@ -1,7 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { Button } from "@/app/components/ui/button";
 import { Order } from "@/lib/types";
 
 export function KitchenOrderItem({ order }: { order: Order }) {
@@ -24,9 +24,9 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                 <CardContent className="px-4 py-3">
                     <div className="border-b-2 border-black pb-3 mb-3">
                         <div className="space-y-2">
-                            {order.orderInfo.individualItems.map((item) => (
+                            {order.orderInfo?.individualItems?.map((item) => (
                                 <div
-                                    key={item.recipeId}
+                                    key={item.recipeName}
                                     className="flex justify-between items-start gap-2"
                                 >
                                     <div className="flex-1">
@@ -51,7 +51,7 @@ export function KitchenOrderItem({ order }: { order: Order }) {
                         <div className="border-t-2 border-black pt-2 mt-2 flex justify-between font-bold">
                             <span>Total Items:</span>
                             <span>
-                                {order.orderInfo.individualItems.reduce(
+                                {order.orderInfo?.individualItems?.reduce(
                                     (sum, item) => sum + item.quantity,
                                     0
                                 )}

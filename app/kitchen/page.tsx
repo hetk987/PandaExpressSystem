@@ -1,6 +1,6 @@
 "use client";
 
-import { KitchenOrderItem } from "@/components/KitchenOrderItem";
+import { KitchenOrderItem } from "@/app/components/KitchenOrderItem";
 import type { Order } from "@/lib/types";
 import { useState } from "react";
 

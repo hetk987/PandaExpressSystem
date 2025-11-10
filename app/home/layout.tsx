@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarProvider } from  "@/app/components/ui/sidebar"
 import { AppSidebar } from "../components/app-sidebar"
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/app/components/ui/sheet"
 import { Button } from "@/app/components/ui/button"
@@ -56,14 +56,31 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
   const tax = useMemo(() => +(subtotal * 0.095).toFixed(2), [subtotal])
   const total = useMemo(() => +(subtotal + tax).toFixed(2), [subtotal, tax])
 
-  const handlePay = () => {
+  const handlePay = async () => {
     const orderInfo: OrderInfo = {
       meals: meals,
       individualItems: individualItems,
     }
-    console.log(JSON.stringify(orderInfo, null, 2))
-    toast.success("Order placed successfully")
-    clearCart()
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      body: JSON.stringify({
+        tax: tax,
+        totalCost: total,
+        orderTime: new Date().toISOString(),
+        cashierId: 1,
+        orderInfo: orderInfo,
+        isCompleted: false,
+      }),
+    })
+
+    if (response.ok) {
+      toast.success("Order placed successfully")
+      clearCart()
+    } else {
+      const error = await response.json()
+      toast.error("Failed to place order")
+      console.error("Failed to place order: " + error.error)
+    }
   }
 
   return (
