@@ -7,7 +7,7 @@ import {
     CardTitle,
 } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { Order, Cooked, RecipeQuantityMap } from "@/lib/types";
+import { Order, Cooked } from "@/lib/types";
 import { extractRecipeQuantities } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -24,7 +24,6 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
         } else {
             toast.error("Failed to complete order");
         }
-        window.location.reload();
     }
 
     const orderItems = useMemo(() => { 
@@ -36,7 +35,7 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
         () => {
             for (const [recipe, quantity] of Object.entries(orderItems)) {
                 const stock = cooked.find(
-                    (c) => c.recipeId === +recipe
+                    (c) => +c.recipeId === +recipe
                 )?.currentStock;
 
                 if (!stock || quantity > stock) {
@@ -45,7 +44,7 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
             }
             return true;
         }
-    , [orderItems]);
+    , [orderItems, cooked]);
 
     return (
         <div className="w-full max-w-md mx-auto">
