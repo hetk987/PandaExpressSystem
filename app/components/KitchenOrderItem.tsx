@@ -133,8 +133,8 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
                             <span>Total Items:</span>
                             <span>
                                 {
-                                    (order.orderInfo?.individualItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0) + 
-                                    (order.orderInfo?.meals?.reduce((sum, item) => sum + item.quantity, 0) ?? 0)
+                                (order.orderInfo?.individualItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0) + 
+                                (order.orderInfo?.meals?.reduce((sum, item) => sum + item.quantity, 0) ?? 0)
                                 }
                             </span>
                         </div>
