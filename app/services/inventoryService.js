@@ -39,14 +39,13 @@ export const deleteInventory = async (id) => {
 };
 
 export const consumeInventory = async (inventoryId, quantity) => {
-    console.log(inventoryId);
-    console.log(quantity);
     const inventoryItem = await getInventoryById(inventoryId);
+    console.log("Inventory item: ", inventoryItem);
     if (!inventoryItem) {
         throw new Error("Inventory not found: " + inventoryId);
     }
-    console.log(inventoryItem, quantity);
     if (inventoryItem[0].currentStock < quantity) {
+        console.log("Insufficient inventory: ", inventoryItem[0].name, inventoryItem[0].currentStock, quantity);
         throw new Error(
             "Insufficient inventory: " +
                 inventoryItem[0].name +
@@ -57,5 +56,6 @@ export const consumeInventory = async (inventoryId, quantity) => {
         );
     }
     inventoryItem[0].currentStock -= quantity;
+    console.log("Inventory item after consumption: ", inventoryItem[0]);
     return await updateInventory(inventoryId, inventoryItem[0]);
 };

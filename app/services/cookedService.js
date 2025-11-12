@@ -41,15 +41,17 @@ export const createCooked = async (newCooked) => {
 // If the recipe is not cooked, create a new cooked item
 export const cookRecipe = async (recipeId) => {
     const recipe = await getRecipeById(recipeId);
+    console.log("Recipe: ", recipe);
     if (!recipe) {
         throw new Error("Recipe not found");
     }
     await cookIngredients(recipeId);
     const cookedByRecipeId = await getCookedByRecipeId(recipeId); // See if already cooked
     if (cookedByRecipeId) {
+        const newStock =
+            (cookedByRecipeId.currentStock || 0) + recipe.ordersPerBatch;
         const updatedCooked = await updateCooked(cookedByRecipeId.id, {
-            currentStock:
-                cookedByRecipeId.currentStock + recipe.ordersPerBatch,
+            currentStock: newStock,
         });
         return updatedCooked;
     } else {
