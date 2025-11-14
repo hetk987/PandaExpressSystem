@@ -40,13 +40,13 @@ export type Expense = {
 }
 
 export type Cooked = {
-    id: number;
+    id?: number;
     recipeId: number;
     currentStock: number;
 }
 
 export type MealType = {
-    name: string;
+    typeName: string;
     sides: number;
     entrees: number;
     drinks: number;
@@ -93,7 +93,6 @@ export type MealSelections = {
 
 export type MealOrder = {
     mealType: string;
-    mealTypeId: string;
     quantity: number;
     price: number;
     selections: MealSelections;
@@ -112,3 +111,4 @@ export type OrderInfo = {
     individualItems: IndividualItem[];
 };
 
+export type RecipeQuantityMap = Record<number, number>;

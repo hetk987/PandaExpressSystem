@@ -1,100 +1,52 @@
 {
-  "id": "00000000-0000-0000-0000-000000000000",
-  "prevId": "",
+  "id": "9865f950-259d-43bf-8c7c-ca2e653e7363",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.team_members": {
-      "name": "team_members",
+    "public.cooked": {
+      "name": "cooked",
       "schema": "",
       "columns": {
-        "student_name": {
-          "name": "student_name",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "section": {
-          "name": "section",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "favorite_movie": {
-          "name": "favorite_movie",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "favorite_holiday": {
-          "name": "favorite_holiday",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.roles": {
-      "name": "roles",
-      "schema": "",
-      "columns": {
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "can_discount": {
-          "name": "can_discount",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "can_restock": {
-          "name": "can_restock",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
         "id": {
           "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true
         },
-        "can_edit_employees": {
-          "name": "can_edit_employees",
-          "type": "boolean",
+        "recipe_id": {
+          "name": "recipe_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "current_stock": {
+          "name": "current_stock",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {
-        "roles_can_discount_check": {
-          "name": "roles_can_discount_check",
-          "value": "can_discount = ANY (ARRAY[true, false])"
-        },
-        "roles_can_restock_check": {
-          "name": "roles_can_restock_check",
-          "value": "can_restock = ANY (ARRAY[true, false])"
-        },
-        "roles_can_edit_employees_check": {
-          "name": "roles_can_edit_employees_check",
-          "value": "can_edit_employees = ANY (ARRAY[true, false])"
+      "foreignKeys": {
+        "cooked_recipe_id_fkey": {
+          "name": "cooked_recipe_id_fkey",
+          "tableFrom": "cooked",
+          "tableTo": "recipes",
+          "columnsFrom": [
+            "recipe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.employees": {
@@ -150,7 +102,6 @@
           "name": "employees_role_id_fkey",
           "tableFrom": "employees",
           "tableTo": "roles",
-          "schemaTo": "public",
           "columnsFrom": [
             "role_id"
           ],
@@ -163,27 +114,21 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
+      "policies": {},
       "checkConstraints": {
         "employees_is_employed_check": {
           "name": "employees_is_employed_check",
           "value": "is_employed = ANY (ARRAY[true, false])"
         }
       },
-      "policies": {},
       "isRLSEnabled": false
     },
-    "public.orders": {
-      "name": "orders",
+    "public.expenses": {
+      "name": "expenses",
       "schema": "",
       "columns": {
-        "tax": {
-          "name": "tax",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "total_cost": {
-          "name": "total_cost",
+        "cost": {
+          "name": "cost",
           "type": "real",
           "primaryKey": false,
           "notNull": true
@@ -194,28 +139,27 @@
           "primaryKey": true,
           "notNull": true
         },
-        "order_time": {
-          "name": "order_time",
-          "type": "text",
+        "item_id": {
+          "name": "item_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
-        "cashier_id": {
-          "name": "cashier_id",
-          "type": "integer",
+        "expense_time": {
+          "name": "expense_time",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "orders_cashier_id_fkey": {
-          "name": "orders_cashier_id_fkey",
-          "tableFrom": "orders",
-          "tableTo": "employees",
-          "schemaTo": "public",
+        "expenses_item_id_fkey": {
+          "name": "expenses_item_id_fkey",
+          "tableFrom": "expenses",
+          "tableTo": "inventory",
           "columnsFrom": [
-            "cashier_id"
+            "item_id"
           ],
           "columnsTo": [
             "id"
@@ -226,8 +170,72 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.inv_rec_junc": {
+      "name": "inv_rec_junc",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "inventory_id": {
+          "name": "inventory_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipe_id": {
+          "name": "recipe_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inventory_quantity": {
+          "name": "inventory_quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inv_rec_junc_inventory_id_fkey": {
+          "name": "inv_rec_junc_inventory_id_fkey",
+          "tableFrom": "inv_rec_junc",
+          "tableTo": "inventory",
+          "columnsFrom": [
+            "inventory_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "inv_rec_junc_recipe_id_fkey": {
+          "name": "inv_rec_junc_recipe_id_fkey",
+          "tableFrom": "inv_rec_junc",
+          "tableTo": "recipes",
+          "columnsFrom": [
+            "recipe_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.inventory": {
@@ -269,16 +277,71 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.expenses": {
-      "name": "expenses",
+    "public.meal_types": {
+      "name": "meal_types",
       "schema": "",
       "columns": {
-        "cost": {
-          "name": "cost",
+        "type_name": {
+          "name": "type_name",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "sides": {
+          "name": "sides",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entrees": {
+          "name": "entrees",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "drinks": {
+          "name": "drinks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "price": {
+          "name": "price",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_file_path": {
+          "name": "image_file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.orders": {
+      "name": "orders",
+      "schema": "",
+      "columns": {
+        "tax": {
+          "name": "tax",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_cost": {
+          "name": "total_cost",
           "type": "real",
           "primaryKey": false,
           "notNull": true
@@ -289,28 +352,39 @@
           "primaryKey": true,
           "notNull": true
         },
-        "item_id": {
-          "name": "item_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expense_time": {
-          "name": "expense_time",
+        "order_time": {
+          "name": "order_time",
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "cashier_id": {
+          "name": "cashier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_completed": {
+          "name": "is_completed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "order_info": {
+          "name": "order_info",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "expenses_item_id_fkey": {
-          "name": "expenses_item_id_fkey",
-          "tableFrom": "expenses",
-          "tableTo": "inventory",
-          "schemaTo": "public",
+        "orders_cashier_id_fkey": {
+          "name": "orders_cashier_id_fkey",
+          "tableFrom": "orders",
+          "tableTo": "employees",
           "columnsFrom": [
-            "item_id"
+            "cashier_id"
           ],
           "columnsTo": [
             "id"
@@ -321,120 +395,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.cooked": {
-      "name": "cooked",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "recipe_id": {
-          "name": "recipe_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "current_stock": {
-          "name": "current_stock",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "cooked_recipe_id_fkey": {
-          "name": "cooked_recipe_id_fkey",
-          "tableFrom": "cooked",
-          "tableTo": "recipes",
-          "schemaTo": "public",
-          "columnsFrom": [
-            "recipe_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "checkConstraints": {},
-      "policies": {},
-      "isRLSEnabled": false
-    },
-    "public.inv_rec_junc": {
-      "name": "inv_rec_junc",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "inventory_id": {
-          "name": "inventory_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "recipe_id": {
-          "name": "recipe_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "inventory_quantity": {
-          "name": "inventory_quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "inv_rec_junc_inventory_id_fkey": {
-          "name": "inv_rec_junc_inventory_id_fkey",
-          "tableFrom": "inv_rec_junc",
-          "tableTo": "inventory",
-          "schemaTo": "public",
-          "columnsFrom": [
-            "inventory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "inv_rec_junc_recipe_id_fkey": {
-          "name": "inv_rec_junc_recipe_id_fkey",
-          "tableFrom": "inv_rec_junc",
-          "tableTo": "recipes",
-          "schemaTo": "public",
-          "columnsFrom": [
-            "recipe_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {},
-      "policies": {},
       "isRLSEnabled": false
     },
     "public.rec_order_junc": {
@@ -472,7 +434,6 @@
           "name": "rec_order_junc_recipe_id_fkey",
           "tableFrom": "rec_order_junc",
           "tableTo": "recipes",
-          "schemaTo": "public",
           "columnsFrom": [
             "recipe_id"
           ],
@@ -486,7 +447,6 @@
           "name": "rec_order_junc_order_id_fkey",
           "tableFrom": "rec_order_junc",
           "tableTo": "orders",
-          "schemaTo": "public",
           "columnsFrom": [
             "order_id"
           ],
@@ -499,8 +459,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
       "isRLSEnabled": false
     },
     "public.recipes": {
@@ -549,20 +509,76 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {},
       "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.roles": {
+      "name": "roles",
+      "schema": "",
+      "columns": {
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "can_discount": {
+          "name": "can_discount",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "can_restock": {
+          "name": "can_restock",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "can_edit_employees": {
+          "name": "can_edit_employees",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "roles_can_discount_check": {
+          "name": "roles_can_discount_check",
+          "value": "can_discount = ANY (ARRAY[true, false])"
+        },
+        "roles_can_restock_check": {
+          "name": "roles_can_restock_check",
+          "value": "can_restock = ANY (ARRAY[true, false])"
+        },
+        "roles_can_edit_employees_check": {
+          "name": "roles_can_edit_employees_check",
+          "value": "can_edit_employees = ANY (ARRAY[true, false])"
+        }
+      },
       "isRLSEnabled": false
     }
   },
   "enums": {
     "public.recipe_type": {
       "name": "recipe_type",
+      "schema": "public",
       "values": [
         "Side",
         "Entree",
         "Drink"
-      ],
-      "schema": "public"
+      ]
     }
   },
   "schemas": {},
@@ -571,11 +587,8 @@
   "policies": {},
   "views": {},
   "_meta": {
+    "columns": {},
     "schemas": {},
-    "tables": {},
-    "columns": {}
-  },
-  "internal": {
     "tables": {}
   }
 }

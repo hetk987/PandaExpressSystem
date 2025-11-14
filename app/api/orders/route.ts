@@ -6,13 +6,25 @@ export async function GET() {
         const orders = await getOrders();
         return NextResponse.json(orders, { status: 200 });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json(
+            { error: 'Failed to fetch orders', details: errorMessage },
+            { status: 500 }
+        );
     }
 }
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json();
+        let body;
+        try {
+            body = await request.json();
+        } catch (parseError) {
+            return NextResponse.json(
+                { error: 'Invalid JSON in request body' },
+                { status: 400 }
+            );
+        }
 
         // Validation: required fields for orders
         if (!body.tax || !body.totalCost || !body.orderTime || !body.cashierId) {
@@ -22,10 +34,54 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Type validation
+        if (typeof body.tax !== 'number' || body.tax < 0) {
+            return NextResponse.json(
+                { error: 'tax must be a non-negative number' },
+                { status: 400 }
+            );
+        }
+        if (typeof body.totalCost !== 'number' || body.totalCost < 0) {
+            return NextResponse.json(
+                { error: 'totalCost must be a non-negative number' },
+                { status: 400 }
+            );
+        }
+        if (typeof body.orderTime !== 'string' || body.orderTime.trim() === '') {
+            return NextResponse.json(
+                { error: 'orderTime must be a non-empty string' },
+                { status: 400 }
+            );
+        }
+        if (typeof body.cashierId !== 'number') {
+            return NextResponse.json(
+                { error: 'cashierId must be a number' },
+                { status: 400 }
+            );
+        }
+        if (body.isCompleted !== undefined && typeof body.isCompleted !== 'boolean') {
+            return NextResponse.json(
+                { error: 'isCompleted must be a boolean' },
+                { status: 400 }
+            );
+        }
         const newOrder = await createOrder(body);
         return NextResponse.json(newOrder, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+        // Handle database constraint errors
+        if (errorMessage.includes('foreign key') || errorMessage.includes('violates foreign key')) {
+            return NextResponse.json(
+                { error: 'Invalid cashierId: employee does not exist', details: errorMessage },
+                { status: 400 }
+            );
+        }
+
+        return NextResponse.json(
+            { error: 'Failed to create order', details: errorMessage },
+            { status: 500 }
+        );
     }
 }
 
