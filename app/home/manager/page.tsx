@@ -4,13 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/app/components/ui/button";
 
 export default function AdminTabsCard() {
     return (
-        <div className="min-h-screen w-full bg-background flex items-start justify-center p-6 md:p-10">
+        <div className="min-h-screen w-[190%] bg-background flex items-start justify-center p-6 md:p-10">
             <Card className="w-full max-w-[1600px] rounded-2xl shadow-lg">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-2xl">Dashboard</CardTitle>
+                    <CardTitle className="text-2xl">Manager Dashboard</CardTitle>
                 </CardHeader>
                 <Separator />
                 <CardContent className="pt-6">
