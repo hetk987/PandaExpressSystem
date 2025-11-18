@@ -13,23 +13,41 @@ import {
 } from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
 
 import { fetchWeatherApi } from "openmeteo";
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
     const { meals, individualItems, clearCart } = useCart();
+    const router = useRouter();
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
         { id: 3, name: "Mobile Pay", icon: Smartphone },
     ];
     const [selectedPayment, setSelectedPayment] = useState<number | null>(null);
+    
+    // Idle detection state
+    const [showIdleDialog, setShowIdleDialog] = useState(false);
+    const [showCancelCountdown, setShowCancelCountdown] = useState(false);
+    const [cancelCountdown, setCancelCountdown] = useState(5);
+    const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Transform cart data to display format
     const orderItems = useMemo(() => {
@@ -109,6 +127,87 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     const [windSpeed, setWindSpeed] = useState<number>();
     const [windDirection, setWindDirection] = useState<number>();
 
+    // Idle detection: Reset timer on mouse movement
+    useEffect(() => {
+        const handleMouseMove = () => {
+            // Reset the idle timer
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+            }
+            
+            // If dialog is showing, don't reset
+            if (showIdleDialog) {
+                return;
+            }
+            
+            // Set new timer for 7 seconds
+            idleTimerRef.current = setTimeout(() => {
+                setShowIdleDialog(true);
+            }, 7000);
+        };
+
+        // Initial timer setup
+        handleMouseMove();
+
+        // Add event listener
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+            }
+        };
+    }, [showIdleDialog]);
+
+    // Handle cancel countdown
+    useEffect(() => {
+        if (!showCancelCountdown) return;
+        
+        let currentCount = 5;
+        setCancelCountdown(5);
+        
+        const interval = setInterval(() => {
+            currentCount -= 1;
+            setCancelCountdown(currentCount);
+            
+            if (currentCount <= 0) {
+                clearInterval(interval);
+                // Defer the side effects to avoid setState during render
+                Promise.resolve().then(() => {
+                    clearCart();
+                    router.push("/");
+                });
+            }
+        }, 1000);
+
+        countdownTimerRef.current = interval;
+
+        return () => {
+            if (countdownTimerRef.current) {
+                clearInterval(countdownTimerRef.current);
+            }
+        };
+    }, [showCancelCountdown, clearCart, router]);
+
+    // Handle continue button - reset idle timer
+    const handleContinue = () => {
+        setShowIdleDialog(false);
+        // Reset the idle timer
+        if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+        }
+        idleTimerRef.current = setTimeout(() => {
+            setShowIdleDialog(true);
+        }, 10000);
+    };
+
+    // Handle cancel button - start countdown
+    const handleCancel = () => {
+        setShowIdleDialog(false);
+        setShowCancelCountdown(true);
+    };
+
     // load weather data
     useEffect(() => {
         const fetchData = async () => {
@@ -151,6 +250,36 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex flex-col">
+            <AlertDialog open={showIdleDialog} onOpenChange={setShowIdleDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you still ordering?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You haven't moved your mouse in a while. Are you still placing an order?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={handleCancel}>
+                            Cancel Order
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleContinue}>
+                            Continue Ordering
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={showCancelCountdown} onOpenChange={(open) => !open && setShowCancelCountdown(false)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Order will be cancelled</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Your order will be cleared and you will be redirected to the home page in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <SidebarProvider>
                 <AppSidebar />
                 <SidebarInset>
