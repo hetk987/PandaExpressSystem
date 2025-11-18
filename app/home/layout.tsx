@@ -33,7 +33,7 @@ import {
 import { fetchWeatherApi } from "openmeteo";
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
-    const { meals, individualItems, clearCart } = useCart();
+    const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
     const router = useRouter();
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
@@ -120,6 +120,19 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     const handleClearCart = () => {
         clearCart();    
         toast.success("Cart cleared successfully");
+    };
+
+    const handleRemoveItem = (item: typeof orderItems[0]) => {
+        // Extract index from item.id (format: "meal-0" or "item-0")
+        const index = parseInt(item.id.split("-")[1]);
+        
+        if (item.kind === "meal") {
+            removeMeal(index);
+            toast.success("Meal removed from cart");
+        } else {
+            removeIndividualItem(index);
+            toast.success("Item removed from cart");
+        }
     };
 
     const [temperature, setTemperature] = useState<number>();
@@ -321,7 +334,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                     {orderItems.map((item) => (
                                                         <div
                                                             key={item.id}
-                                                            className="px-4 py-3"
+                                                            className="px-4 py-3 relative"
                                                         >
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-2">
@@ -361,6 +374,14 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                                     {item.name}
                                                                 </div>
                                                             )}
+                                                            <Button
+                                                                onClick={() => handleRemoveItem(item)}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
                                                         </div>
                                                     ))}
                                                 </div>
