@@ -1,17 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { roles, employees, orders, inventory, expenses, recipes, cooked, invRecJunc, recOrderJunc } from "./schema";
-
-export const employeesRelations = relations(employees, ({one, many}) => ({
-	role: one(roles, {
-		fields: [employees.roleId],
-		references: [roles.id]
-	}),
-	orders: many(orders),
-}));
-
-export const rolesRelations = relations(roles, ({many}) => ({
-	employees: many(employees),
-}));
+import { employees, orders, inventory, expenses, recipes, cooked, invRecJunc, recOrderJunc, roles } from "./schema";
 
 export const ordersRelations = relations(orders, ({one, many}) => ({
 	employee: one(employees, {
@@ -19,6 +7,14 @@ export const ordersRelations = relations(orders, ({one, many}) => ({
 		references: [employees.id]
 	}),
 	recOrderJuncs: many(recOrderJunc),
+}));
+
+export const employeesRelations = relations(employees, ({one, many}) => ({
+	orders: many(orders),
+	role: one(roles, {
+		fields: [employees.roleId],
+		references: [roles.id]
+	}),
 }));
 
 export const expensesRelations = relations(expenses, ({one}) => ({
@@ -66,4 +62,8 @@ export const recOrderJuncRelations = relations(recOrderJunc, ({one}) => ({
 		fields: [recOrderJunc.orderId],
 		references: [orders.id]
 	}),
+}));
+
+export const rolesRelations = relations(roles, ({many}) => ({
+	employees: many(employees),
 }));

@@ -21,7 +21,10 @@ export const verifyLoginPassword = async (password) => {
         console.log("Query result:", result);
 
         if (!result || result.length === 0) {
-            console.log("No matching employee found for password:", cleanedPassword);
+            console.log(
+                "No matching employee found for password:",
+                cleanedPassword
+            );
             return null;
         }
 
