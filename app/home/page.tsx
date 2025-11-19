@@ -43,7 +43,7 @@ export default function Home() {
             <div className="grid grid-cols-5 gap-10 w-full max-w-6xl">
                 {options.map((item, i) => (
                     <a href={`/home/${item.href}`} key={i}>
-                        <MealCard name={item.title} image="/images/image.png" />
+                        <MealCard name={item.title} image={"/images/image.png"}/>
                     </a>
                 ))}
             </div>

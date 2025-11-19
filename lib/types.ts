@@ -51,7 +51,7 @@ export type MealType = {
     entrees: number;
     drinks: number;
     price: number;
-    image: string;
+    imageFilePath: string;
 }
 
 export type InvRecJunc = {
