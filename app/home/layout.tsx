@@ -13,23 +13,44 @@ import {
 } from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
 
 import { fetchWeatherApi } from "openmeteo";
+import { WeatherWidget } from "@/app/components/app-weather-widget";
+
+const IDLE_TIMEOUT = 10000; // 10 seconds
+const COUNTDOWN_SECONDS = 7; // 7 seconds
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
-    const { meals, individualItems, clearCart } = useCart();
+    const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
+    const router = useRouter(); 
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
         { id: 3, name: "Mobile Pay", icon: Smartphone },
     ];
     const [selectedPayment, setSelectedPayment] = useState<number | null>(null);
+    
+    // Idle detection state
+    const [showIdleDialog, setShowIdleDialog] = useState(false);
+    const [cancelCountdown, setCancelCountdown] = useState(5);
+    const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Transform cart data to display format
     const orderItems = useMemo(() => {
@@ -104,10 +125,130 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
         toast.success("Cart cleared successfully");
     };
 
+    const handleRemoveItem = (item: typeof orderItems[0]) => {
+        // Extract index from item.id (format: "meal-0" or "item-0")
+        const index = parseInt(item.id.split("-")[1]);
+        
+        if (item.kind === "meal") {
+            removeMeal(index);
+            toast.success("Meal removed from cart");
+        } else {
+            removeIndividualItem(index);
+            toast.success("Item removed from cart");
+        }
+    };
+
     const [temperature, setTemperature] = useState<number>();
     const [precipitation, setPrecipitation] = useState<number>();
     const [windSpeed, setWindSpeed] = useState<number>();
     const [windDirection, setWindDirection] = useState<number>();
+
+    // Idle detection: Reset timer on mouse movement
+    useEffect(() => {
+        const handleMouseMove = () => {
+            // Reset the idle timer
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+            }
+            
+            // If dialog is showing, don't reset
+            if (showIdleDialog) {
+                return;
+            }
+            
+            // Set new timer for IDLE_TIMEOUT seconds
+            idleTimerRef.current = setTimeout(() => {
+                setShowIdleDialog(true);
+            }, IDLE_TIMEOUT);
+        };
+
+        // Initial timer setup
+        handleMouseMove();
+
+        // Add event listener
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+            }
+        };
+    }, [showIdleDialog]);
+
+    // Handle countdown timer when idle dialog opens
+    useEffect(() => {
+        if (!showIdleDialog) {
+            // Reset countdown when dialog closes
+            setCancelCountdown(COUNTDOWN_SECONDS);
+            if (countdownTimerRef.current) {
+                clearInterval(countdownTimerRef.current);
+                countdownTimerRef.current = null;
+            }
+            return;
+        }
+        
+        // Start countdown when dialog opens
+        let currentCount = COUNTDOWN_SECONDS;
+        setCancelCountdown(COUNTDOWN_SECONDS);
+        
+        const interval = setInterval(() => {
+            currentCount -= 1;
+            setCancelCountdown(currentCount);
+            
+            if (currentCount <= 0) {
+                clearInterval(interval);
+                countdownTimerRef.current = null;
+                // Auto-cancel when countdown reaches 0
+                Promise.resolve().then(() => {
+                    clearCart();
+                    router.push("/");
+                });
+            }
+        }, 1000);
+
+        countdownTimerRef.current = interval;
+
+        return () => {
+            if (countdownTimerRef.current) {
+                clearInterval(countdownTimerRef.current);
+                countdownTimerRef.current = null;
+            }
+        };
+    }, [showIdleDialog, clearCart, router]);
+
+    // Handle continue button - reset idle timer and countdown
+    const handleContinue = () => {
+        setShowIdleDialog(false);
+        // Clear countdown timer
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
+        setCancelCountdown(COUNTDOWN_SECONDS);
+        // Reset the idle timer
+        if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+        }
+        idleTimerRef.current = setTimeout(() => {
+            setShowIdleDialog(true);
+        }, 7000);
+    };
+
+    // Handle cancel button - immediately cancel
+    const handleCancel = () => {
+        setShowIdleDialog(false);
+        // Clear countdown timer
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
+        // Immediately cancel and redirect
+        Promise.resolve().then(() => {
+            clearCart();
+            router.push("/");
+        });
+    };
 
     // load weather data
     useEffect(() => {
@@ -151,8 +292,35 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex flex-col">
+            <AlertDialog open={showIdleDialog} onOpenChange={setShowIdleDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you still ordering?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You haven't moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel 
+                            onClick={handleCancel}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
+                        >
+                            Cancel Order ({cancelCountdown})
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleContinue}>
+                            Continue Ordering
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <SidebarProvider>
-                <AppSidebar />
+                <AppSidebar 
+                    temperature={temperature}
+                    precipitation={precipitation}
+                    windSpeed={windSpeed}
+                    windDirection={windDirection}
+                />
                 <SidebarInset>
                     <div className="flex flex-col flex-1">
                         <main className="flex-1 overflow-y-auto">
@@ -160,7 +328,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         </main>
 
                         <footer className="bg-dark-red text-white h-15 flex items-center justify-between px-6">
-
                             <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
                                 <span className="font-semibold tracking-wide">Weather</span>
                                 <span className="text-white/80">
@@ -192,7 +359,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                     {orderItems.map((item) => (
                                                         <div
                                                             key={item.id}
-                                                            className="px-4 py-3"
+                                                            className="px-4 py-3 relative"
                                                         >
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-2">
@@ -232,6 +399,14 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                                     {item.name}
                                                                 </div>
                                                             )}
+                                                            <Button
+                                                                onClick={() => handleRemoveItem(item)}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
                                                         </div>
                                                     ))}
                                                 </div>
