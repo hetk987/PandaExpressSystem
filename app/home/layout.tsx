@@ -31,10 +31,14 @@ import {
 } from "@/app/components/ui/alert-dialog";
 
 import { fetchWeatherApi } from "openmeteo";
+import { WeatherWidget } from "@/app/components/app-weather-widget";
+
+const IDLE_TIMEOUT = 10000; // 10 seconds
+const COUNTDOWN_SECONDS = 7; // 7 seconds
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
     const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
-    const router = useRouter();
+    const router = useRouter(); 
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
@@ -44,7 +48,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     
     // Idle detection state
     const [showIdleDialog, setShowIdleDialog] = useState(false);
-    const [showCancelCountdown, setShowCancelCountdown] = useState(false);
     const [cancelCountdown, setCancelCountdown] = useState(5);
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -153,10 +156,10 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 return;
             }
             
-            // Set new timer for 7 seconds
+            // Set new timer for IDLE_TIMEOUT seconds
             idleTimerRef.current = setTimeout(() => {
                 setShowIdleDialog(true);
-            }, 7000);
+            }, IDLE_TIMEOUT);
         };
 
         // Initial timer setup
@@ -173,12 +176,21 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
         };
     }, [showIdleDialog]);
 
-    // Handle cancel countdown
+    // Handle countdown timer when idle dialog opens
     useEffect(() => {
-        if (!showCancelCountdown) return;
+        if (!showIdleDialog) {
+            // Reset countdown when dialog closes
+            setCancelCountdown(COUNTDOWN_SECONDS);
+            if (countdownTimerRef.current) {
+                clearInterval(countdownTimerRef.current);
+                countdownTimerRef.current = null;
+            }
+            return;
+        }
         
-        let currentCount = 5;
-        setCancelCountdown(5);
+        // Start countdown when dialog opens
+        let currentCount = COUNTDOWN_SECONDS;
+        setCancelCountdown(COUNTDOWN_SECONDS);
         
         const interval = setInterval(() => {
             currentCount -= 1;
@@ -186,7 +198,8 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             
             if (currentCount <= 0) {
                 clearInterval(interval);
-                // Defer the side effects to avoid setState during render
+                countdownTimerRef.current = null;
+                // Auto-cancel when countdown reaches 0
                 Promise.resolve().then(() => {
                     clearCart();
                     router.push("/");
@@ -199,26 +212,42 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
         return () => {
             if (countdownTimerRef.current) {
                 clearInterval(countdownTimerRef.current);
+                countdownTimerRef.current = null;
             }
         };
-    }, [showCancelCountdown, clearCart, router]);
+    }, [showIdleDialog, clearCart, router]);
 
-    // Handle continue button - reset idle timer
+    // Handle continue button - reset idle timer and countdown
     const handleContinue = () => {
         setShowIdleDialog(false);
+        // Clear countdown timer
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
+        setCancelCountdown(COUNTDOWN_SECONDS);
         // Reset the idle timer
         if (idleTimerRef.current) {
             clearTimeout(idleTimerRef.current);
         }
         idleTimerRef.current = setTimeout(() => {
             setShowIdleDialog(true);
-        }, 10000);
+        }, 7000);
     };
 
-    // Handle cancel button - start countdown
+    // Handle cancel button - immediately cancel
     const handleCancel = () => {
         setShowIdleDialog(false);
-        setShowCancelCountdown(true);
+        // Clear countdown timer
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
+        // Immediately cancel and redirect
+        Promise.resolve().then(() => {
+            clearCart();
+            router.push("/");
+        });
     };
 
     // load weather data
@@ -268,12 +297,15 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you still ordering?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            You haven't moved your mouse in a while. Are you still placing an order?
+                            You haven't moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel onClick={handleCancel}>
-                            Cancel Order
+                        <AlertDialogCancel 
+                            onClick={handleCancel}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
+                        >
+                            Cancel Order ({cancelCountdown})
                         </AlertDialogCancel>
                         <AlertDialogAction onClick={handleContinue}>
                             Continue Ordering
@@ -282,19 +314,13 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <AlertDialog open={showCancelCountdown} onOpenChange={(open) => !open && setShowCancelCountdown(false)}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Order will be cancelled</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Your order will be cleared and you will be redirected to the home page in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                </AlertDialogContent>
-            </AlertDialog>
-
             <SidebarProvider>
-                <AppSidebar />
+                <AppSidebar 
+                    temperature={temperature}
+                    precipitation={precipitation}
+                    windSpeed={windSpeed}
+                    windDirection={windDirection}
+                />
                 <SidebarInset>
                     <div className="flex flex-col flex-1">
                         <main className="flex-1 overflow-y-auto">
@@ -302,7 +328,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         </main>
 
                         <footer className="bg-dark-red text-white h-15 flex items-center justify-between px-6">
-
                             <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
                                 <span className="font-semibold tracking-wide">Weather</span>
                                 <span className="text-white/80">
