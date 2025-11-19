@@ -1,14 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-    Sheet,
-    SheetContent,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
@@ -16,13 +8,10 @@ import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-
 import { fetchWeatherApi } from "openmeteo";
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
     const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
-    const router = useRouter(); 
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
@@ -167,12 +156,11 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 <main className="flex-1 overflow-y-auto">
                     {children}
                 </main>
-
                 <div>
-                    <div className="flex flex-col gap-4 p-4">
+                    <div className="flex flex-col gap-4 p-4 h-full">
                         <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
                             {orderItems.length === 0 ? (
-                                <div className="px-4 py-8 text-center text-white/70">
+                                <div className="px-4 py-8 text-center text-black">
                                     <p>Your cart is empty</p>
                                 </div>
                             ) : (
@@ -190,7 +178,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                             ? item.name
                                                             : "Individual A-la-carte"}
                                                     </span>
-                                                    <span className="text-xs text-white/70">
+                                                    <span className="text-xs text-black">
                                                         {item.quantity}x
                                                     </span>
                                                 </div>
@@ -205,7 +193,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                 </div>
                                             </div>
                                             {item.kind === "meal" && (
-                                                <ul className="mt-1 list-disc list-inside text-sm text-white/85">
+                                                <ul className="mt-1 list-disc list-inside text-sm text-black">
                                                     {item.components.map(
                                                         (c) => (
                                                             <li key={c}>
@@ -216,7 +204,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                 </ul>
                                             )}
                                             {item.kind === "ala" && (
-                                                <div className="mt-1 text-sm text-white/85">
+                                                <div className="mt-1 text-sm text-black">
                                                     {item.name}
                                                 </div>
                                             )}
@@ -235,11 +223,11 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         </div>
 
                         <div className="space-y-2 rounded-md bg-white/5 p-4">
-                            <div className="flex justify-between text-white/90">
+                            <div className="flex justify-between text-black">
                                 <span>Subtotal</span>
                                 <span>${subtotal.toFixed(2)}</span>
                             </div>
-                            <div className="flex justify-between text-white/90">
+                            <div className="flex justify-between text-black">
                                 <span>Tax</span>
                                 <span>${tax.toFixed(2)}</span>
                             </div>
@@ -251,7 +239,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         </div>
 
                         <div className="space-y-3">
-                            <p className="text-sm uppercase tracking-wide text-white/80">
+                            <p className="text-sm uppercase tracking-wide text-black">
                                 Payment method
                             </p>
                             <div className="grid grid-cols-2 gap-3">
@@ -263,9 +251,9 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         key={method.id}
                                         variant="outline"
                                         className={cn(
-                                            "justify-center border-white/60 bg-white/10 text-white hover:bg-white/20",
+                                            "justify-center border-black bg-white/10 text-black hover:bg-white/20",
                                             selectedPayment === method.id &&
-                                                "border-white bg-white/20 ring-2 ring-white/80",
+                                                "border-black bg-white/20 ring-2 ring-black",
                                             method.id === 3 && "col-span-2"
                                         )}
                                     >
