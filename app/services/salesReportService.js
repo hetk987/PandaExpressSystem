@@ -47,15 +47,17 @@ export const getHourlySalesReport = async (startDate, endDate) => {
 
 export const getHourlySales = async (day, startHour, endHour) => {
     // Build time window: [day@startHour, day@(endHour+1))  (end-exclusive)
-    const startDate = new Date(day);
-    startDate.setHours(startHour, 0, 0, 0);
+    // Parse as UTC date by adding 'T00:00:00Z' suffix
+    const startDate = new Date(day + "T00:00:00Z");
+    // Use UTC methods to set the hour
+    startDate.setUTCHours(startHour, 0, 0, 0);
 
-    const endDate = new Date(day);
+    const endDate = new Date(day + "T00:00:00Z");
     if (endHour === 23) {
-        endDate.setDate(endDate.getDate() + 1);
-        endDate.setHours(0, 0, 0, 0);
+        endDate.setUTCDate(endDate.getUTCDate() + 1);
+        endDate.setUTCHours(0, 0, 0, 0);
     } else {
-        endDate.setHours(endHour + 1, 0, 0, 0);
+        endDate.setUTCHours(endHour + 1, 0, 0, 0);
     }
 
     const hourlySalesData = await db

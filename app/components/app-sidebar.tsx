@@ -17,11 +17,25 @@ import {
   Utensils, 
   Cookie, 
   Coffee, 
-  ChefHat 
+  ChefHat,
+  Accessibility
 } from "lucide-react"
 import { usePathname } from "next/navigation"
+import { AccessibilitySheet } from "./app-accessibility-sheet"
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  temperature?: number;
+  precipitation?: number;
+  windSpeed?: number;
+  windDirection?: number;
+}
+
+export function AppSidebar({ 
+  temperature, 
+  precipitation, 
+  windSpeed, 
+  windDirection 
+}: AppSidebarProps) {
   const pathname = usePathname()
   const menuItems = [
     {
@@ -91,6 +105,18 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <AccessibilitySheet
+                temperature={temperature}
+                precipitation={precipitation}
+                windSpeed={windSpeed}
+                windDirection={windDirection}
+                trigger={
+                  <SidebarMenuButton size="lg" className="text-white hover:text-black border rounded-md w-full">
+                    <Accessibility className="size-5" />
+                    <span>Accessibility</span>
+                  </SidebarMenuButton>
+                }
+              />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
