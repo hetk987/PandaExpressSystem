@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 
 import { MealType } from "@/lib/types";
-import MealCard from "@/app/components/app-mealcard";
+import CashierCard from "@/app/components/app-cashier-card";
 
 export default function Home() {
   const [mealtypes, setMealtypes] = useState<MealType[]>([]);
@@ -32,8 +32,8 @@ export default function Home() {
   return (
       <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
         {mealtypes.map((item, i) => (
-            <a href={`/home/build/${item.typeName}`} key={i}>
-              <MealCard name={item.typeName} image={item.imageFilePath} key={i}/>
+            <a href={`/cashier/build/${item.typeName}`} key={i}>
+              <CashierCard name={item.typeName} />
             </a>
         ))}
     </div>

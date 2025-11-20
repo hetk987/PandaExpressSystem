@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { Recipe } from "@/lib/types";
-import MealCard from "@/app/components/app-mealcard";
+import CashierCard from "@/app/components/app-cashier-card";
 import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
@@ -68,7 +68,7 @@ export default function Home() {
             onClick={() => handleRecipeClick(item)}
             className="cursor-pointer"
           >
-            <MealCard name={item.name} image={item.image}/>
+            <CashierCard name={item.name} />
           </button>
         ))}
       </div>

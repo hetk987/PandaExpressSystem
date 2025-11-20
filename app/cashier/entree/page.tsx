@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { Recipe } from "@/lib/types";
-import MealCard from "@/app/components/app-mealcard";
+import CashierCard from "@/app/components/app-cashier-card";
 import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
@@ -45,7 +45,7 @@ export default function Home() {
         addIndividualItem({
           recipeId: selectedRecipe.id,
           recipeName: selectedRecipe.name,
-          recipeType: "Side",
+          recipeType: "Entree",
           quantity: quantity,
           price: selectedRecipe.pricePerServing
         });
@@ -62,13 +62,13 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
-        {recipes.filter(r => r.type === "Side").map((item, i) => (
+        {recipes.filter(r => r.type === "Entree").map((item, i) => (
           <button
             key={i}
             onClick={() => handleRecipeClick(item)}
             className="cursor-pointer"
           >
-            <MealCard name={item.name} image={item.image}/>
+            <CashierCard name={item.name} />
           </button>
         ))}
       </div>

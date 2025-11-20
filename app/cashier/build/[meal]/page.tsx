@@ -8,6 +8,7 @@ import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAddToCartToast } from "@/app/hooks/use-add-to-cart-toast";
+import CashierCard from "@/app/components/app-cashier-card";
 
 interface Selection {
     type: RecipeType;
@@ -178,39 +179,12 @@ export default function Build({
             }
         );
         
-        router.push("/home/build");
+        router.push("/cashier/build");
     };
 
     return (
         <div className="flex flex-row">
-            <div className="w-full">
-                <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{`Select ${selection?.type} ${selection ? selection.num + 1 : ""}`}</h2>
-                </div>
-                <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
-                    {recipes.filter(r => r.type === currentMenu).map((item, i) => (
-                        <button
-                            key={i}
-                            onClick={() => handleRecipeClick(item)}
-                            className="cursor-pointer"
-                        >
-                            <MealCard name={item.name} image={item.image}/>
-                        </button>
-                    ))}
-                </div>
-                {isComplete && (
-                    <div className="px-5 pb-5">
-                        <Button onClick={handleAddToCart} className="w-full">
-                            Add to Cart
-                        </Button>
-                    </div>
-                )}
-            </div>
-            <div className="w-70">
-                <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{mealName}</h2>
-                </div>
-                <div className="flex flex-col p-10 gap-10 mb-10">
+            <div className="flex flex-col p-10 gap-10 mb-10">
                     {entrees?.map((e, i) => {
                         const selectedRecipe = mealSelections.entrees[i];
                         return (
@@ -224,9 +198,8 @@ export default function Build({
                                     })
                                 }}
                             >
-                                <MealCard 
+                                <CashierCard 
                                     name={selectedRecipe ? selectedRecipe.name : `Entree ${i + 1}`} 
-                                    image={selectedRecipe ? selectedRecipe.image : undefined}
                                     className={`cursor-pointer ${selection && selection.type == "Entree" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
                                 />
                             </button>
@@ -245,9 +218,8 @@ export default function Build({
                                     })
                                 }}
                             >
-                                <MealCard 
+                                <CashierCard
                                     name={selectedRecipe ? selectedRecipe.name : `Side ${i + 1}`} 
-                                    image={selectedRecipe ? selectedRecipe.image : undefined}
                                     className={`cursor-pointer ${selection && selection.type == "Side" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
                                 />
                             </button>
@@ -266,7 +238,7 @@ export default function Build({
                                     })
                                 }}
                             >
-                                <MealCard 
+                                <CashierCard 
                                     name={selectedRecipe ? selectedRecipe.name : `Drink ${i + 1}`} 
                                     className={`cursor-pointer ${selection && selection.type == "Drink" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
                                 />
@@ -274,6 +246,34 @@ export default function Build({
                         );
                     })}
                 </div>
+            <div className="w-full">
+                <div className="pt-5 pl-5">
+                    <h2 className=" text-3xl font-bold ">{`Select ${selection?.type} ${selection ? selection.num + 1 : ""}`}</h2>
+                </div>
+                <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
+                    {recipes.filter(r => r.type === currentMenu).map((item, i) => (
+                        <button
+                            key={i}
+                            onClick={() => handleRecipeClick(item)}
+                            className="cursor-pointer"
+                        >
+                            <CashierCard name={item.name} />
+                        </button>
+                    ))}
+                </div>
+                {isComplete && (
+                    <div className="px-5 pb-5">
+                        <Button onClick={handleAddToCart} className="w-full">
+                            Add to Cart
+                        </Button>
+                    </div>
+                )}
+            </div>
+            <div className="w-70">
+                <div className="pt-5 pl-5">
+                    <h2 className=" text-3xl font-bold ">{mealName}</h2>
+                </div>
+                
             </div>
         </div>
     );
