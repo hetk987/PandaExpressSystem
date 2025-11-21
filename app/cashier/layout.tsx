@@ -203,7 +203,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         onClick={() => handleRemoveItem(item)}
                                         variant="ghost"
                                         size="icon"
-                                        className="absolute top-2 right-2 h-7 w-7 text-neutral-500 hover:text-panda-red hover:bg-red-50"
+                                        className="absolute bottom-2 right-2 h-7 w-7 text-neutral-500 hover:text-panda-red hover:bg-red-50"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
