@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 import { Recipe } from "@/lib/types";
-import MealCard from "@/app/components/app-mealcard";
+import CashierCard from "@/app/components/app-cashier-card";
 import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
@@ -45,7 +45,7 @@ export default function Home() {
         addIndividualItem({
           recipeId: selectedRecipe.id,
           recipeName: selectedRecipe.name,
-          recipeType: "Side",
+          recipeType: "Drink",
           quantity: quantity,
           price: selectedRecipe.pricePerServing
         });
@@ -61,17 +61,32 @@ export default function Home() {
 
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
-        {recipes.filter(r => r.type === "Side").map((item, i) => (
-          <button
-            key={i}
-            onClick={() => handleRecipeClick(item)}
-            className="cursor-pointer"
-          >
-            <MealCard name={item.name} image={item.image}/>
-          </button>
-        ))}
-      </div>
+      <div className="h-full bg-white p-6">
+            <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-neutral-900">
+                    Select A Drink
+                </h1>
+                <a href="/cashier">
+                    <Button
+                        variant="default"
+                        className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
+                    >
+                        Home
+                    </Button>
+                </a>
+            </div>
+            <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
+                {recipes.filter(r => r.type === "Drink").map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleRecipeClick(item)}
+                    className="cursor-pointer"
+                  >
+                    <CashierCard name={item.name} />
+                  </button>
+                ))}
+            </div>
+        </div>
       
       {selectedRecipe && (
         <div className="fixed bottom-20 left-0 right-0 bg-white border-t-2 border-gray-200 p-6 shadow-lg">
