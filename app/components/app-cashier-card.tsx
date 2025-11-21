@@ -1,12 +1,4 @@
-import Image from "next/image"
 import React from "react";
-
-import {
-  Item,
-  ItemContent,
-  ItemHeader,
-  ItemTitle,
-} from "@/app/components/ui/item"
 
 const CashierCard = (props: {
     name: string,
@@ -14,15 +6,32 @@ const CashierCard = (props: {
     className?: string
 }) => {
   return (
-    <Item
-        key={props.name}
-        variant="outline"
-        className={`shadow-md bg-red-500 p-0 overflow-hidden rounded-lg ${props.className}`}
-        >
-        <ItemContent className="bg-red-500 text-white flex items-center justify-center p-3 aspect-square">
-            <ItemTitle className="text-md font-semibold text-center min-h-10">{props.name}</ItemTitle>
-        </ItemContent>
-    </Item>
+    <div
+        className={`
+            aspect-square 
+            bg-panda-red 
+            hover:bg-panda-dark-red 
+            active:scale-95
+            transition-all 
+            duration-150 
+            rounded-lg 
+            shadow-md 
+            hover:shadow-lg
+            flex 
+            items-center 
+            justify-center 
+            p-6
+            cursor-pointer
+            border-2
+            border-transparent
+            hover:border-panda-light-red
+            ${props.className || ''}
+        `}
+    >
+        <h3 className="text-white text-xl font-bold text-center leading-tight">
+            {props.name}
+        </h3>
+    </div>
   );
 };
 
