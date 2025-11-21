@@ -32,3 +32,20 @@ export function extractRecipeQuantities(order: OrderInfo): RecipeQuantityMap {
 
     return result;
 }
+
+/**
+ * Returns the current timestamp in CST (Central Standard Time, UTC-6)
+ * formatted as an ISO string
+ */
+export function getCSTTimestamp(): string {
+    const now = new Date();
+    // CST is UTC-6 hours
+    const cstOffset = -6 * 60; // in minutes
+    // Adjust from local time to UTC, then to CST
+    const cstTime = new Date(
+        now.getTime() + 
+        (cstOffset * 60 * 1000) + 
+        (now.getTimezoneOffset() * 60 * 1000)
+    );
+    return cstTime.toISOString();
+}
