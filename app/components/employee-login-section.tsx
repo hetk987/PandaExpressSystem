@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { UserCircle, Lock } from "lucide-react";
+import { signIn as googleSignIn } from "next-auth/react";
 
 export default function EmployeeLoginSection() {
     const [pin, setPin] = useState("");
@@ -107,6 +108,14 @@ export default function EmployeeLoginSection() {
                                 maxLength={6}
                             />
                         </div>
+                    </div>
+                    <div className="space-y-4 mb-6">
+                        <Button
+                            onClick={() => googleSignIn("google", { callbackUrl: "/home" })}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl"
+                        >
+                            Sign in with Google
+                        </Button>
                     </div>
 
                     {/* Keypad */}
