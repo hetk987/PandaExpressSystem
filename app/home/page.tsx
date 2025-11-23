@@ -49,15 +49,15 @@ export default function Home() {
                 ))}
             </div>
             {/*temporary button*/}
-            <div>
-                <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700"
-                >
-                    Logout
-                </button>
+            {/*<div>*/}
+            {/*    <button*/}
+            {/*        onClick={() => signOut({ callbackUrl: "/" })}*/}
+            {/*        className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700"*/}
+            {/*    >*/}
+            {/*        Logout*/}
+            {/*    </button>*/}
 
-            </div>
+            {/*</div>*/}
         </div>
     );
 }
