@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MealCard from "../components/app-mealcard";
 import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 const options = [
     { href: "build", title: "Build Your Own" },
@@ -47,6 +48,16 @@ export default function Home() {
                     </a>
                 ))}
             </div>
+            {/*temporary button*/}
+            {/*<div>*/}
+            {/*    <button*/}
+            {/*        onClick={() => signOut({ callbackUrl: "/" })}*/}
+            {/*        className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700"*/}
+            {/*    >*/}
+            {/*        Logout*/}
+            {/*    </button>*/}
+
+            {/*</div>*/}
         </div>
     );
 }
