@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { MealType } from "@/lib/types";
 import CashierCard from "@/app/components/app-cashier-card";
-import { Button } from "@/app/components/button";
+import { Button } from "@/app/components/ui/button";
 
 export default function Home() {
   const [mealtypes, setMealtypes] = useState<MealType[]>([]);
