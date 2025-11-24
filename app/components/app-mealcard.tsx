@@ -12,7 +12,7 @@ import {
 
 const MealCard = (props: {
     name: string,
-    image?: string,
+    image?: string | null,
     key?: number
     className?: string
 }) => {

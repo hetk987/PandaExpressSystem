@@ -3,8 +3,8 @@
 import React from "react";
 import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { cn, getCSTTimestamp } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
@@ -69,7 +69,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             body: JSON.stringify({
                 tax: tax,
                 totalCost: total,
-                orderTime: new Date().toISOString(),
+                orderTime: getCSTTimestamp(),
                 cashierId: 2,
                 orderInfo: orderInfo,
                 isCompleted: true,

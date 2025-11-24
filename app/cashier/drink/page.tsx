@@ -43,7 +43,7 @@ export default function Home() {
     await addItemWithToast(
       () => {
         addIndividualItem({
-          recipeId: selectedRecipe.id,
+          recipeId: selectedRecipe.id!,
           recipeName: selectedRecipe.name,
           recipeType: "Drink",
           quantity: quantity,

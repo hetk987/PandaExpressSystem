@@ -146,15 +146,15 @@ export default function Build({
             drinks: RecipeSelection[];
         } = {
             entrees: mealSelections.entrees.map(r => ({
-                recipeId: r.id,
+                recipeId: r.id!,
                 recipeName: r.name
             })),
             sides: mealSelections.sides.map(r => ({
-                recipeId: r.id,
+                recipeId: r.id!,
                 recipeName: r.name
             })),
             drinks: mealSelections.drinks.map(r => ({
-                recipeId: r.id,
+                recipeId: r.id!,
                 recipeName: r.name
             }))
         };
