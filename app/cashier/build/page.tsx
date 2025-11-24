@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { MealType } from "@/lib/types";
 import CashierCard from "@/app/components/app-cashier-card";
+import { Button } from "@/app/components/button";
 
 export default function Home() {
   const [mealtypes, setMealtypes] = useState<MealType[]>([]);
@@ -30,12 +31,28 @@ export default function Home() {
   }, []);
 
   return (
-      <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
-        {mealtypes.map((item, i) => (
-            <a href={`/cashier/build/${item.typeName}`} key={i}>
-              <CashierCard name={item.typeName} />
-            </a>
-        ))}
-    </div>
+    <div className="h-full bg-white p-6">
+            <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-neutral-900">
+                    Select Meal Type
+                </h1>
+
+                <a href="/cashier">
+                    <Button
+                        variant="default"
+                        className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
+                    >
+                        Home
+                    </Button>
+                </a>
+            </div>
+            <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
+                {mealtypes.map((item, i) => (
+                    <a href={`/cashier/build/${item.typeName}`} key={i}>
+                      <CashierCard name={item.typeName} />
+                    </a>
+                ))}
+            </div>
+        </div>
   );
 }

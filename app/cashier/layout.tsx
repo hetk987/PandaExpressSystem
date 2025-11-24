@@ -3,7 +3,7 @@
 import React from "react";
 import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
@@ -15,7 +15,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
-        { id: 3, name: "Mobile Pay", icon: Smartphone },
     ];
     const [selectedPayment, setSelectedPayment] = useState<number | null>(null);
 
@@ -73,7 +72,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 orderTime: new Date().toISOString(),
                 cashierId: 2,
                 orderInfo: orderInfo,
-                isCompleted: false,
+                isCompleted: true,
             }),
         });
 
@@ -93,7 +92,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     };
 
     const handleRemoveItem = (item: typeof orderItems[0]) => {
-        // Extract index from item.id (format: "meal-0" or "item-0")
         const index = parseInt(item.id.split("-")[1]);
         
         if (item.kind === "meal") {
@@ -104,11 +102,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             toast.success("Item removed from cart");
         }
     };
-
-    const [temperature, setTemperature] = useState<number>();
-    const [precipitation, setPrecipitation] = useState<number>();
-    const [windSpeed, setWindSpeed] = useState<number>();
-    const [windDirection, setWindDirection] = useState<number>();
 
     // load weather data
     useEffect(() => {
@@ -125,12 +118,10 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             const url = "https://api.open-meteo.com/v1/forecast";
             const responses = await fetchWeatherApi(url, params);
 
-            // Process first location. Add a for-loop for multiple locations or weather models
             const response = responses[0];
             const utcOffsetSeconds = response.utcOffsetSeconds();
             const current = response.current()!;
 
-            // Note: The order of weather variables in the URL query and the indices below need to match!
             const weatherData = {
                 current: {
                     time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
@@ -140,144 +131,155 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                     wind_direction_10m: current.variables(3)!.value(),
                 },
             };
-
-            setTemperature(weatherData.current.temperature_2m);
-            setPrecipitation(weatherData.current.precipitation);
-            setWindSpeed(weatherData.current.wind_speed_10m);
-            setWindDirection(weatherData.current.wind_direction_10m);
         }
 
         fetchData();
     }, []);
 
     return (
-        <div className="flex flex-col">
-            <div className="flex flex-row">
-                <main className="flex-1 overflow-y-auto">
-                    {children}
-                </main>
-                <div>
-                    <div className="flex flex-col gap-4 p-4 h-full">
-                        <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
-                            {orderItems.length === 0 ? (
-                                <div className="px-4 py-8 text-center text-black">
-                                    <p>Your cart is empty</p>
-                                </div>
-                            ) : (
-                                <div className="divide-y divide-white/10">
-                                    {orderItems.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            className="px-4 py-3 relative"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-semibold">
-                                                        {item.kind ===
-                                                        "meal"
-                                                            ? item.name
-                                                            : "Individual A-la-carte"}
-                                                    </span>
-                                                    <span className="text-xs text-black">
-                                                        {item.quantity}x
-                                                    </span>
-                                                </div>
-                                                <div className="text-right font-medium">
-                                                    <span>
-                                                        $
-                                                        {(
-                                                            item.price *
-                                                            item.quantity
-                                                        ).toFixed(2)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            {item.kind === "meal" && (
-                                                <ul className="mt-1 list-disc list-inside text-sm text-black">
-                                                    {item.components.map(
-                                                        (c) => (
-                                                            <li key={c}>
-                                                                {c}
-                                                            </li>
-                                                        )
-                                                    )}
-                                                </ul>
-                                            )}
-                                            {item.kind === "ala" && (
-                                                <div className="mt-1 text-sm text-black">
-                                                    {item.name}
-                                                </div>
-                                            )}
-                                            <Button
-                                                onClick={() => handleRemoveItem(item)}
-                                                variant="ghost"
-                                                size="icon"
-                                                className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+        <div className="flex h-screen bg-neutral-50">
+            {/* Main Content Area */}
+            <main className="flex-1 overflow-y-auto bg-white">
+                {children}
+            </main>
 
-                        <div className="space-y-2 rounded-md bg-white/5 p-4">
-                            <div className="flex justify-between text-black">
-                                <span>Subtotal</span>
-                                <span>${subtotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex justify-between text-black">
-                                <span>Tax</span>
-                                <span>${tax.toFixed(2)}</span>
-                            </div>
-                            <div className="h-px bg-white/20" />
-                            <div className="flex justify-between text-lg font-semibold">
-                                <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
-                            </div>
-                        </div>
+            {/* Right Side Order Panel */}
+            <div className="w-96 bg-neutral-100 border-l-4 border-panda-red flex flex-col">
+                {/* Order Header */}
+                <div className="bg-panda-red text-white p-3 flex items-center justify-between">
+                    <h2 className="text-lg font-bold">Current Order</h2>
+                </div>
 
-                        <div className="space-y-3">
-                            <p className="text-sm uppercase tracking-wide text-black">
-                                Payment method
+                {/* Order Items */}
+                <div className="flex-1 overflow-y-auto p-4">
+                    {orderItems.length === 0 ? (
+                        <div className="flex items-center justify-center h-full">
+                            <p className="text-neutral-600 text-center">
+                                No items in cart
                             </p>
-                            <div className="grid grid-cols-2 gap-3">
-                                {paymentMethods.map((method) => (
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {orderItems.map((item) => (
+                                <div
+                                    key={item.id}
+                                    className="bg-white rounded-lg p-3 shadow-sm border border-neutral-200 relative"
+                                >
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1 pr-8">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-neutral-900">
+                                                    {item.kind === "meal"
+                                                        ? item.name
+                                                        : "A-la-carte"}
+                                                </span>
+                                                <span className="text-sm bg-neutral-200 px-2 py-0.5 rounded">
+                                                    x{item.quantity}
+                                                </span>
+                                            </div>
+                                            {item.kind === "ala" && (
+                                                <p className="text-sm text-neutral-600 mt-1">
+                                                    {item.name}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="font-bold text-neutral-900">
+                                            ${(item.price * item.quantity).toFixed(2)}
+                                        </div>
+                                    </div>
+                                    
+                                    {item.kind === "meal" && (
+                                        <ul className="text-sm text-neutral-600 space-y-1 ml-2">
+                                            {item.components.map((c, idx) => (
+                                                <li key={idx} className="flex items-start">
+                                                    <span className="mr-2">•</span>
+                                                    <span>{c}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    
                                     <Button
-                                        onClick={() =>
-                                            setSelectedPayment(method.id)
-                                        }
-                                        key={method.id}
-                                        variant="outline"
-                                        className={cn(
-                                            "justify-center border-black bg-white/10 text-black hover:bg-white/20",
-                                            selectedPayment === method.id &&
-                                                "border-black bg-white/20 ring-2 ring-black",
-                                            method.id === 3 && "col-span-2"
-                                        )}
+                                        onClick={() => handleRemoveItem(item)}
+                                        variant="ghost"
+                                        size="icon"
+                                        className="absolute bottom-2 right-2 h-7 w-7 text-neutral-500 hover:text-panda-red hover:bg-red-50"
                                     >
-                                        <method.icon className="size-4" />
-                                        {method.name}
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
-                                ))}
-                            </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Order Summary */}
+                <div className="border-t-2 border-neutral-300 bg-white p-3 space-y-3">
+                    <div className="space-y-2 text-sm">
+                        <div className="flex justify-between text-neutral-700">
+                            <span>Subtotal</span>
+                            <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-neutral-700">
+                            <span>Tax (8.25%)</span>
+                            <span className="font-semibold">${tax.toFixed(2)}</span>
+                        </div>
+                        <div className="h-px bg-neutral-300" />
+                        <div className="flex justify-between text-lg font-bold text-neutral-900">
+                            <span>Total</span>
+                            <span>${total.toFixed(2)}</span>
                         </div>
                     </div>
-                    <Button onClick={handleClearCart} variant="outline" className="bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60">
-                        <Trash2 className="size-4" />
-                        Clear Cart
-                    </Button>
-                    <Button
-                        disabled={
-                            selectedPayment === null ||
-                            orderItems.length === 0
-                        }
-                        onClick={handlePay}
-                        className="cursor-pointer hover:bg-white/90"
+
+                    {/* Payment + Action Grid */}
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                        {/* Card */}
+                        <Button
+                            onClick={() => setSelectedPayment(1)}
+                            variant="outline"
+                            className={cn(
+                                "h-12 justify-center border-2 bg-white text-neutral-700 hover:bg-neutral-50 font-semibold",
+                                selectedPayment === 1 &&
+                                    "border-panda-red bg-red-50 text-panda-red ring-2 ring-panda-red ring-offset-1"
+                            )}
                         >
-                        Pay ${total.toFixed(2)}
-                    </Button>
+                            <CreditCard className="h-4 w-4 mr-1" />
+                            Card
+                        </Button>
+
+                        {/* Student Card */}
+                        <Button
+                            onClick={() => setSelectedPayment(2)}
+                            variant="outline"
+                            className={cn(
+                                "h-12 justify-center border-2 bg-white text-neutral-700 hover:bg-neutral-50 font-semibold",
+                                selectedPayment === 2 &&
+                                    "border-panda-red bg-red-50 text-panda-red ring-2 ring-panda-red ring-offset-1"
+                            )}
+                        >
+                            <IdCard className="h-4 w-4 mr-1" />
+                            Student
+                        </Button>
+
+                        {/* Clear */}
+                        <Button
+                            onClick={handleClearCart}
+                            variant="outline"
+                            className="h-12 w-full border-2 border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-100 font-semibold"
+                        >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Clear
+                        </Button>
+
+                        {/* Pay */}
+                        <Button
+                            disabled={selectedPayment === null || orderItems.length === 0}
+                            onClick={handlePay}
+                            className="h-12 w-full bg-panda-red hover:bg-panda-dark-red text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Pay ${total.toFixed(2)}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

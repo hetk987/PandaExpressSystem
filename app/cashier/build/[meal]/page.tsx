@@ -1,7 +1,6 @@
 "use client"
 import { use } from "react"
 
-import MealCard from "@/app/components/app-mealcard";
 import { useEffect, useMemo, useState } from "react";
 import { RecipeType, Recipe, MealType, RecipeSelection } from "@/lib/types";
 import { useCart } from "@/app/providers/cart-provider";
@@ -183,74 +182,112 @@ export default function Build({
     };
 
     return (
-        <div className="flex flex-row">
-            <div className="flex flex-col p-10 gap-10 mb-10">
-                    {entrees?.map((e, i) => {
-                        const selectedRecipe = mealSelections.entrees[i];
-                        return (
-                            <button 
-                                key={i} 
-                                onClick={() => {
-                                    setCurrentMenu("Entree");
-                                    setSelection({
-                                        type: "Entree",
-                                        num: i
-                                    })
-                                }}
-                            >
-                                <CashierCard 
-                                    name={selectedRecipe ? selectedRecipe.name : `Entree ${i + 1}`} 
-                                    className={`cursor-pointer ${selection && selection.type == "Entree" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
-                                />
-                            </button>
-                        );
-                    })}
-                    {sides?.map((e, i) => {
-                        const selectedRecipe = mealSelections.sides[i];
-                        return (
-                            <button 
-                                key={i} 
-                                onClick={() => {
-                                    setCurrentMenu("Side");
-                                    setSelection({
-                                        type: "Side",
-                                        num: i
-                                    })
-                                }}
-                            >
-                                <CashierCard
-                                    name={selectedRecipe ? selectedRecipe.name : `Side ${i + 1}`} 
-                                    className={`cursor-pointer ${selection && selection.type == "Side" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
-                                />
-                            </button>
-                        );
-                    })}
-                    {drinks?.map((e, i) => {
-                        const selectedRecipe = mealSelections.drinks[i];
-                        return (
-                            <button 
-                                key={i} 
-                                onClick={() => {
-                                    setCurrentMenu("Drink");
-                                    setSelection({
-                                        type: "Drink",
-                                        num: i
-                                    })
-                                }}
-                            >
-                                <CashierCard 
-                                    name={selectedRecipe ? selectedRecipe.name : `Drink ${i + 1}`} 
-                                    className={`cursor-pointer ${selection && selection.type == "Drink" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
-                                />
-                            </button>
-                        );
-                    })}
+        <div className="flex h-full">
+            {/* Left Sidebar - Meal Selections */}
+            <div className="w-48 bg-neutral-100 border-r-2 border-neutral-300 p-4 space-y-3 overflow-y-auto">
+                <div className="mb-4">
+                    <h3 className="text-lg font-bold text-neutral-900 mb-1">{mealName}</h3>
+                    {mealtype && (
+                        <p className="text-sm text-neutral-600">${mealtype.price.toFixed(2)}</p>
+                    )}
                 </div>
-            <div className="w-full">
-                <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{`Select ${selection?.type} ${selection ? selection.num + 1 : ""}`}</h2>
+                
+                {entrees?.map((e, i) => {
+                    const selectedRecipe = mealSelections.entrees[i];
+                    const isSelected = selection && selection.type === "Entree" && selection.num === i;
+                    return (
+                        <button 
+                            key={i} 
+                            onClick={() => {
+                                setCurrentMenu("Entree");
+                                setSelection({
+                                    type: "Entree",
+                                    num: i
+                                })
+                            }}
+                            className={`w-full p-3 rounded text-left text-sm font-semibold transition-all ${
+                                isSelected 
+                                    ? "bg-panda-red text-white shadow-md" 
+                                    : selectedRecipe
+                                    ? "bg-white text-neutral-900 border-2 border-green-500"
+                                    : "bg-white text-neutral-700 border-2 border-neutral-300"
+                            } hover:shadow-md`}
+                        >
+                            {selectedRecipe ? selectedRecipe.name : `Entree ${i + 1}`}
+                        </button>
+                    );
+                })}
+                
+                {sides?.map((e, i) => {
+                    const selectedRecipe = mealSelections.sides[i];
+                    const isSelected = selection && selection.type === "Side" && selection.num === i;
+                    return (
+                        <button 
+                            key={i} 
+                            onClick={() => {
+                                setCurrentMenu("Side");
+                                setSelection({
+                                    type: "Side",
+                                    num: i
+                                })
+                            }}
+                            className={`w-full p-3 rounded text-left text-sm font-semibold transition-all ${
+                                isSelected 
+                                    ? "bg-panda-red text-white shadow-md" 
+                                    : selectedRecipe
+                                    ? "bg-white text-neutral-900 border-2 border-green-500"
+                                    : "bg-white text-neutral-700 border-2 border-neutral-300"
+                            } hover:shadow-md`}
+                        >
+                            {selectedRecipe ? selectedRecipe.name : `Side ${i + 1}`}
+                        </button>
+                    );
+                })}
+                
+                {drinks?.map((e, i) => {
+                    const selectedRecipe = mealSelections.drinks[i];
+                    const isSelected = selection && selection.type === "Drink" && selection.num === i;
+                    return (
+                        <button 
+                            key={i} 
+                            onClick={() => {
+                                setCurrentMenu("Drink");
+                                setSelection({
+                                    type: "Drink",
+                                    num: i
+                                })
+                            }}
+                            className={`w-full p-3 rounded text-left text-sm font-semibold transition-all ${
+                                isSelected 
+                                    ? "bg-panda-red text-white shadow-md" 
+                                    : selectedRecipe
+                                    ? "bg-white text-neutral-900 border-2 border-green-500"
+                                    : "bg-white text-neutral-700 border-2 border-neutral-300"
+                            } hover:shadow-md`}
+                        >
+                            {selectedRecipe ? selectedRecipe.name : `Drink ${i + 1}`}
+                        </button>
+                    );
+                })}
+
+                {isComplete && (
+                    <Button 
+                        onClick={handleAddToCart} 
+                        className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-bold mt-4"
+                    >
+                        Add to Cart
+                    </Button>
+                )}
+            </div>
+
+            {/* Main Content - Recipe Selection */}
+            <div className="flex-1 bg-white p-6 overflow-y-auto">
+                <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-neutral-900">
+                        Select {selection?.type} {selection ? selection.num + 1 : ""}
+                    </h2>
                 </div>
-                <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
+                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl">
                     {recipes.filter(r => r.type === currentMenu).map((item, i) => (
                         <button
                             key={i}
@@ -261,19 +298,6 @@ export default function Build({
                         </button>
                     ))}
                 </div>
-                {isComplete && (
-                    <div className="px-5 pb-5">
-                        <Button onClick={handleAddToCart} className="w-full">
-                            Add to Cart
-                        </Button>
-                    </div>
-                )}
-            </div>
-            <div className="w-70">
-                <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{mealName}</h2>
-                </div>
-                
             </div>
         </div>
     );
