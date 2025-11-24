@@ -125,10 +125,12 @@ export default function AdminTabsCard() {
 
             const data = await res.json();
 
-            const normalized: HourlyRow[] = (data ?? []).map((row: any) => ({
-                hour: Number(row.hour),
-                netSales: Number(row.netSales) || 0,
-            }));
+            const normalized: HourlyRow[] = (data ?? []).map(
+                (row: { hour: number; netSales: number }) => ({
+                    hour: Number(row.hour),
+                    netSales: Number(row.netSales) || 0,
+                })
+            );
 
             setReportData(normalized);
         } catch (err: unknown) {
@@ -154,13 +156,17 @@ export default function AdminTabsCard() {
             }
 
             const data = await res.json();
-            const normalized: HourlyRow[] = (data ?? []).map((row: any) => ({
-                hour: Number(row.hour),
-                netSales: Number(row.netSales) || 0,
-            }));
+            const normalized: HourlyRow[] = (data ?? []).map(
+                (row: { hour: number; netSales: number }) => ({
+                    hour: Number(row.hour),
+                    netSales: Number(row.netSales) || 0,
+                })
+            );
             setReportData(normalized);
-        } catch (err: any) {
-            setReportError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setReportError(
+                err instanceof Error ? err.message : "Unknown error"
+            );
         } finally {
             setReportLoading(false);
         }
@@ -211,7 +217,7 @@ export default function AdminTabsCard() {
             hours: 0,
             password: "",
             isEmployed: true,
-            roleid: null,
+            roleId: 1,
         });
         setEmpError(null);
         setEmpDialogOpen(true);
@@ -370,8 +376,8 @@ export default function AdminTabsCard() {
 
             await fetchInventory();
             setInvDialogOpen(false);
-        } catch (err: any) {
-            setInvError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setInvError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setInvLoading(false);
         }
@@ -418,8 +424,8 @@ export default function AdminTabsCard() {
 
             await fetchInventory();
             setRestockDialogOpen(false);
-        } catch (err: any) {
-            setInvError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setInvError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setInvLoading(false);
         }
@@ -445,8 +451,8 @@ export default function AdminTabsCard() {
 
             await fetchInventory();
             setInvDialogOpen(false);
-        } catch (err: any) {
-            setInvError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setInvError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setInvLoading(false);
         }
@@ -465,8 +471,8 @@ export default function AdminTabsCard() {
 
             const data = await res.json();
             setRecipes(data ?? []);
-        } catch (err: any) {
-            setRecError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setRecError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setRecLoading(false);
         }
@@ -478,7 +484,7 @@ export default function AdminTabsCard() {
             pricePerServing: 0,
             ordersPerBatch: 1,
             type: null,
-            image: null,
+            image: "",
         });
         setIngredients([]);
         setRecError(null);
@@ -615,8 +621,8 @@ export default function AdminTabsCard() {
 
             await fetchRecipes();
             setRecDialogOpen(false);
-        } catch (err: any) {
-            setRecError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setRecError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setRecLoading(false);
         }
@@ -641,8 +647,8 @@ export default function AdminTabsCard() {
 
             await fetchRecipes();
             setRecDialogOpen(false);
-        } catch (err: any) {
-            setRecError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setRecError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setRecLoading(false);
         }
@@ -846,10 +852,10 @@ export default function AdminTabsCard() {
                                         <TableCell>{emp.salary}</TableCell>
                                         <TableCell>{emp.hours}</TableCell>
                                         <TableCell>
-                                            {emp.employed ? "Yes" : "No"}
+                                            {emp.isEmployed ? "Yes" : "No"}
                                         </TableCell>
                                         <TableCell>
-                                            {emp.role?.id ?? "-"}
+                                            {emp.roleId ?? "-"}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button
@@ -954,26 +960,26 @@ export default function AdminTabsCard() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <Label htmlFor="emp-roleid">
+                                                <Label htmlFor="emp-roleId">
                                                     Role ID
                                                 </Label>
                                                 <Input
-                                                    id="emp-roleid"
+                                                    id="emp-roleId"
                                                     type="number"
                                                     value={
-                                                        selectedEmployee.roleid ??
+                                                        selectedEmployee.roleId ??
                                                         ""
                                                     }
                                                     onChange={(e) =>
                                                         updateSelected(
-                                                            "roleid",
+                                                            "roleId",
                                                             e.target.value ===
                                                                 ""
-                                                                ? null
+                                                                ? 1
                                                                 : Number(
                                                                       e.target
                                                                           .value
-                                                                  ) || 0
+                                                                  ) || 1
                                                         )
                                                     }
                                                 />

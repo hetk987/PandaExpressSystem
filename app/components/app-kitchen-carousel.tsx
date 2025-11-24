@@ -67,8 +67,8 @@ export const KitchenCarousel = ({ cooked }: { cooked: Cooked[] }) => {
                 } else if (inInv.currentStock < inv.inventoryQuantity) {
                     missing.push({
                         id: -1,
-                        inventoryId: inInv.id,
-                        recipeId: recipe.id,
+                        inventoryId: inInv.id!,
+                        recipeId: recipe.id!,
                         inventoryQuantity:
                             inv.inventoryQuantity - inInv.currentStock,
                         inventoryName: inInv.name,

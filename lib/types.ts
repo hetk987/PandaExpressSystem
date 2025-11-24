@@ -12,8 +12,9 @@ export type Employee = {
     salary: number;
     hours: number;
     password: string;
-    employed: boolean;
-    role: Role;
+    isEmployed: boolean;
+    roleId: number;
+    role?: Role;
 }
 
 export type Order = {
@@ -72,11 +73,11 @@ export type RecOrderJunc = {
 
 export type Recipe = {
     name: string;
-    image: string;
-    id: number;
+    image: string | null;
+    id?: number;
     pricePerServing: number;
     ordersPerBatch: number;
-    type: RecipeType;
+    type: RecipeType | null;
 }
 
 export type RecipeType = "Side" | "Entree" | "Drink";
