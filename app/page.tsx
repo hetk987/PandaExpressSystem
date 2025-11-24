@@ -19,7 +19,7 @@ export default function Home() {
             {/* Employee Login Button - Small, in corner */}
             <div className="absolute top-6 right-6 z-100">
                 <Button
-                    onClick={() => router.push("/employee/employee-login")}
+                    onClick={() => router.push("/api/auth/login")}
                     variant="outline"
                     size="sm"
                     className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:text-white transition-all"
