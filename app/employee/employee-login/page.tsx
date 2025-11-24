@@ -18,7 +18,7 @@ export default function EmployeeLoginPage() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            router.push("/manager");
+            router.push("/employee/manager");
         }
     }, [isAuthenticated, router]);
 
