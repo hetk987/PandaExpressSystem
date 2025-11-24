@@ -106,6 +106,7 @@ export const employees = pgTable("employees", {
     isEmployed: boolean().notNull(),
     id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "employees_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
     roleId: integer().notNull(),
+    email: text(),
 }, (table) => [
     foreignKey({
         columns: [table.roleId],
