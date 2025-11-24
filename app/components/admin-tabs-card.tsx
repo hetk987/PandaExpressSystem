@@ -849,7 +849,7 @@ export default function AdminTabsCard() {
                                             {emp.employed ? "Yes" : "No"}
                                         </TableCell>
                                         <TableCell>
-                                            {emp.role?.name ?? "-"}
+                                            {emp.role?.id ?? "-"}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button
