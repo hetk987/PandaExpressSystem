@@ -66,7 +66,7 @@ export default function Home() {
                 <h1 className="text-2xl font-bold text-neutral-900">
                     Select A Drink
                 </h1>
-                <a href="/cashier">
+                <a href="/employee/cashier">
                     <Button
                         variant="default"
                         className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
