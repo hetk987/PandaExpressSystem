@@ -67,83 +67,57 @@ export default function Home() {
                         Select An Entree
                     </h1>
 
-                    <a href="/cashier">
-                        <Button
-                            variant="default"
-                            className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
-                        >
-                            Home
-                        </Button>
-                    </a>
-                </div>
-                <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
-                    {recipes
-                        .filter((r) => r.type === "Entree")
-                        .map((item, i) => (
-                            <button
-                                key={i}
-                                onClick={() => handleRecipeClick(item)}
-                                className="cursor-pointer"
-                            >
-                                <CashierCard name={item.name} />
-                            </button>
-                        ))}
-                </div>
+                <a href="/employee/cashier">
+                    <Button
+                        variant="default"
+                        className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
+                    >
+                        Home
+                    </Button>
+                </a>
             </div>
-
-            {selectedRecipe && (
-                <div className="fixed bottom-20 left-0 right-0 bg-white border-t-2 border-gray-200 p-6 shadow-lg">
-                    <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold">
-                                    {selectedRecipe.name}
-                                </h3>
-                                <p className="text-gray-600">
-                                    ${selectedRecipe.pricePerServing.toFixed(2)}{" "}
-                                    each
-                                </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <label className="text-sm font-medium">
-                                    Quantity:
-                                </label>
-                                <Input
-                                    type="number"
-                                    min="1"
-                                    value={quantity}
-                                    onChange={(e) =>
-                                        setQuantity(
-                                            Math.max(
-                                                1,
-                                                parseInt(e.target.value) || 1
-                                            )
-                                        )
-                                    }
-                                    className="w-20"
-                                />
-                            </div>
-                        </div>
-                        <div className="flex gap-4 items-center">
-                            <p className="text-lg font-semibold">
-                                Total: $
-                                {(
-                                    selectedRecipe.pricePerServing * quantity
-                                ).toFixed(2)}
-                            </p>
-                            <Button onClick={handleAddToCart}>
-                                Add to Cart
-                            </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => setSelectedRecipe(null)}
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
+                {recipes.filter(r => r.type === "Entree").map((item, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleRecipeClick(item)}
+                    className="cursor-pointer"
+                  >
+                    <CashierCard name={item.name} />
+                  </button>
+                ))}
+            </div>
         </div>
-    );
+      
+      {selectedRecipe && (
+        <div className="fixed bottom-20 left-0 right-0 bg-white border-t-2 border-gray-200 p-6 shadow-lg">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div>
+                <h3 className="text-xl font-bold">{selectedRecipe.name}</h3>
+                <p className="text-gray-600">${selectedRecipe.pricePerServing.toFixed(2)} each</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">Quantity:</label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-20"
+                />
+              </div>
+            </div>
+            <div className="flex gap-4 items-center">
+              <p className="text-lg font-semibold">
+                Total: ${(selectedRecipe.pricePerServing * quantity).toFixed(2)}
+              </p>
+              <Button onClick={handleAddToCart}>Add to Cart</Button>
+              <Button variant="outline" onClick={() => setSelectedRecipe(null)}>Cancel</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

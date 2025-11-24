@@ -37,7 +37,7 @@ export default function Home() {
                     Select Meal Type
                 </h1>
 
-                <a href="/cashier">
+                <a href="/employee/cashier">
                     <Button
                         variant="default"
                         className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
@@ -48,7 +48,7 @@ export default function Home() {
             </div>
             <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
                 {mealtypes.map((item, i) => (
-                    <a href={`/cashier/build/${item.typeName}`} key={i}>
+                    <a href={`/employee/cashier/build/${item.typeName}`} key={i}>
                       <CashierCard name={item.typeName} />
                     </a>
                 ))}

@@ -1,7 +1,7 @@
 "use client";
 
-import CashierCard from "../components/app-cashier-card";
-import { Button } from "../components/ui/button";
+import CashierCard from "@/app/components/app-cashier-card";
+import { Button } from "@/app/components/ui/button";
 
 const options: {
   href: string,
@@ -22,7 +22,7 @@ export default function Home() {
                     Select Category
                 </h1>
 
-                <a href="/cashier">
+                <a href="/employee/cashier">
                     <Button
                         variant="default"
                         className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
@@ -33,7 +33,7 @@ export default function Home() {
             </div>
             <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
                 {options.map((item, i) => (
-                    <a href={`/cashier/${item.href}`} key={i}>
+                    <a href={`/employee/cashier/${item.href}`} key={i}>
                         <CashierCard name={item.title} />
                     </a>
                 ))}

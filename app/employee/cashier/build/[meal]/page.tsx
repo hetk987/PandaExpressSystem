@@ -192,8 +192,8 @@ export default function Build({
                 },
             }
         );
-
-        router.push("/cashier/build");
+        
+        router.push("/employee/cashier/build");
     };
 
     return (
