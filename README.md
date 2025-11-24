@@ -38,3 +38,67 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ## Deployment link
 
 https://project-3-team-41-zbyt.onrender.com/
+
+Style
+
+Accessibility
+- font bigger
+- bold option
+
+Idle page
+- too much red
+- no emoji
+- remove employee login button
+
+Home Page
+- change red
+- loading skeleton
+- incerase idle time
+- figure out how to provide accessibility
+- remove manager view from side bar
+- checkout out button needs to grab attention
+- increase box shadow
+- add background to white space
+
+Manager
+- min-height to full height
+- Filter recipes by type
+
+Checkout
+- 
+
+Build Your Own
+- remove frink a a la carte
+- move add to cart button 
+
+A La Carte
+- 
+
+Kitchen
+- masonry layout
+- make recipes thinner
+- make kitchen button easier to find
+- filter for meal types in kitchen
+
+Cashier
+- fix a la carte entree
+
+Menu
+- make it bigger
+- add catering option
+- add pictures
+- add apps
+- custom font
+
+
+TODO
+
+Move toast to top middle
+Once you complete order, go back to main screen
+Quit order
+Add appetizers (add more food in general)
+Add logout button to employee pages
+Add kitchen button
+Disable a card if its out of stock for ingredients in kiosk view
+Limit order quanities
+Add catering
