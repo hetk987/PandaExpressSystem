@@ -1,7 +1,7 @@
 "use client";
 
-import CashierCard from "../components/app-cashier-card";
-import { Button } from "../components/ui/button";
+import CashierCard from "@/app/components/app-cashier-card";
+import { Button } from "@/app/components/ui/button";
 
 const options: {
   href: string,

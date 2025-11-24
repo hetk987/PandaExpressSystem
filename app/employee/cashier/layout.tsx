@@ -5,7 +5,7 @@ import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { cn, getCSTTimestamp } from "@/lib/utils";
-import { CartProvider, useCart } from "../providers/cart-provider";
+import { CartProvider, useCart } from "@/app/providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
 import { fetchWeatherApi } from "openmeteo";
