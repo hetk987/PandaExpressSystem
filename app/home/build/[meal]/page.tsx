@@ -1,5 +1,5 @@
-"use client"
-import { use } from "react"
+"use client";
+import { use } from "react";
 
 import MealCard from "@/app/components/app-mealcard";
 import { useEffect, useMemo, useState } from "react";
@@ -7,12 +7,12 @@ import { RecipeType, Recipe, MealType, RecipeSelection } from "@/lib/types";
 import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useAddToCartToast } from "@/app/hooks/use-add-to-cart-toast";
+import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
 
 interface Selection {
     type: RecipeType;
     num: number;
-};
+}
 
 interface MealSelections {
     entrees: Recipe[];
@@ -21,9 +21,9 @@ interface MealSelections {
 }
 
 export default function Build({
-    params
+    params,
 }: {
-    params: Promise<{ meal: string }>
+    params: Promise<{ meal: string }>;
 }) {
     const { meal } = use(params);
     const { addMeal } = useCart();
@@ -36,7 +36,7 @@ export default function Build({
     const [mealSelections, setMealSelections] = useState<MealSelections>({
         entrees: [],
         sides: [],
-        drinks: []
+        drinks: [],
     });
 
     // fetch recipes
@@ -58,42 +58,40 @@ export default function Build({
                 setCurrentMenu("Entree");
                 setSelection({
                     type: "Entree",
-                    num: 0
+                    num: 0,
                 });
-
             } catch (error) {
                 console.error("Failed to fetch links");
-            } 
-        }
+            }
+        };
 
         fetchData();
     }, []);
 
-    const mealName = useMemo(
-        () => meal.replaceAll('%20', ' '), [meal]
-    );
+    const mealName = useMemo(() => meal.replaceAll("%20", " "), [meal]);
 
     const mealtype = useMemo(
-        () => mealtypes.find(t => t.typeName === mealName), [mealName, mealtypes]
+        () => mealtypes.find((t) => t.typeName === mealName),
+        [mealName, mealtypes]
     );
 
     const entrees = useMemo(
-        () => [...Array(mealtype?.entrees || 0)], [mealtype]
+        () => [...Array(mealtype?.entrees || 0)],
+        [mealtype]
     );
 
-    const sides = useMemo(
-        () => [...Array(mealtype?.sides || 0)], [mealtype]
-    );
+    const sides = useMemo(() => [...Array(mealtype?.sides || 0)], [mealtype]);
 
-    const drinks = useMemo(
-        () => [...Array(mealtype?.drinks || 0)], [mealtype]
-    );
+    const drinks = useMemo(() => [...Array(mealtype?.drinks || 0)], [mealtype]);
 
     const isComplete = useMemo(() => {
         if (!mealtype) return false;
-        const entreesComplete = mealSelections.entrees.filter(Boolean).length === mealtype.entrees;
-        const sidesComplete = mealSelections.sides.filter(Boolean).length === mealtype.sides;
-        const drinksComplete = mealSelections.drinks.filter(Boolean).length === mealtype.drinks;
+        const entreesComplete =
+            mealSelections.entrees.filter(Boolean).length === mealtype.entrees;
+        const sidesComplete =
+            mealSelections.sides.filter(Boolean).length === mealtype.sides;
+        const drinksComplete =
+            mealSelections.drinks.filter(Boolean).length === mealtype.drinks;
         return entreesComplete && sidesComplete && drinksComplete;
     }, [mealtype, mealSelections]);
 
@@ -101,7 +99,7 @@ export default function Build({
         if (!selection) return;
 
         const newSelections = { ...mealSelections };
-        
+
         if (selection.type === "Entree") {
             const updatedEntrees = [...newSelections.entrees];
             updatedEntrees[selection.num] = recipe;
@@ -119,19 +117,36 @@ export default function Build({
         setMealSelections(newSelections);
 
         // Auto-advance to next selection
-        if (selection.type === "Entree" && selection.num < (mealtype?.entrees || 0) - 1) {
+        if (
+            selection.type === "Entree" &&
+            selection.num < (mealtype?.entrees || 0) - 1
+        ) {
             setSelection({ type: "Entree", num: selection.num + 1 });
             setCurrentMenu("Entree");
-        } else if (selection.type === "Entree" && mealtype && mealtype.sides > 0) {
+        } else if (
+            selection.type === "Entree" &&
+            mealtype &&
+            mealtype.sides > 0
+        ) {
             setSelection({ type: "Side", num: 0 });
             setCurrentMenu("Side");
-        } else if (selection.type === "Side" && selection.num < (mealtype?.sides || 0) - 1) {
+        } else if (
+            selection.type === "Side" &&
+            selection.num < (mealtype?.sides || 0) - 1
+        ) {
             setSelection({ type: "Side", num: selection.num + 1 });
             setCurrentMenu("Side");
-        } else if (selection.type === "Side" && mealtype && mealtype.drinks > 0) {
+        } else if (
+            selection.type === "Side" &&
+            mealtype &&
+            mealtype.drinks > 0
+        ) {
             setSelection({ type: "Drink", num: 0 });
             setCurrentMenu("Drink");
-        } else if (selection.type === "Drink" && selection.num < (mealtype?.drinks || 0) - 1) {
+        } else if (
+            selection.type === "Drink" &&
+            selection.num < (mealtype?.drinks || 0) - 1
+        ) {
             setSelection({ type: "Drink", num: selection.num + 1 });
             setCurrentMenu("Drink");
         }
@@ -145,18 +160,18 @@ export default function Build({
             sides: RecipeSelection[];
             drinks: RecipeSelection[];
         } = {
-            entrees: mealSelections.entrees.map(r => ({
+            entrees: mealSelections.entrees.map((r) => ({
                 recipeId: r.id!,
-                recipeName: r.name
+                recipeName: r.name,
             })),
-            sides: mealSelections.sides.map(r => ({
+            sides: mealSelections.sides.map((r) => ({
                 recipeId: r.id!,
-                recipeName: r.name
+                recipeName: r.name,
             })),
-            drinks: mealSelections.drinks.map(r => ({
+            drinks: mealSelections.drinks.map((r) => ({
                 recipeId: r.id!,
-                recipeName: r.name
-            }))
+                recipeName: r.name,
+            })),
         };
 
         await addMealWithToast(
@@ -165,7 +180,7 @@ export default function Build({
                     mealType: mealtype.typeName,
                     quantity: 1,
                     price: mealtype.price,
-                    selections: selections
+                    selections: selections,
                 });
             },
             {
@@ -174,10 +189,10 @@ export default function Build({
                     setMealSelections({ entrees: [], sides: [], drinks: [] });
                     setSelection({ type: "Entree", num: 0 });
                     setCurrentMenu("Entree");
-                }
+                },
             }
         );
-        
+
         router.push("/home/build");
     };
 
@@ -185,18 +200,22 @@ export default function Build({
         <div className="flex flex-row">
             <div className="w-full">
                 <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{`Select ${selection?.type} ${selection ? selection.num + 1 : ""}`}</h2>
+                    <h2 className=" text-3xl font-bold ">{`Select ${
+                        selection?.type
+                    } ${selection ? selection.num + 1 : ""}`}</h2>
                 </div>
                 <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
-                    {recipes.filter(r => r.type === currentMenu).map((item, i) => (
-                        <button
-                            key={i}
-                            onClick={() => handleRecipeClick(item)}
-                            className="cursor-pointer"
-                        >
-                            <MealCard name={item.name} image={item.image}/>
-                        </button>
-                    ))}
+                    {recipes
+                        .filter((r) => r.type === currentMenu)
+                        .map((item, i) => (
+                            <button
+                                key={i}
+                                onClick={() => handleRecipeClick(item)}
+                                className="cursor-pointer"
+                            >
+                                <MealCard name={item.name} image={item.image} />
+                            </button>
+                        ))}
                 </div>
                 {isComplete && (
                     <div className="px-5 pb-5">
@@ -214,20 +233,34 @@ export default function Build({
                     {entrees?.map((e, i) => {
                         const selectedRecipe = mealSelections.entrees[i];
                         return (
-                            <button 
-                                key={i} 
+                            <button
+                                key={i}
                                 onClick={() => {
                                     setCurrentMenu("Entree");
                                     setSelection({
                                         type: "Entree",
-                                        num: i
-                                    })
+                                        num: i,
+                                    });
                                 }}
                             >
-                                <MealCard 
-                                    name={selectedRecipe ? selectedRecipe.name : `Entree ${i + 1}`} 
-                                    image={selectedRecipe ? selectedRecipe.image : undefined}
-                                    className={`cursor-pointer ${selection && selection.type == "Entree" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
+                                <MealCard
+                                    name={
+                                        selectedRecipe
+                                            ? selectedRecipe.name
+                                            : `Entree ${i + 1}`
+                                    }
+                                    image={
+                                        selectedRecipe
+                                            ? selectedRecipe.image
+                                            : undefined
+                                    }
+                                    className={`cursor-pointer ${
+                                        selection &&
+                                        selection.type == "Entree" &&
+                                        selection.num == i
+                                            ? "border-yellow-300 border-3"
+                                            : ""
+                                    }`}
                                 />
                             </button>
                         );
@@ -235,20 +268,34 @@ export default function Build({
                     {sides?.map((e, i) => {
                         const selectedRecipe = mealSelections.sides[i];
                         return (
-                            <button 
-                                key={i} 
+                            <button
+                                key={i}
                                 onClick={() => {
                                     setCurrentMenu("Side");
                                     setSelection({
                                         type: "Side",
-                                        num: i
-                                    })
+                                        num: i,
+                                    });
                                 }}
                             >
-                                <MealCard 
-                                    name={selectedRecipe ? selectedRecipe.name : `Side ${i + 1}`} 
-                                    image={selectedRecipe ? selectedRecipe.image : undefined}
-                                    className={`cursor-pointer ${selection && selection.type == "Side" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
+                                <MealCard
+                                    name={
+                                        selectedRecipe
+                                            ? selectedRecipe.name
+                                            : `Side ${i + 1}`
+                                    }
+                                    image={
+                                        selectedRecipe
+                                            ? selectedRecipe.image
+                                            : undefined
+                                    }
+                                    className={`cursor-pointer ${
+                                        selection &&
+                                        selection.type == "Side" &&
+                                        selection.num == i
+                                            ? "border-yellow-300 border-3"
+                                            : ""
+                                    }`}
                                 />
                             </button>
                         );
@@ -256,19 +303,29 @@ export default function Build({
                     {drinks?.map((e, i) => {
                         const selectedRecipe = mealSelections.drinks[i];
                         return (
-                            <button 
-                                key={i} 
+                            <button
+                                key={i}
                                 onClick={() => {
                                     setCurrentMenu("Drink");
                                     setSelection({
                                         type: "Drink",
-                                        num: i
-                                    })
+                                        num: i,
+                                    });
                                 }}
                             >
-                                <MealCard 
-                                    name={selectedRecipe ? selectedRecipe.name : `Drink ${i + 1}`} 
-                                    className={`cursor-pointer ${selection && selection.type == "Drink" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
+                                <MealCard
+                                    name={
+                                        selectedRecipe
+                                            ? selectedRecipe.name
+                                            : `Drink ${i + 1}`
+                                    }
+                                    className={`cursor-pointer ${
+                                        selection &&
+                                        selection.type == "Drink" &&
+                                        selection.num == i
+                                            ? "border-yellow-300 border-3"
+                                            : ""
+                                    }`}
                                 />
                             </button>
                         );

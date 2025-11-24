@@ -18,7 +18,7 @@ export default function EmployeeLoginPage() {
 
     useEffect(() => {
         if (isAuthenticated) {
-            router.push("/manager");
+            router.push("/employee/manager");
         }
     }, [isAuthenticated, router]);
 
@@ -66,7 +66,7 @@ export default function EmployeeLoginPage() {
     const handleClear = () => setPin("");
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-linear-to-br from-neutral-50 to-neutral-100 flex items-center justify-center p-4">
             {/* Back button */}
             <Button
                 onClick={() => router.push("/")}

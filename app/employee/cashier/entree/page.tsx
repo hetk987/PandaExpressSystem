@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 
 import { Recipe } from "@/lib/types";
@@ -6,67 +6,68 @@ import CashierCard from "@/app/components/app-cashier-card";
 import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
-import { useAddToCartToast } from "@/app/hooks/use-add-to-cart-toast";
+import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
 
 export default function Home() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const { addIndividualItem } = useCart();
-  const { addItemWithToast } = useAddToCartToast();
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+    const [quantity, setQuantity] = useState<number>(1);
+    const { addIndividualItem } = useCart();
+    const { addItemWithToast } = useAddToCartToast();
 
-  // fetch recipes
-  useEffect(() => {
-      const fetchData = async () => {
-          try {
-              const response = await fetch(`/api/recipes`);
-              if (response.ok) {
-                  const data = await response.json();
-                  setRecipes(data);
-              }
-          } catch (error) {
-              console.error("Failed to fetch links");
-          } 
-      }
+    // fetch recipes
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`/api/recipes`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setRecipes(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch links");
+            }
+        };
 
-      fetchData();
-  }, []);
+        fetchData();
+    }, []);
 
-  const handleRecipeClick = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setQuantity(1);
-  };
+    const handleRecipeClick = (recipe: Recipe) => {
+        setSelectedRecipe(recipe);
+        setQuantity(1);
+    };
 
-  const handleAddToCart = async () => {
-    if (!selectedRecipe) return;
-    
-    await addItemWithToast(
-      () => {
-        addIndividualItem({
-          recipeId: selectedRecipe.id!,
-          recipeName: selectedRecipe.name,
-          recipeType: "Drink",
-          quantity: quantity,
-          price: selectedRecipe.pricePerServing
-        });
-      },
-      {
-        onSuccess: () => {
-          setSelectedRecipe(null);
-          setQuantity(1);
-        }
-      }
-    );
-  };
+    const handleAddToCart = async () => {
+        if (!selectedRecipe) return;
 
-  return (
-    <div className="flex flex-col">
-      <div className="h-full bg-white p-6">
-            <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-neutral-900">
-                    Select A Drink
-                </h1>
-                <a href="/cashier">
+        await addItemWithToast(
+            () => {
+                addIndividualItem({
+                    recipeId: selectedRecipe.id!,
+                    recipeName: selectedRecipe.name,
+                    recipeType: "Entree",
+                    quantity: quantity,
+                    price: selectedRecipe.pricePerServing,
+                });
+            },
+            {
+                onSuccess: () => {
+                    setSelectedRecipe(null);
+                    setQuantity(1);
+                },
+            }
+        );
+    };
+
+    return (
+        <div className="flex flex-col">
+            <div className="h-full bg-white p-6">
+                <div className="mb-6 flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-neutral-900">
+                        Select An Entree
+                    </h1>
+
+                <a href="/employee/cashier">
                     <Button
                         variant="default"
                         className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
@@ -76,7 +77,7 @@ export default function Home() {
                 </a>
             </div>
             <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
-                {recipes.filter(r => r.type === "Drink").map((item, i) => (
+                {recipes.filter(r => r.type === "Entree").map((item, i) => (
                   <button
                     key={i}
                     onClick={() => handleRecipeClick(item)}

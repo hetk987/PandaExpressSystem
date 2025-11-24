@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useEffect, useState } from "react";
 
 import { Recipe } from "@/lib/types";
@@ -6,68 +6,68 @@ import CashierCard from "@/app/components/app-cashier-card";
 import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
-import { useAddToCartToast } from "@/app/hooks/use-add-to-cart-toast";
+import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
 
 export default function Home() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
-  const { addIndividualItem } = useCart();
-  const { addItemWithToast } = useAddToCartToast();
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+    const [quantity, setQuantity] = useState<number>(1);
+    const { addIndividualItem } = useCart();
+    const { addItemWithToast } = useAddToCartToast();
 
-  // fetch recipes
-  useEffect(() => {
-      const fetchData = async () => {
-          try {
-              const response = await fetch(`/api/recipes`);
-              if (response.ok) {
-                  const data = await response.json();
-                  setRecipes(data);
-              }
-          } catch (error) {
-              console.error("Failed to fetch links");
-          } 
-      }
+    // fetch recipes
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`/api/recipes`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setRecipes(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch links");
+            }
+        };
 
-      fetchData();
-  }, []);
+        fetchData();
+    }, []);
 
-  const handleRecipeClick = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setQuantity(1);
-  };
+    const handleRecipeClick = (recipe: Recipe) => {
+        setSelectedRecipe(recipe);
+        setQuantity(1);
+    };
 
-  const handleAddToCart = async () => {
-    if (!selectedRecipe) return;
-    
-    await addItemWithToast(
-      () => {
-        addIndividualItem({
-          recipeId: selectedRecipe.id!,
-          recipeName: selectedRecipe.name,
-          recipeType: "Side",
-          quantity: quantity,
-          price: selectedRecipe.pricePerServing
-        });
-      },
-      {
-        onSuccess: () => {
-          setSelectedRecipe(null);
-          setQuantity(1);
-        }
-      }
-    );
-  };
+    const handleAddToCart = async () => {
+        if (!selectedRecipe) return;
 
-  return (
-    <div className="flex flex-col">
-      <div className="h-full bg-white p-6">
-            <div className="mb-6 flex items-center justify-between">
-                <h1 className="text-2xl font-bold text-neutral-900">
-                    Select A Side
-                </h1>
+        await addItemWithToast(
+            () => {
+                addIndividualItem({
+                    recipeId: selectedRecipe.id!,
+                    recipeName: selectedRecipe.name,
+                    recipeType: "Side",
+                    quantity: quantity,
+                    price: selectedRecipe.pricePerServing,
+                });
+            },
+            {
+                onSuccess: () => {
+                    setSelectedRecipe(null);
+                    setQuantity(1);
+                },
+            }
+        );
+    };
 
-                <a href="/cashier">
+    return (
+        <div className="flex flex-col">
+            <div className="h-full bg-white p-6">
+                <div className="mb-6 flex items-center justify-between">
+                    <h1 className="text-2xl font-bold text-neutral-900">
+                        Select A Side
+                    </h1>
+
+                <a href="/employee/cashier">
                     <Button
                         variant="default"
                         className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
