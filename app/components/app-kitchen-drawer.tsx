@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Cooked } from "@/lib/types";
-import { Button } from "@/app/components/button";
+import { Button } from "@/app/components/ui/button";
 import {
     Drawer,
     DrawerClose,
@@ -12,7 +12,7 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from "@/app/components/drawer";
+} from "@/app/components/ui/drawer";
 import { KitchenCarousel } from "./app-kitchen-carousel";
 
 export const KitchenDrawer = ({ cooked }: { cooked: Cooked[] }) => {
