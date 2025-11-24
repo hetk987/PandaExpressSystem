@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        console.log(body);
 
         const newCooked = await createCooked(body);
         return NextResponse.json(newCooked, { status: 201 });

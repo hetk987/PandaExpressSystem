@@ -1,32 +1,33 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/auth/auth-context";
 import MealCard from "../components/app-mealcard";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
-const options: {
-  href: string,
-  title: string
-}[] = [
-  {href: 'build', title: 'Build Your Own'},
-  {href: 'appetizer', title: 'Appetizers'},
-  {href: 'drink', title: 'Drinks'},
-  {href: 'entree', title: 'Entrees'},
-  {href: 'side', title: 'Sides'}
-]
+const options = [
+    { href: "build", title: "Build Your Own" },
+    { href: "appetizer", title: "Appetizers" },
+    { href: "drink", title: "Drinks" },
+    { href: "entree", title: "Entrees" },
+    { href: "side", title: "Sides" },
+];
 
 export default function Home() {
-    const { isAuthenticated, user } = useAuth();
     const router = useRouter();
+    const { data: session, status } = useSession();
 
+    // Redirect if not logged in
     useEffect(() => {
-        if (!isAuthenticated) {
-            router.push("/");
-        }
-    }, [isAuthenticated, router]);
+        if (status === "unauthenticated") router.push("/");
+    }, [status, router]);
 
-    if (!isAuthenticated) {
+    if (status === "loading") {
+        return <p>Loading...</p>;
+    }
+
+    if (!session) {
         return (
             <div className="min-h-screen flex items-center justify-center text-gray-600">
                 Redirecting to login...
@@ -37,16 +38,26 @@ export default function Home() {
     return (
         <div className="min-h-screen flex flex-col items-center bg-neutral-50 p-10 w-full">
             <h1 className="text-4xl font-bold text-neutral-900 mb-8">
-                Welcome, {user?.username}!
+                Welcome, {session.user?.name || "Employee"}!
             </h1>
 
             <div className="grid grid-cols-5 gap-10 w-full max-w-6xl">
                 {options.map((item, i) => (
                     <a href={`/home/${item.href}`} key={i}>
-                        <MealCard name={item.title} image="/images/image.png" />
+                        <MealCard name={item.title} image={"/images/image.png"}/>
                     </a>
                 ))}
             </div>
+            {/*temporary button*/}
+            {/*<div>*/}
+            {/*    <button*/}
+            {/*        onClick={() => signOut({ callbackUrl: "/" })}*/}
+            {/*        className="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700"*/}
+            {/*    >*/}
+            {/*        Logout*/}
+            {/*    </button>*/}
+
+            {/*</div>*/}
         </div>
     );
 }

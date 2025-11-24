@@ -10,7 +10,7 @@ export const getRecipes = async () => {
 };
 
 export const getRecipeById = async (id) => {
-    const recipe = await db.select().from(recipes).where(eq(recipes.id, id));
+    const [recipe] = await db.select().from(recipes).where(eq(recipes.id, id));
     return recipe;
 };
 
@@ -35,6 +35,7 @@ export const deleteRecipe = async (id) => {
 // Get each inventory item in recipe and consume it
 export const cookIngredients = async (recipeId) => {
     const invRecJuncs = await getIngredientsByRecipeId(recipeId);
+    console.log("InvRecJuncs: ", invRecJuncs);
     if (!invRecJuncs) {
         throw new Error("Inventory recipe junction not found: " + recipeId);
     }
@@ -44,4 +45,5 @@ export const cookIngredients = async (recipeId) => {
             junction.inventoryQuantity
         );
     }
+    console.log("Ingredients cooked");
 };

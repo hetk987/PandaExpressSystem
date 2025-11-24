@@ -194,7 +194,7 @@ export default function Build({
                             onClick={() => handleRecipeClick(item)}
                             className="cursor-pointer"
                         >
-                            <MealCard name={item.name} image="/images/image.png"/>
+                            <MealCard name={item.name} image={item.image}/>
                         </button>
                     ))}
                 </div>
@@ -226,6 +226,7 @@ export default function Build({
                             >
                                 <MealCard 
                                     name={selectedRecipe ? selectedRecipe.name : `Entree ${i + 1}`} 
+                                    image={selectedRecipe ? selectedRecipe.image : undefined}
                                     className={`cursor-pointer ${selection && selection.type == "Entree" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
                                 />
                             </button>
@@ -246,6 +247,7 @@ export default function Build({
                             >
                                 <MealCard 
                                     name={selectedRecipe ? selectedRecipe.name : `Side ${i + 1}`} 
+                                    image={selectedRecipe ? selectedRecipe.image : undefined}
                                     className={`cursor-pointer ${selection && selection.type == "Side" && selection.num == i ? "border-yellow-300 border-3" : ""}`}
                                 />
                             </button>

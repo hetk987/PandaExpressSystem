@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SidebarProvider } from "@/app/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/app/components/ui/sidebar";
 import { AppSidebar } from "../components/app-sidebar";
 import {
     Sheet,
@@ -13,21 +13,44 @@ import {
 } from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
 import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
+
+import { fetchWeatherApi } from "openmeteo";
+import { WeatherWidget } from "@/app/components/app-weather-widget";
+
+const IDLE_TIMEOUT = 10000; // 10 seconds
+const COUNTDOWN_SECONDS = 7; // 7 seconds
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
-    const { meals, individualItems, clearCart } = useCart();
+    const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
+    const router = useRouter(); 
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
         { id: 3, name: "Mobile Pay", icon: Smartphone },
     ];
     const [selectedPayment, setSelectedPayment] = useState<number | null>(null);
+    
+    // Idle detection state
+    const [showIdleDialog, setShowIdleDialog] = useState(false);
+    const [cancelCountdown, setCancelCountdown] = useState(5);
+    const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Transform cart data to display format
     const orderItems = useMemo(() => {
@@ -102,150 +125,361 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
         toast.success("Cart cleared successfully");
     };
 
+    const handleRemoveItem = (item: typeof orderItems[0]) => {
+        // Extract index from item.id (format: "meal-0" or "item-0")
+        const index = parseInt(item.id.split("-")[1]);
+        
+        if (item.kind === "meal") {
+            removeMeal(index);
+            toast.success("Meal removed from cart");
+        } else {
+            removeIndividualItem(index);
+            toast.success("Item removed from cart");
+        }
+    };
+
+    const [temperature, setTemperature] = useState<number>();
+    const [precipitation, setPrecipitation] = useState<number>();
+    const [windSpeed, setWindSpeed] = useState<number>();
+    const [windDirection, setWindDirection] = useState<number>();
+
+    // Idle detection: Reset timer on mouse movement
+    useEffect(() => {
+        const handleMouseMove = () => {
+            // Reset the idle timer
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+            }
+            
+            // If dialog is showing, don't reset
+            if (showIdleDialog) {
+                return;
+            }
+            
+            // Set new timer for IDLE_TIMEOUT seconds
+            idleTimerRef.current = setTimeout(() => {
+                setShowIdleDialog(true);
+            }, IDLE_TIMEOUT);
+        };
+
+        // Initial timer setup
+        handleMouseMove();
+
+        // Add event listener
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove);
+            if (idleTimerRef.current) {
+                clearTimeout(idleTimerRef.current);
+            }
+        };
+    }, [showIdleDialog]);
+
+    // Handle countdown timer when idle dialog opens
+    useEffect(() => {
+        if (!showIdleDialog) {
+            // Reset countdown when dialog closes
+            setCancelCountdown(COUNTDOWN_SECONDS);
+            if (countdownTimerRef.current) {
+                clearInterval(countdownTimerRef.current);
+                countdownTimerRef.current = null;
+            }
+            return;
+        }
+        
+        // Start countdown when dialog opens
+        let currentCount = COUNTDOWN_SECONDS;
+        setCancelCountdown(COUNTDOWN_SECONDS);
+        
+        const interval = setInterval(() => {
+            currentCount -= 1;
+            setCancelCountdown(currentCount);
+            
+            if (currentCount <= 0) {
+                clearInterval(interval);
+                countdownTimerRef.current = null;
+                // Auto-cancel when countdown reaches 0
+                Promise.resolve().then(() => {
+                    clearCart();
+                    router.push("/");
+                });
+            }
+        }, 1000);
+
+        countdownTimerRef.current = interval;
+
+        return () => {
+            if (countdownTimerRef.current) {
+                clearInterval(countdownTimerRef.current);
+                countdownTimerRef.current = null;
+            }
+        };
+    }, [showIdleDialog, clearCart, router]);
+
+    // Handle continue button - reset idle timer and countdown
+    const handleContinue = () => {
+        setShowIdleDialog(false);
+        // Clear countdown timer
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
+        setCancelCountdown(COUNTDOWN_SECONDS);
+        // Reset the idle timer
+        if (idleTimerRef.current) {
+            clearTimeout(idleTimerRef.current);
+        }
+        idleTimerRef.current = setTimeout(() => {
+            setShowIdleDialog(true);
+        }, 7000);
+    };
+
+    // Handle cancel button - immediately cancel
+    const handleCancel = () => {
+        setShowIdleDialog(false);
+        // Clear countdown timer
+        if (countdownTimerRef.current) {
+            clearInterval(countdownTimerRef.current);
+            countdownTimerRef.current = null;
+        }
+        // Immediately cancel and redirect
+        Promise.resolve().then(() => {
+            clearCart();
+            router.push("/");
+        });
+    };
+
+    // load weather data
+    useEffect(() => {
+        const fetchData = async () => {
+            const params = {
+                latitude: 30.628,
+                longitude: -96.3344,
+                current: ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"],
+                timezone: "auto",
+                wind_speed_unit: "mph",
+                temperature_unit: "fahrenheit",
+                precipitation_unit: "inch",
+            };
+            const url = "https://api.open-meteo.com/v1/forecast";
+            const responses = await fetchWeatherApi(url, params);
+
+            // Process first location. Add a for-loop for multiple locations or weather models
+            const response = responses[0];
+            const utcOffsetSeconds = response.utcOffsetSeconds();
+            const current = response.current()!;
+
+            // Note: The order of weather variables in the URL query and the indices below need to match!
+            const weatherData = {
+                current: {
+                    time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
+                    temperature_2m: current.variables(0)!.value(),
+                    precipitation: current.variables(1)!.value(),
+                    wind_speed_10m: current.variables(2)!.value(),
+                    wind_direction_10m: current.variables(3)!.value(),
+                },
+            };
+
+            setTemperature(weatherData.current.temperature_2m);
+            setPrecipitation(weatherData.current.precipitation);
+            setWindSpeed(weatherData.current.wind_speed_10m);
+            setWindDirection(weatherData.current.wind_direction_10m);
+        }
+
+        fetchData();
+    }, []);
+
     return (
         <div className="flex flex-col">
+            <AlertDialog open={showIdleDialog} onOpenChange={setShowIdleDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you still ordering?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            You haven't moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel 
+                            onClick={handleCancel}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
+                        >
+                            Cancel Order ({cancelCountdown})
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleContinue}>
+                            Continue Ordering
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             <SidebarProvider>
-                <AppSidebar />
-                <main>{children}</main>
+                <AppSidebar 
+                    temperature={temperature}
+                    precipitation={precipitation}
+                    windSpeed={windSpeed}
+                    windDirection={windDirection}
+                />
+                <SidebarInset>
+                    <div className="flex flex-col flex-1">
+                        <main className="flex-1 overflow-y-auto">
+                            {children}
+                        </main>
+
+                        <footer className="bg-dark-red text-white h-15 flex items-center justify-between px-6">
+                            <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
+                                <span className="font-semibold tracking-wide">Weather</span>
+                                <span className="text-white/80">
+                                    {temperature}°F • {precipitation}" rain • {windSpeed} mph • {windDirection}°
+                                </span>
+                            </div>
+
+                            <Sheet>
+                                <SheetTrigger className="h-full">
+                                    <div className="h-full flex items-center gap-2 px-6 border-l border-white/30 hover:bg-white/10 active:bg-white/20 transition-colors">
+                                        <p className="text-lg font-medium">Checkout</p>
+                                    </div>
+                                </SheetTrigger>
+                                <SheetContent className="bg-bright-red text-white">
+                                    <SheetHeader className="border-b border-white/30 p-4">
+                                        <SheetTitle className="text-2xl text-white">
+                                            Your Order
+                                        </SheetTitle>
+                                    </SheetHeader>
+
+                                    <div className="flex flex-col gap-4 p-4">
+                                        <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
+                                            {orderItems.length === 0 ? (
+                                                <div className="px-4 py-8 text-center text-white/70">
+                                                    <p>Your cart is empty</p>
+                                                </div>
+                                            ) : (
+                                                <div className="divide-y divide-white/10">
+                                                    {orderItems.map((item) => (
+                                                        <div
+                                                            key={item.id}
+                                                            className="px-4 py-3 relative"
+                                                        >
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-semibold">
+                                                                        {item.kind ===
+                                                                        "meal"
+                                                                            ? item.name
+                                                                            : "Individual A-la-carte"}
+                                                                    </span>
+                                                                    <span className="text-xs text-white/70">
+                                                                        {item.quantity}x
+                                                                    </span>
+                                                                </div>
+                                                                <div className="text-right font-medium">
+                                                                    <span>
+                                                                        $
+                                                                        {(
+                                                                            item.price *
+                                                                            item.quantity
+                                                                        ).toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            {item.kind === "meal" && (
+                                                                <ul className="mt-1 list-disc list-inside text-sm text-white/85">
+                                                                    {item.components.map(
+                                                                        (c) => (
+                                                                            <li key={c}>
+                                                                                {c}
+                                                                            </li>
+                                                                        )
+                                                                    )}
+                                                                </ul>
+                                                            )}
+                                                            {item.kind === "ala" && (
+                                                                <div className="mt-1 text-sm text-white/85">
+                                                                    {item.name}
+                                                                </div>
+                                                            )}
+                                                            <Button
+                                                                onClick={() => handleRemoveItem(item)}
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-2 rounded-md bg-white/5 p-4">
+                                            <div className="flex justify-between text-white/90">
+                                                <span>Subtotal</span>
+                                                <span>${subtotal.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-white/90">
+                                                <span>Tax</span>
+                                                <span>${tax.toFixed(2)}</span>
+                                            </div>
+                                            <div className="h-px bg-white/20" />
+                                            <div className="flex justify-between text-lg font-semibold">
+                                                <span>Total</span>
+                                                <span>${total.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <p className="text-sm uppercase tracking-wide text-white/80">
+                                                Payment method
+                                            </p>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                {paymentMethods.map((method) => (
+                                                    <Button
+                                                        onClick={() =>
+                                                            setSelectedPayment(method.id)
+                                                        }
+                                                        key={method.id}
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "justify-center border-white/60 bg-white/10 text-white hover:bg-white/20",
+                                                            selectedPayment === method.id &&
+                                                                "border-white bg-white/20 ring-2 ring-white/80",
+                                                            method.id === 3 && "col-span-2"
+                                                        )}
+                                                    >
+                                                        <method.icon className="size-4" />
+                                                        {method.name}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <SheetFooter className="flex flex-row justify-between items-center border-t border-white/20 p-4">
+                                            <Button onClick={handleClearCart} variant="outline" className="bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60">
+                                                <Trash2 className="size-4" />
+                                                Clear Cart
+                                            </Button>
+                                            <Button
+                                                disabled={
+                                                    selectedPayment === null ||
+                                                    orderItems.length === 0
+                                                }
+                                                onClick={handlePay}
+                                                className="cursor-pointer hover:bg-white/90"
+                                                >
+                                                Pay ${total.toFixed(2)}
+                                            </Button>
+                                    </SheetFooter>
+                                </SheetContent>
+                            </Sheet>
+                        </footer>
+                    </div>
+                </SidebarInset>
             </SidebarProvider>
 
-            <footer className="fixed bottom-0 w-full bg-dark-red text-white flex flex-row justify-between items-stretch h-16">
-                <Link href="/" className="flex items-center px-6 h-full border-r-2 border-white/80 text-white transition-colors hover:bg-white/10 active:bg-white/20">
-                    Quit
-                </Link>
-
-                <Sheet>
-                    <SheetTrigger className="h-full">
-                        <div className="h-full flex items-center gap-2 border-l-2 border-white/80 px-6 text-white transition-colors hover:bg-white/10 active:bg-white/20">
-                            <p className="text-lg font-medium">Checkout</p>
-                        </div>
-                    </SheetTrigger>
-                    <SheetContent className="bg-bright-red text-white">
-                        <SheetHeader className="border-b border-white/30 p-4">
-                            <SheetTitle className="text-2xl text-white">
-                                Your Order
-                            </SheetTitle>
-                        </SheetHeader>
-
-                        <div className="flex flex-col gap-4 p-4">
-                            <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
-                                {orderItems.length === 0 ? (
-                                    <div className="px-4 py-8 text-center text-white/70">
-                                        <p>Your cart is empty</p>
-                                    </div>
-                                ) : (
-                                    <div className="divide-y divide-white/10">
-                                        {orderItems.map((item) => (
-                                            <div
-                                                key={item.id}
-                                                className="px-4 py-3"
-                                            >
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-semibold">
-                                                            {item.kind ===
-                                                            "meal"
-                                                                ? item.name
-                                                                : "Individual A-la-carte"}
-                                                        </span>
-                                                        <span className="text-xs text-white/70">
-                                                            {item.quantity}x
-                                                        </span>
-                                                    </div>
-                                                    <div className="text-right font-medium">
-                                                        <span>
-                                                            $
-                                                            {(
-                                                                item.price *
-                                                                item.quantity
-                                                            ).toFixed(2)}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                {item.kind === "meal" && (
-                                                    <ul className="mt-1 list-disc list-inside text-sm text-white/85">
-                                                        {item.components.map(
-                                                            (c) => (
-                                                                <li key={c}>
-                                                                    {c}
-                                                                </li>
-                                                            )
-                                                        )}
-                                                    </ul>
-                                                )}
-                                                {item.kind === "ala" && (
-                                                    <div className="mt-1 text-sm text-white/85">
-                                                        {item.name}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-2 rounded-md bg-white/5 p-4">
-                                <div className="flex justify-between text-white/90">
-                                    <span>Subtotal</span>
-                                    <span>${subtotal.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between text-white/90">
-                                    <span>Tax</span>
-                                    <span>${tax.toFixed(2)}</span>
-                                </div>
-                                <div className="h-px bg-white/20" />
-                                <div className="flex justify-between text-lg font-semibold">
-                                    <span>Total</span>
-                                    <span>${total.toFixed(2)}</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <p className="text-sm uppercase tracking-wide text-white/80">
-                                    Payment method
-                                </p>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {paymentMethods.map((method) => (
-                                        <Button
-                                            onClick={() =>
-                                                setSelectedPayment(method.id)
-                                            }
-                                            key={method.id}
-                                            variant="outline"
-                                            className={cn(
-                                                "justify-center border-white/60 bg-white/10 text-white hover:bg-white/20",
-                                                selectedPayment === method.id &&
-                                                    "border-white bg-white/20 ring-2 ring-white/80",
-                                                method.id === 3 && "col-span-2"
-                                            )}
-                                        >
-                                            <method.icon className="size-4" />
-                                            {method.name}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <SheetFooter className="flex flex-row justify-between items-center border-t border-white/20 p-4">
-                                <Button onClick={handleClearCart} variant="outline" className="bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60">
-                                    <Trash2 className="size-4" />
-                                    Clear Cart
-                                </Button>
-                                <Button
-                                    disabled={
-                                        selectedPayment === null ||
-                                        orderItems.length === 0
-                                    }
-                                    onClick={handlePay}
-                                    className="cursor-pointer hover:bg-white/90"
-                                    >
-                                    Pay ${total.toFixed(2)}
-                                </Button>
-                        </SheetFooter>
-                    </SheetContent>
-                </Sheet>
-            </footer>
+            
         </div>
     );
 }
