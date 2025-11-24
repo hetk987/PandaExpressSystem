@@ -26,8 +26,8 @@ export const verifyLoginPassword = async (password) => {
             console.log("No matching employee found for password:", cleanedPassword);
             return null;
         }
-
-        console.log("Authenticated PIN employee:", user);
+        let user = result[0];
+        console.log("Authenticated PIN employee:", user.password);
 
         return {
             id: user.id,
