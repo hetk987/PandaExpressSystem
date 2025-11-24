@@ -34,7 +34,7 @@ import {
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Switch } from "@/app/components/ui/switch";
-import { Employee, Recipe } from "@/lib/types";
+import { Employee, Inventory, Recipe } from "@/lib/types";
 
 type ReportType = "x" | "z" | null;
 
@@ -53,13 +53,7 @@ type HourlyRow = {
 //     roleid?: number | null;
 // };
 
-// type InventoryItem = {
-//     id?: number;
-//     name: string;
-//     batchPurchaseCost: number;
-//     currentStock: number;
-//     estimatedUsedPerDay: number;
-// };
+type InventoryItem = Inventory;
 
 // type Recipe = {
 //     id?: number;
@@ -70,13 +64,13 @@ type HourlyRow = {
 //     image?: string | null;
 // };
 
-// type Ingredient = {
-//     id?: number;
-//     inventoryId: number;
-//     recipeId?: number;
-//     inventoryQuantity: number;
-//     inventoryName?: string;
-// };
+type Ingredient = {
+    id?: number;
+    inventoryId: number;
+    recipeId?: number;
+    inventoryQuantity: number;
+    inventoryName?: string;
+};
 
 export default function AdminTabsCard() {
     const [reportDialogOpen, setReportDialogOpen] = React.useState(false);
@@ -137,8 +131,10 @@ export default function AdminTabsCard() {
             }));
 
             setReportData(normalized);
-        } catch (err: any) {
-            setReportError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setReportError(
+                err instanceof Error ? err.message : "Unknown error"
+            );
         } finally {
             setReportLoading(false);
         }
@@ -195,8 +191,8 @@ export default function AdminTabsCard() {
 
             const data = await res.json();
             setEmployees(data ?? []);
-        } catch (err: any) {
-            setEmpError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setEmpError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setEmpLoading(false);
         }
@@ -262,8 +258,8 @@ export default function AdminTabsCard() {
 
             await fetchEmployees();
             setEmpDialogOpen(false);
-        } catch (err: any) {
-            setEmpError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setEmpError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setEmpLoading(false);
         }
@@ -288,8 +284,8 @@ export default function AdminTabsCard() {
 
             await fetchEmployees();
             setEmpDialogOpen(false);
-        } catch (err: any) {
-            setEmpError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setEmpError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setEmpLoading(false);
         }
@@ -308,8 +304,8 @@ export default function AdminTabsCard() {
 
             const data = await res.json();
             setInventory(data ?? []);
-        } catch (err: any) {
-            setInvError(err.message ?? "Unknown error");
+        } catch (err: unknown) {
+            setInvError(err instanceof Error ? err.message : "Unknown error");
         } finally {
             setInvLoading(false);
         }
@@ -850,10 +846,10 @@ export default function AdminTabsCard() {
                                         <TableCell>{emp.salary}</TableCell>
                                         <TableCell>{emp.hours}</TableCell>
                                         <TableCell>
-                                            {emp.isEmployed ? "Yes" : "No"}
+                                            {emp.employed ? "Yes" : "No"}
                                         </TableCell>
                                         <TableCell>
-                                            {emp.roleid ?? "-"}
+                                            {emp.role?.name ?? "-"}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button
@@ -1625,8 +1621,7 @@ export default function AdminTabsCard() {
                                                             updateSelectedRecipe(
                                                                 "image",
                                                                 e.target
-                                                                    .value ||
-                                                                    null
+                                                                    .value || ""
                                                             )
                                                         }
                                                     />

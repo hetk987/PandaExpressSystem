@@ -7,11 +7,13 @@ export type Role = {
 }
 
 export type Employee = {
-    id: number;
+    id?: number;
     name: string;
     salary: number;
     hours: number;
     password: string;
+    employed: boolean;
+    role: Role;
 }
 
 export type Order = {
@@ -25,7 +27,7 @@ export type Order = {
 }
 
 export type Inventory = {
-    id: number;
+    id?: number;
     name: string;
     batchPurchaseCost: number;
     currentStock: number;
