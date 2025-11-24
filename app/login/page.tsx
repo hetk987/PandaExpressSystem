@@ -7,11 +7,23 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/app/c
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { UserCircle, Lock, Delete } from "lucide-react";
+import {useSearchParams} from "next/navigation";
 
 export default function LoginPage() {
     const [pin, setPin] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const params = useSearchParams();
+    const oauthError = params.get("error");
+
+    const oauthMessage = oauthError === "AccessDenied"
+        ? "Your Google account is not registered as an employee."
+        : oauthError === "OAuthAccountNotLinked"
+        ? "This Google account is not linked to an employee profile."
+        : oauthError === "Callback"
+        ? "Google login failed. Please try again."
+        : null;
 
     const onPinSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -61,6 +73,11 @@ export default function LoginPage() {
                 </CardHeader>
 
                 <CardContent className="flex flex-col gap-6">
+                    {oauthMessage && (
+                        <p className="text-center text-sm text-red-600 font-medium">
+                            {oauthMessage}
+                        </p>
+                    )}
                     <Button
                         onClick={() => signIn("google", { callbackUrl: "/home" })}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg rounded-xl"
