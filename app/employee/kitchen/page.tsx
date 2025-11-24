@@ -2,8 +2,8 @@
 
 import useSWR from "swr";
 import { fetcher } from "@/lib/fetcher";
-import { KitchenOrderItem } from "../components/KitchenOrderItem";
-import { KitchenDrawer } from "../components/app-kitchen-drawer";
+import { KitchenOrderItem } from "@/app/components/KitchenOrderItem";
+import { KitchenDrawer } from "@/app/components/app-kitchen-drawer";
 import type { Order, Cooked } from "@/lib/types";
 
 export default function KitchenPage() {
