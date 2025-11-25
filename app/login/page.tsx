@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/app/components/ui/button";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/app/components/ui/card";
@@ -9,7 +9,7 @@ import { Label } from "@/app/components/ui/label";
 import { UserCircle, Lock, Delete } from "lucide-react";
 import {useSearchParams} from "next/navigation";
 
-export default function LoginPage() {
+function LoginContent() {
     const [pin, setPin] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -169,5 +169,31 @@ export default function LoginPage() {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
+                <Card className="w-full max-w-md border-2 shadow-lg">
+                    <CardHeader className="space-y-4 text-center">
+                        <div className="flex justify-center">
+                            <div className="rounded-full bg-neutral-900/10 p-6">
+                                <UserCircle className="h-16 w-16 text-neutral-900" />
+                            </div>
+                        </div>
+                        <CardTitle className="text-3xl font-bold text-neutral-900">
+                            Employee Login
+                        </CardTitle>
+                        <CardDescription className="text-neutral-600">
+                            Loading...
+                        </CardDescription>
+                    </CardHeader>
+                </Card>
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 }
