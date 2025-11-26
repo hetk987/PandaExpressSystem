@@ -59,8 +59,7 @@ export default function AdminEmployeesTab() {
         setSelectedEmployee({
             name: "",
             salary: 0,
-            
-            : 0,
+            hours: 0,
             password: "",
             isEmployed: true,
             roleId: 1,
