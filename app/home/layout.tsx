@@ -12,7 +12,7 @@ import {
     SheetTrigger,
 } from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
-import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
+import { CreditCard, IdCard, ShoppingCart, Smartphone, Trash2 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { cn, getCSTTimestamp } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
@@ -33,7 +33,6 @@ import {
 } from "@/app/components/ui/alert-dialog";
 
 import { fetchWeatherApi } from "openmeteo";
-import { WeatherWidget } from "@/app/components/app-weather-widget";
 
 const IDLE_TIMEOUT = 30000; // 30 seconds
 const COUNTDOWN_SECONDS = 7; // 7 seconds
@@ -339,11 +338,12 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             </div>
 
                             <Sheet>
-                                <SheetTrigger className="h-full">
-                                    <div className="h-full flex items-center gap-2 px-6 border-l border-white/30 hover:bg-white/10 active:bg-white/20 transition-colors">
-                                        <p className={`text-lg font-medium ${textClasses}`}>Checkout</p>
-                                    </div>
-                                </SheetTrigger>
+                            <SheetTrigger asChild>
+                                    <Button className="fixed bottom-16 right-6 h-16 px-8 bg-panda-dark-red text-white font-bold text-xl rounded-full shadow-2xl hover:bg-panda-dark-red hover:scale-110 transition-all z-50 flex items-center gap-2">
+                                    <ShoppingCart className="h-6 w-6" />
+                                    Checkout
+                                </Button>
+                            </SheetTrigger>
                                 <SheetContent className="bg-bright-red text-white">
                                     <SheetHeader className="border-b border-white/30 p-4">
                                         <SheetTitle className={`text-2xl text-white ${textClasses}`}>

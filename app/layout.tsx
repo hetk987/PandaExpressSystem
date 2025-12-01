@@ -34,7 +34,7 @@ export default function RootLayout({
         <ClientProviders>
             {children}
         </ClientProviders>
-        <Toaster position="top-right" richColors/>
+        <Toaster position="top-center" richColors/>
         
         {/* Vercel Analytics */}
         <Analytics />
