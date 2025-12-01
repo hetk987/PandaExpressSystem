@@ -66,7 +66,7 @@ export function AppSidebar({
     {
       title: "Manager View",
       icon: ChefHat, // Can be changed later
-      href: "/home/manager" // TODO: Add file 
+      href: "/employee/manager"
     }
   ]
 
