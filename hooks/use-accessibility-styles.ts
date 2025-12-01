@@ -25,8 +25,6 @@ export function useAccessibilityStyles() {
   const getTextClasses = (): string => {
     const sizeClass = getTextSizeClass();
     const boldClass = getBoldClass();
-    console.log("textClasses", `${sizeClass} ${boldClass}`.trim());
-    console.log("textSize", textSize);
     return `${sizeClass} ${boldClass}`.trim();
   };
 
