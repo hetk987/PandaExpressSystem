@@ -113,6 +113,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
         if (response.ok) {
             toast.success("Order placed successfully");
             clearCart();
+            router.push('/logout');
         } else {
             const error = await response.json();
             toast.error("Failed to place order");
