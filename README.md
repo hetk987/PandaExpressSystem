@@ -102,3 +102,6 @@ Add kitchen button
 Disable a card if its out of stock for ingredients in kiosk view
 Limit order quanities
 Add catering
+Premium items
+ChatGPT Wrapper
+Add sales report button
