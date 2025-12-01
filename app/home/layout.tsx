@@ -16,6 +16,8 @@ import { CreditCard, IdCard, Smartphone, Trash2 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { cn, getCSTTimestamp } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
+import { AccessibilityProvider } from "../providers/accessibility-provider";
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -38,7 +40,8 @@ const COUNTDOWN_SECONDS = 7; // 7 seconds
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
     const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
-    const router = useRouter(); 
+    const router = useRouter();
+    const { textClasses } = useAccessibilityStyles(); 
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
@@ -295,19 +298,19 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             <AlertDialog open={showIdleDialog} onOpenChange={setShowIdleDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you still ordering?</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className={textClasses}>Are you still ordering?</AlertDialogTitle>
+                        <AlertDialogDescription className={textClasses}>
                             You haven't moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel 
                             onClick={handleCancel}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold"
+                            className={`bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold ${textClasses}`}
                         >
                             Cancel Order ({cancelCountdown})
                         </AlertDialogCancel>
-                        <AlertDialogAction onClick={handleContinue}>
+                        <AlertDialogAction onClick={handleContinue} className={textClasses}>
                             Continue Ordering
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -329,8 +332,8 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
 
                         <footer className="bg-dark-red text-white h-15 flex items-center justify-between px-6">
                             <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
-                                <span className="font-semibold tracking-wide">Weather</span>
-                                <span className="text-white/80">
+                                <span className={`font-semibold tracking-wide ${textClasses}`}>Weather</span>
+                                <span className={`text-white/80 ${textClasses}`}>
                                     {temperature}°F • {precipitation}" rain • {windSpeed} mph • {windDirection}°
                                 </span>
                             </div>
@@ -338,12 +341,12 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             <Sheet>
                                 <SheetTrigger className="h-full">
                                     <div className="h-full flex items-center gap-2 px-6 border-l border-white/30 hover:bg-white/10 active:bg-white/20 transition-colors">
-                                        <p className="text-lg font-medium">Checkout</p>
+                                        <p className={`text-lg font-medium ${textClasses}`}>Checkout</p>
                                     </div>
                                 </SheetTrigger>
                                 <SheetContent className="bg-bright-red text-white">
                                     <SheetHeader className="border-b border-white/30 p-4">
-                                        <SheetTitle className="text-2xl text-white">
+                                        <SheetTitle className={`text-2xl text-white ${textClasses}`}>
                                             Your Order
                                         </SheetTitle>
                                     </SheetHeader>
@@ -352,7 +355,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
                                             {orderItems.length === 0 ? (
                                                 <div className="px-4 py-8 text-center text-white/70">
-                                                    <p>Your cart is empty</p>
+                                                    <p className={textClasses}>Your cart is empty</p>
                                                 </div>
                                             ) : (
                                                 <div className="divide-y divide-white/10">
@@ -363,17 +366,17 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                         >
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="font-semibold">
+                                                                    <span className={`font-semibold ${textClasses}`}>
                                                                         {item.kind ===
                                                                         "meal"
                                                                             ? item.name
                                                                             : "Individual A-la-carte"}
                                                                     </span>
-                                                                    <span className="text-xs text-white/70">
+                                                                    <span className={`text-xs text-white/70 ${textClasses}`}>
                                                                         {item.quantity}x
                                                                     </span>
                                                                 </div>
-                                                                <div className="text-right font-medium">
+                                                                <div className={`text-right font-medium ${textClasses}`}>
                                                                     <span>
                                                                         $
                                                                         {(
@@ -384,7 +387,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                                 </div>
                                                             </div>
                                                             {item.kind === "meal" && (
-                                                                <ul className="mt-1 list-disc list-inside text-sm text-white/85">
+                                                                <ul className={`mt-1 list-disc list-inside text-sm text-white/85 ${textClasses}`}>
                                                                     {item.components.map(
                                                                         (c) => (
                                                                             <li key={c}>
@@ -395,7 +398,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                                 </ul>
                                                             )}
                                                             {item.kind === "ala" && (
-                                                                <div className="mt-1 text-sm text-white/85">
+                                                                <div className={`mt-1 text-sm text-white/85 ${textClasses}`}>
                                                                     {item.name}
                                                                 </div>
                                                             )}
@@ -414,23 +417,23 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         </div>
 
                                         <div className="space-y-2 rounded-md bg-white/5 p-4">
-                                            <div className="flex justify-between text-white/90">
+                                            <div className={`flex justify-between text-white/90 ${textClasses}`}>
                                                 <span>Subtotal</span>
                                                 <span>${subtotal.toFixed(2)}</span>
                                             </div>
-                                            <div className="flex justify-between text-white/90">
+                                            <div className={`flex justify-between text-white/90 ${textClasses}`}>
                                                 <span>Tax</span>
                                                 <span>${tax.toFixed(2)}</span>
                                             </div>
                                             <div className="h-px bg-white/20" />
-                                            <div className="flex justify-between text-lg font-semibold">
+                                            <div className={`flex justify-between text-lg font-semibold ${textClasses}`}>
                                                 <span>Total</span>
                                                 <span>${total.toFixed(2)}</span>
                                             </div>
                                         </div>
 
                                         <div className="space-y-3">
-                                            <p className="text-sm uppercase tracking-wide text-white/80">
+                                            <p className={`text-sm uppercase tracking-wide text-white/80 ${textClasses}`}>
                                                 Payment method
                                             </p>
                                             <div className="grid grid-cols-2 gap-3">
@@ -442,7 +445,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                         key={method.id}
                                                         variant="outline"
                                                         className={cn(
-                                                            "justify-center border-white/60 bg-white/10 text-white hover:bg-white/20",
+                                                            `justify-center border-white/60 bg-white/10 text-white hover:bg-white/20 ${textClasses}`,
                                                             selectedPayment === method.id &&
                                                                 "border-white bg-white/20 ring-2 ring-white/80",
                                                             method.id === 3 && "col-span-2"
@@ -457,7 +460,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                     </div>
 
                                     <SheetFooter className="flex flex-row justify-between items-center border-t border-white/20 p-4">
-                                            <Button onClick={handleClearCart} variant="outline" className="bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60">
+                                            <Button onClick={handleClearCart} variant="outline" className={`bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60 ${textClasses}`}>
                                                 <Trash2 className="size-4" />
                                                 Clear Cart
                                             </Button>
@@ -467,7 +470,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                     orderItems.length === 0
                                                 }
                                                 onClick={handlePay}
-                                                className="cursor-pointer hover:bg-white/90"
+                                                className={`cursor-pointer hover:bg-white/90 ${textClasses}`}
                                                 >
                                                 Pay ${total.toFixed(2)}
                                             </Button>
@@ -486,8 +489,10 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <CartProvider>
-            <CheckoutContent>{children}</CheckoutContent>
-        </CartProvider>
+        <AccessibilityProvider>
+            <CartProvider>
+                <CheckoutContent>{children}</CheckoutContent>
+            </CartProvider>
+        </AccessibilityProvider>
     );
 }
