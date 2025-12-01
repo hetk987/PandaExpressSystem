@@ -8,6 +8,7 @@ import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 
 interface Selection {
     type: RecipeType;
@@ -29,6 +30,7 @@ export default function Build({
     const { addMeal } = useCart();
     const router = useRouter();
     const { addMealWithToast } = useAddToCartToast();
+    const { textClasses } = useAccessibilityStyles();
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [mealtypes, setMealtypes] = useState<MealType[]>([]);
     const [currentMenu, setCurrentMenu] = useState<RecipeType>();
@@ -200,7 +202,7 @@ export default function Build({
         <div className="flex flex-row">
             <div className="w-full">
                 <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{`Select ${
+                    <h2 className={`text-3xl font-bold ${textClasses}`}>{`Select ${
                         selection?.type
                     } ${selection ? selection.num + 1 : ""}`}</h2>
                 </div>
@@ -227,7 +229,7 @@ export default function Build({
             </div>
             <div className="w-70">
                 <div className="pt-5 pl-5">
-                    <h2 className=" text-3xl font-bold ">{mealName}</h2>
+                    <h2 className={`text-3xl font-bold ${textClasses}`}>{mealName}</h2>
                 </div>
                 <div className="flex flex-col p-10 gap-10 mb-10">
                     {entrees?.map((e, i) => {

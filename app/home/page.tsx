@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import MealCard from "../components/app-mealcard";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 
 const options = [
     { href: "build", title: "Build Your Own" },
@@ -17,6 +18,7 @@ const options = [
 export default function Home() {
     const router = useRouter();
     const { data: session, status } = useSession();
+    const { textClasses } = useAccessibilityStyles();
 
     // Redirect if not logged in
     useEffect(() => {
@@ -37,7 +39,7 @@ export default function Home() {
 
     return (
         <div className="min-h-screen flex flex-col items-center bg-neutral-50 p-10 w-full">
-            <h1 className="text-4xl font-bold text-neutral-900 mb-8">
+            <h1 className={`text-4xl font-bold text-neutral-900 mb-8 ${textClasses}`}>
                 Welcome, {session.user?.name || "Employee"}!
             </h1>
 

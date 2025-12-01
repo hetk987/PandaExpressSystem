@@ -7,6 +7,7 @@ import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 
 export default function Home() {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -14,6 +15,7 @@ export default function Home() {
     const [quantity, setQuantity] = useState<number>(1);
     const { addIndividualItem } = useCart();
     const { addItemWithToast } = useAddToCartToast();
+    const { textClasses } = useAccessibilityStyles();
 
     // fetch recipes
     useEffect(() => {
@@ -80,16 +82,16 @@ export default function Home() {
                     <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <div>
-                                <h3 className="text-xl font-bold">
+                                <h3 className={`text-xl font-bold ${textClasses}`}>
                                     {selectedRecipe.name}
                                 </h3>
-                                <p className="text-gray-600">
+                                <p className={`text-gray-600 ${textClasses}`}>
                                     ${selectedRecipe.pricePerServing.toFixed(2)}{" "}
                                     each
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <label className="text-sm font-medium">
+                                <label className={`text-sm font-medium ${textClasses}`}>
                                     Quantity:
                                 </label>
                                 <Input
@@ -109,7 +111,7 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="flex gap-4 items-center">
-                            <p className="text-lg font-semibold">
+                            <p className={`text-lg font-semibold ${textClasses}`}>
                                 Total: $
                                 {(
                                     selectedRecipe.pricePerServing * quantity
