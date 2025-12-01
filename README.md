@@ -90,7 +90,6 @@ Menu
 - add apps
 - custom font
 
-
 TODO
 
 Move toast to top middle

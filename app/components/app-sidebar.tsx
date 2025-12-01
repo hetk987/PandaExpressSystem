@@ -65,7 +65,7 @@ export function AppSidebar({
     },
     {
       title: "Manager View",
-      icon: ChefHat, // Can be changed later
+      icon: ChefHat, 
       href: "/employee/manager" 
     }
   ]
