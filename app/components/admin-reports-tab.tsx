@@ -49,33 +49,54 @@ type RestockRow = {
 };
 
 export default function AdminReportsTab() {
+    // Helper function to get today's date in YYYY-MM-DD format
+    const getTodayDate = () => {
+        const today = new Date();
+        return today.toISOString().split("T")[0];
+    };
+
     // Product Usage state
-    const [productUsageData, setProductUsageData] = React.useState<ProductUsageRow[] | null>(null);
+    const [productUsageData, setProductUsageData] = React.useState<
+        ProductUsageRow[] | null
+    >(null);
     const [productUsageLoading, setProductUsageLoading] = React.useState(false);
-    const [productUsageError, setProductUsageError] = React.useState<string | null>(null);
-    const [productUsageStartDate, setProductUsageStartDate] = React.useState("");
+    const [productUsageError, setProductUsageError] = React.useState<
+        string | null
+    >(null);
+    const [productUsageStartDate, setProductUsageStartDate] =
+        React.useState("");
     const [productUsageEndDate, setProductUsageEndDate] = React.useState("");
 
     // Sales By Item state
-    const [salesByItemData, setSalesByItemData] = React.useState<SalesByItemRow[] | null>(null);
+    const [salesByItemData, setSalesByItemData] = React.useState<
+        SalesByItemRow[] | null
+    >(null);
     const [salesByItemLoading, setSalesByItemLoading] = React.useState(false);
-    const [salesByItemError, setSalesByItemError] = React.useState<string | null>(null);
+    const [salesByItemError, setSalesByItemError] = React.useState<
+        string | null
+    >(null);
     const [salesByItemStartDate, setSalesByItemStartDate] = React.useState("");
     const [salesByItemEndDate, setSalesByItemEndDate] = React.useState("");
 
     // X-Report state
-    const [xReportData, setXReportData] = React.useState<HourlyRow[] | null>(null);
+    const [xReportData, setXReportData] = React.useState<HourlyRow[] | null>(
+        null
+    );
     const [xReportLoading, setXReportLoading] = React.useState(false);
     const [xReportError, setXReportError] = React.useState<string | null>(null);
 
     // Z-Report state
-    const [zReportData, setZReportData] = React.useState<HourlyRow[] | null>(null);
+    const [zReportData, setZReportData] = React.useState<HourlyRow[] | null>(
+        null
+    );
     const [zReportLoading, setZReportLoading] = React.useState(false);
     const [zReportError, setZReportError] = React.useState<string | null>(null);
     const [zReportResetLoading, setZReportResetLoading] = React.useState(false);
 
     // Restock Report state
-    const [restockData, setRestockData] = React.useState<RestockRow[] | null>(null);
+    const [restockData, setRestockData] = React.useState<RestockRow[] | null>(
+        null
+    );
     const [restockLoading, setRestockLoading] = React.useState(false);
     const [restockError, setRestockError] = React.useState<string | null>(null);
 
@@ -209,7 +230,9 @@ export default function AdminReportsTab() {
     async function resetZReport() {
         try {
             setZReportResetLoading(true);
-            const res = await fetch(`/api/reports/z-report`, { method: 'POST' });
+            const res = await fetch(`/api/reports/z-report`, {
+                method: "POST",
+            });
 
             if (!res.ok) {
                 const text = await res.text();
@@ -220,7 +243,7 @@ export default function AdminReportsTab() {
         } catch (err: unknown) {
             alert(
                 "Failed to reset Z-report: " +
-                (err instanceof Error ? err.message : "Unknown error")
+                    (err instanceof Error ? err.message : "Unknown error")
             );
         } finally {
             setZReportResetLoading(false);
@@ -261,57 +284,101 @@ export default function AdminReportsTab() {
                         <div className="space-y-4">
                             <div className="flex gap-4 items-end">
                                 <div className="flex-1">
-                                    <Label htmlFor="product-usage-start">Start Date</Label>
+                                    <Label htmlFor="product-usage-start">
+                                        Start Date
+                                    </Label>
                                     <Input
                                         id="product-usage-start"
                                         type="date"
                                         value={productUsageStartDate}
-                                        onChange={(e) => setProductUsageStartDate(e.target.value)}
+                                        onChange={(e) =>
+                                            setProductUsageStartDate(
+                                                e.target.value
+                                            )
+                                        }
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <Label htmlFor="product-usage-end">End Date</Label>
+                                    <Label htmlFor="product-usage-end">
+                                        End Date
+                                    </Label>
                                     <Input
                                         id="product-usage-end"
                                         type="date"
                                         value={productUsageEndDate}
-                                        onChange={(e) => setProductUsageEndDate(e.target.value)}
+                                        onChange={(e) =>
+                                            setProductUsageEndDate(
+                                                e.target.value
+                                            )
+                                        }
                                     />
                                 </div>
-                                <Button onClick={fetchProductUsage} disabled={productUsageLoading}>
-                                    {productUsageLoading ? "Loading..." : "Generate Report"}
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        const today = getTodayDate();
+                                        setProductUsageStartDate(today);
+                                        setProductUsageEndDate(today);
+                                    }}
+                                >
+                                    Today
+                                </Button>
+                                <Button
+                                    onClick={fetchProductUsage}
+                                    disabled={productUsageLoading}
+                                >
+                                    {productUsageLoading
+                                        ? "Loading..."
+                                        : "Generate Report"}
                                 </Button>
                             </div>
 
                             {productUsageError && (
-                                <p className="text-sm text-red-500">{productUsageError}</p>
+                                <p className="text-sm text-red-500">
+                                    {productUsageError}
+                                </p>
                             )}
 
-                            {productUsageData && productUsageData.length > 0 && (
-                                <Table>
-                                    <TableCaption>Inventory usage for the selected period</TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Inventory Name</TableHead>
-                                            <TableHead className="text-right">Total Used</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {productUsageData.map((row) => (
-                                            <TableRow key={row.inventoryId}>
-                                                <TableCell>{row.inventoryName}</TableCell>
-                                                <TableCell className="text-right">
-                                                    {Number(row.totalUsed).toFixed(2)}
-                                                </TableCell>
+                            {productUsageData &&
+                                productUsageData.length > 0 && (
+                                    <Table>
+                                        <TableCaption>
+                                            Inventory usage for the selected
+                                            period
+                                        </TableCaption>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>
+                                                    Inventory Name
+                                                </TableHead>
+                                                <TableHead className="text-right">
+                                                    Total Used
+                                                </TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            )}
+                                        </TableHeader>
+                                        <TableBody>
+                                            {productUsageData.map((row) => (
+                                                <TableRow key={row.inventoryId}>
+                                                    <TableCell>
+                                                        {row.inventoryName}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        {Number(
+                                                            row.totalUsed
+                                                        ).toFixed(2)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                )}
 
-                            {productUsageData && productUsageData.length === 0 && (
-                                <p className="text-sm text-muted-foreground">No data for this period.</p>
-                            )}
+                            {productUsageData &&
+                                productUsageData.length === 0 && (
+                                    <p className="text-sm text-muted-foreground">
+                                        No data for this period.
+                                    </p>
+                                )}
                         </div>
                     </AccordionContent>
                 </AccordionItem>
@@ -323,53 +390,95 @@ export default function AdminReportsTab() {
                         <div className="space-y-4">
                             <div className="flex gap-4 items-end">
                                 <div className="flex-1">
-                                    <Label htmlFor="sales-by-item-start">Start Date</Label>
+                                    <Label htmlFor="sales-by-item-start">
+                                        Start Date
+                                    </Label>
                                     <Input
                                         id="sales-by-item-start"
                                         type="date"
                                         value={salesByItemStartDate}
-                                        onChange={(e) => setSalesByItemStartDate(e.target.value)}
+                                        onChange={(e) =>
+                                            setSalesByItemStartDate(
+                                                e.target.value
+                                            )
+                                        }
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <Label htmlFor="sales-by-item-end">End Date</Label>
+                                    <Label htmlFor="sales-by-item-end">
+                                        End Date
+                                    </Label>
                                     <Input
                                         id="sales-by-item-end"
                                         type="date"
                                         value={salesByItemEndDate}
-                                        onChange={(e) => setSalesByItemEndDate(e.target.value)}
+                                        onChange={(e) =>
+                                            setSalesByItemEndDate(
+                                                e.target.value
+                                            )
+                                        }
                                     />
                                 </div>
-                                <Button onClick={fetchSalesByItem} disabled={salesByItemLoading}>
-                                    {salesByItemLoading ? "Loading..." : "Generate Report"}
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        const today = getTodayDate();
+                                        setSalesByItemStartDate(today);
+                                        setSalesByItemEndDate(today);
+                                    }}
+                                >
+                                    Today
+                                </Button>
+                                <Button
+                                    onClick={fetchSalesByItem}
+                                    disabled={salesByItemLoading}
+                                >
+                                    {salesByItemLoading
+                                        ? "Loading..."
+                                        : "Generate Report"}
                                 </Button>
                             </div>
 
                             {salesByItemError && (
-                                <p className="text-sm text-red-500">{salesByItemError}</p>
+                                <p className="text-sm text-red-500">
+                                    {salesByItemError}
+                                </p>
                             )}
 
                             {salesByItemData && salesByItemData.length > 0 && (
                                 <Table>
-                                    <TableCaption>Sales by item for the selected period</TableCaption>
+                                    <TableCaption>
+                                        Sales by item for the selected period
+                                    </TableCaption>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Recipe Name</TableHead>
                                             <TableHead>Type</TableHead>
-                                            <TableHead className="text-right">Quantity Sold</TableHead>
-                                            <TableHead className="text-right">Revenue ($)</TableHead>
+                                            <TableHead className="text-right">
+                                                Quantity Sold
+                                            </TableHead>
+                                            <TableHead className="text-right">
+                                                Revenue ($)
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {salesByItemData.map((row) => (
                                             <TableRow key={row.recipeId}>
-                                                <TableCell>{row.recipeName}</TableCell>
-                                                <TableCell>{row.recipeType}</TableCell>
+                                                <TableCell>
+                                                    {row.recipeName}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {row.recipeType}
+                                                </TableCell>
                                                 <TableCell className="text-right">
                                                     {Number(row.totalQuantity)}
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    ${Number(row.totalRevenue).toFixed(2)}
+                                                    $
+                                                    {Number(
+                                                        row.totalRevenue
+                                                    ).toFixed(2)}
                                                 </TableCell>
                                             </TableRow>
                                         ))}
@@ -377,44 +486,63 @@ export default function AdminReportsTab() {
                                 </Table>
                             )}
 
-                            {salesByItemData && salesByItemData.length === 0 && (
-                                <p className="text-sm text-muted-foreground">No data for this period.</p>
-                            )}
+                            {salesByItemData &&
+                                salesByItemData.length === 0 && (
+                                    <p className="text-sm text-muted-foreground">
+                                        No data for this period.
+                                    </p>
+                                )}
                         </div>
                     </AccordionContent>
                 </AccordionItem>
 
                 {/* X-Report */}
                 <AccordionItem value="x-report">
-                    <AccordionTrigger>X-Report (Hourly Sales - Current Day)</AccordionTrigger>
+                    <AccordionTrigger>
+                        X-Report (Hourly Sales - Current Day)
+                    </AccordionTrigger>
                     <AccordionContent>
                         <div className="space-y-4">
                             <div className="flex gap-4 items-center">
                                 <p className="text-sm text-muted-foreground flex-1">
-                                    Hourly sales for today. Run as often as needed.
+                                    Hourly sales for today. Run as often as
+                                    needed.
                                 </p>
-                                <Button onClick={fetchXReport} disabled={xReportLoading}>
-                                    {xReportLoading ? "Loading..." : "Generate Report"}
+                                <Button
+                                    onClick={fetchXReport}
+                                    disabled={xReportLoading}
+                                >
+                                    {xReportLoading
+                                        ? "Loading..."
+                                        : "Generate Report"}
                                 </Button>
                             </div>
 
                             {xReportError && (
-                                <p className="text-sm text-red-500">{xReportError}</p>
+                                <p className="text-sm text-red-500">
+                                    {xReportError}
+                                </p>
                             )}
 
                             {xReportData && xReportData.length > 0 && (
                                 <Table>
-                                    <TableCaption>Hourly sales for the current day</TableCaption>
+                                    <TableCaption>
+                                        Hourly sales for the current day
+                                    </TableCaption>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Hour</TableHead>
-                                            <TableHead className="text-right">Net Sales ($)</TableHead>
+                                            <TableHead className="text-right">
+                                                Net Sales ($)
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {xReportData.map((row) => (
                                             <TableRow key={row.hour}>
-                                                <TableCell>{row.hour}:00</TableCell>
+                                                <TableCell>
+                                                    {row.hour}:00
+                                                </TableCell>
                                                 <TableCell className="text-right">
                                                     ${row.netSales.toFixed(2)}
                                                 </TableCell>
@@ -425,7 +553,9 @@ export default function AdminReportsTab() {
                             )}
 
                             {xReportData && xReportData.length === 0 && (
-                                <p className="text-sm text-muted-foreground">No sales data for today.</p>
+                                <p className="text-sm text-muted-foreground">
+                                    No sales data for today.
+                                </p>
                             )}
                         </div>
                     </AccordionContent>
@@ -433,57 +563,80 @@ export default function AdminReportsTab() {
 
                 {/* Z-Report */}
                 <AccordionItem value="z-report">
-                    <AccordionTrigger>Z-Report (End of Day Summary)</AccordionTrigger>
+                    <AccordionTrigger>
+                        Z-Report (End of Day Summary)
+                    </AccordionTrigger>
                     <AccordionContent>
                         <div className="space-y-4">
                             <div className="flex gap-4 items-center">
                                 <p className="text-sm text-muted-foreground flex-1">
-                                    End-of-day totals. Run once per day at closing.
+                                    End-of-day totals. Run once per day at
+                                    closing.
                                 </p>
-                                <Button onClick={fetchZReport} disabled={zReportLoading}>
-                                    {zReportLoading ? "Loading..." : "Generate Report"}
+                                <Button
+                                    onClick={fetchZReport}
+                                    disabled={zReportLoading}
+                                >
+                                    {zReportLoading
+                                        ? "Loading..."
+                                        : "Generate Report"}
                                 </Button>
                             </div>
 
                             {zReportError && (
-                                <p className="text-sm text-red-500">{zReportError}</p>
+                                <p className="text-sm text-red-500">
+                                    {zReportError}
+                                </p>
                             )}
 
                             {zReportData && zReportData.length > 0 && (
                                 <>
                                     <Table>
-                                        <TableCaption>End-of-day sales summary</TableCaption>
+                                        <TableCaption>
+                                            End-of-day sales summary
+                                        </TableCaption>
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Hour</TableHead>
-                                                <TableHead className="text-right">Net Sales ($)</TableHead>
+                                                <TableHead className="text-right">
+                                                    Net Sales ($)
+                                                </TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {zReportData.map((row) => (
                                                 <TableRow key={row.hour}>
-                                                    <TableCell>{row.hour}:00</TableCell>
+                                                    <TableCell>
+                                                        {row.hour}:00
+                                                    </TableCell>
                                                     <TableCell className="text-right">
-                                                        ${row.netSales.toFixed(2)}
+                                                        $
+                                                        {row.netSales.toFixed(
+                                                            2
+                                                        )}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
                                     </Table>
                                     <div className="flex justify-end">
-                                        <Button 
-                                            onClick={resetZReport} 
+                                        <Button
+                                            onClick={resetZReport}
                                             disabled={zReportResetLoading}
                                             variant="destructive"
                                         >
-                                            {zReportResetLoading ? "Resetting..." : "Reset Z-Report (End of Day)"}
+                                            {zReportResetLoading
+                                                ? "Resetting..."
+                                                : "Reset Z-Report (End of Day)"}
                                         </Button>
                                     </div>
                                 </>
                             )}
 
                             {zReportData && zReportData.length === 0 && (
-                                <p className="text-sm text-muted-foreground">No sales data for today.</p>
+                                <p className="text-sm text-muted-foreground">
+                                    No sales data for today.
+                                </p>
                             )}
                         </div>
                     </AccordionContent>
@@ -496,31 +649,47 @@ export default function AdminReportsTab() {
                         <div className="space-y-4">
                             <div className="flex gap-4 items-center">
                                 <p className="text-sm text-muted-foreground flex-1">
-                                    Items with current stock below estimated daily usage.
+                                    Items with current stock below estimated
+                                    daily usage.
                                 </p>
-                                <Button onClick={fetchRestockReport} disabled={restockLoading}>
-                                    {restockLoading ? "Loading..." : "Generate Report"}
+                                <Button
+                                    onClick={fetchRestockReport}
+                                    disabled={restockLoading}
+                                >
+                                    {restockLoading
+                                        ? "Loading..."
+                                        : "Generate Report"}
                                 </Button>
                             </div>
 
                             {restockError && (
-                                <p className="text-sm text-red-500">{restockError}</p>
+                                <p className="text-sm text-red-500">
+                                    {restockError}
+                                </p>
                             )}
 
                             {restockData && restockData.length > 0 && (
                                 <Table>
-                                    <TableCaption>Items that need restocking</TableCaption>
+                                    <TableCaption>
+                                        Items that need restocking
+                                    </TableCaption>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Item Name</TableHead>
-                                            <TableHead className="text-right">Current Stock</TableHead>
-                                            <TableHead className="text-right">Est. Daily Usage</TableHead>
+                                            <TableHead className="text-right">
+                                                Current Stock
+                                            </TableHead>
+                                            <TableHead className="text-right">
+                                                Est. Daily Usage
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {restockData.map((row) => (
                                             <TableRow key={row.id}>
-                                                <TableCell>{row.name}</TableCell>
+                                                <TableCell>
+                                                    {row.name}
+                                                </TableCell>
                                                 <TableCell className="text-right">
                                                     {row.currentStock}
                                                 </TableCell>

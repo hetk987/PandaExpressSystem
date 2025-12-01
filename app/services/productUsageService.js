@@ -1,15 +1,18 @@
 import db from "@/drizzle/src/index";
-import { orders, recOrderJunc, recipes, invRecJunc, inventory } from "@/drizzle/src/db/schema";
-import { sql, and, gte, lt, eq } from "drizzle-orm";
+import {
+    orders,
+    recOrderJunc,
+    recipes,
+    invRecJunc,
+    inventory,
+} from "@/drizzle/src/db/schema";
+import { sql, and, gte, lte, eq } from "drizzle-orm";
 
 export const getProductUsage = async (startDate, endDate) => {
-    // Convert dates to match Java behavior: start at start of day, end at start of next day
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(endDate);
-    end.setDate(end.getDate() + 1);
-    end.setHours(0, 0, 0, 0);
+    // Convert dates: start at beginning of start day, end at end of end day (inclusive)
+    // Parse as UTC to match database timestamps
+    const start = new Date(startDate + "T00:00:00.000Z");
+    const end = new Date(endDate + "T23:59:59.999Z");
 
     // Query: orders -> recOrderJunc -> recipes -> invRecJunc -> inventory
     // Calculate: SUM(invRecJunc.inventoryQuantity * recOrderJunc.quantity) grouped by inventory item
@@ -17,7 +20,10 @@ export const getProductUsage = async (startDate, endDate) => {
         .select({
             inventoryId: inventory.id,
             inventoryName: inventory.name,
-            totalUsed: sql`SUM(${invRecJunc.inventoryQuantity} * ${recOrderJunc.quantity})`.as('totalUsed'),
+            totalUsed:
+                sql`SUM(${invRecJunc.inventoryQuantity} * ${recOrderJunc.quantity})`.as(
+                    "totalUsed"
+                ),
         })
         .from(orders)
         .innerJoin(recOrderJunc, eq(orders.id, recOrderJunc.orderId))
@@ -26,12 +32,12 @@ export const getProductUsage = async (startDate, endDate) => {
         .innerJoin(inventory, eq(invRecJunc.inventoryId, inventory.id))
         .where(
             and(
+                eq(orders.isCompleted, true),
                 gte(orders.orderTime, start.toISOString()),
-                lt(orders.orderTime, end.toISOString())
+                lte(orders.orderTime, end.toISOString())
             )
         )
         .groupBy(inventory.id, inventory.name);
 
     return productUsage;
 };
-

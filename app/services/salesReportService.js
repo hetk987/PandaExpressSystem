@@ -1,15 +1,12 @@
 import db from "@/drizzle/src/index";
 import { orders } from "@/drizzle/src/db/schema";
-import { sum, sql, and, gte, lt } from "drizzle-orm";
+import { sum, sql, and, gte, lte, eq } from "drizzle-orm";
 
 export const getSalesReport = async (startDate, endDate) => {
-    // Convert dates to match Java behavior: start at start of day, end at start of next day
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(endDate);
-    end.setDate(end.getDate() + 1);
-    end.setHours(0, 0, 0, 0);
+    // Convert dates: start at beginning of start day, end at end of end day (inclusive)
+    // Parse as UTC to match database timestamps
+    const start = new Date(startDate + "T00:00:00.000Z");
+    const end = new Date(endDate + "T23:59:59.999Z");
 
     const salesReport = await db
         .select({
@@ -22,8 +19,9 @@ export const getSalesReport = async (startDate, endDate) => {
         .from(orders)
         .where(
             and(
+                eq(orders.isCompleted, true),
                 gte(orders.orderTime, start.toISOString()),
-                lt(orders.orderTime, end.toISOString())
+                lte(orders.orderTime, end.toISOString())
             )
         );
     return salesReport;
@@ -32,16 +30,22 @@ export const getSalesReport = async (startDate, endDate) => {
 export const getHourlySalesReport = async (startDate, endDate) => {
     const hourlySalesReport = await db
         .select({
-            hour: sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`.as(
+            hour: sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`.as(
                 "hour"
             ),
             netSales: sum(orders.totalCost),
         })
         .from(orders)
         .where(
-            and(gte(orders.orderTime, startDate), lt(orders.orderTime, endDate))
+            and(
+                eq(orders.isCompleted, true),
+                gte(orders.orderTime, startDate),
+                lte(orders.orderTime, endDate)
+            )
         )
-        .groupBy(sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`);
+        .groupBy(
+            sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`
+        );
     return hourlySalesReport;
 };
 
@@ -62,7 +66,7 @@ export const getHourlySales = async (day, startHour, endHour) => {
 
     const hourlySalesData = await db
         .select({
-            hour: sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`.as(
+            hour: sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`.as(
                 "hour"
             ),
             netSales: sum(orders.totalCost),
@@ -70,11 +74,14 @@ export const getHourlySales = async (day, startHour, endHour) => {
         .from(orders)
         .where(
             and(
+                eq(orders.isCompleted, true),
                 gte(orders.orderTime, startDate.toISOString()),
-                lt(orders.orderTime, endDate.toISOString())
+                lte(orders.orderTime, endDate.toISOString())
             )
         )
-        .groupBy(sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`);
+        .groupBy(
+            sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`
+        );
 
     // Collect into a map so we can zero-fill missing hours
     const byHour = new Map();
