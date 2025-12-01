@@ -33,7 +33,7 @@ import {
 import { fetchWeatherApi } from "openmeteo";
 import { WeatherWidget } from "@/app/components/app-weather-widget";
 
-const IDLE_TIMEOUT = 10000; // 10 seconds
+const IDLE_TIMEOUT = 30000; // 30 seconds
 const COUNTDOWN_SECONDS = 7; // 7 seconds
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
