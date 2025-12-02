@@ -1,15 +1,12 @@
 import db from "@/drizzle/src/index";
 import { orders, recOrderJunc, recipes } from "@/drizzle/src/db/schema";
-import { sql, and, gte, lt, eq, sum } from "drizzle-orm";
+import { sql, and, gte, lte, eq, sum } from "drizzle-orm";
 
 export const getSalesByItem = async (startDate, endDate) => {
-    // Convert dates to match Java behavior: start at start of day, end at start of next day
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(endDate);
-    end.setDate(end.getDate() + 1);
-    end.setHours(0, 0, 0, 0);
+    // Convert dates: start at beginning of start day, end at end of end day (inclusive)
+    // Parse as UTC to match database timestamps
+    const start = new Date(startDate + "T00:00:00.000Z");
+    const end = new Date(endDate + "T23:59:59.999Z");
 
     // Query: orders -> recOrderJunc -> recipes
     // Group by recipe.id
@@ -20,19 +17,22 @@ export const getSalesByItem = async (startDate, endDate) => {
             recipeName: recipes.name,
             recipeType: recipes.type,
             totalQuantity: sum(recOrderJunc.quantity),
-            totalRevenue: sql`SUM(${recOrderJunc.quantity} * ${recipes.pricePerServing})`.as('totalRevenue'),
+            totalRevenue:
+                sql`SUM(${recOrderJunc.quantity} * ${recipes.pricePerServing})`.as(
+                    "totalRevenue"
+                ),
         })
         .from(orders)
         .innerJoin(recOrderJunc, eq(orders.id, recOrderJunc.orderId))
         .innerJoin(recipes, eq(recOrderJunc.recipeId, recipes.id))
         .where(
             and(
+                eq(orders.isCompleted, true),
                 gte(orders.orderTime, start.toISOString()),
-                lt(orders.orderTime, end.toISOString())
+                lte(orders.orderTime, end.toISOString())
             )
         )
         .groupBy(recipes.id, recipes.name, recipes.type);
 
     return salesByItem;
 };
-

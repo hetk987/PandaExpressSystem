@@ -47,60 +47,60 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
     , [orderItems, cooked]);
 
     return (
-        <div className="w-full max-w-md mx-auto">
+        <div className="w-full max-w-xs mx-auto">
             <Card className="border-2 border-black">
                 {/* Header - Order Number and Time */}
-                <CardHeader className="border-b-2 border-black pb-2 pt-4 px-4">
+                <CardHeader className="border-b-2 border-black pb-1.5 pt-3 px-3">
                     <div className="flex justify-between items-start">
-                        <CardTitle className="text-2xl font-bold">
+                        <CardTitle className="text-xl font-bold">
                             ORDER #{order.id}
                         </CardTitle>
-                        <span className="text-sm font-mono">
+                        <span className="text-xs font-mono">
                             {order.orderTime}
                         </span>
                     </div>
                 </CardHeader>
 
                 {/* Items */}
-                <CardContent className="px-4 py-3">
-                    <div className="border-b-2 border-black pb-3 mb-3">
-                        <div className="space-y-2">
+                <CardContent className="px-3 py-2">
+                    <div className="border-b-2 border-black pb-2 mb-2">
+                        <div className="space-y-1">
                             {order.orderInfo?.meals.map((item, i) => (
                                 <div
                                     key={i}
-                                    className="flex justify-between items-start gap-2"
+                                    className="flex justify-between items-start gap-1"
                                 >
                                     <div className="flex-1">
-                                        <div className="font-bold text-lg">
+                                        <div className="font-bold text-sm">
                                             {item.quantity}x {item.mealType}
                                         </div>
                                         {item.selections.entrees.map(
                                             (entree, j) => (
                                                 <div
-                                                    className="text-xs text-muted-foreground"
+                                                    className="text-[10px] text-muted-foreground leading-tight"
                                                     key={j}
                                                 >
-                                                    {entree.recipeName}
+                                                    • {entree.recipeName}
                                                 </div>
                                             )
                                         )}
                                         {item.selections.sides.map(
                                             (side, j) => (
                                                 <div
-                                                    className="text-xs text-muted-foreground"
+                                                    className="text-[10px] text-muted-foreground leading-tight"
                                                     key={j}
                                                 >
-                                                    {side.recipeName}
+                                                    • {side.recipeName}
                                                 </div>
                                             )
                                         )}
                                         {item.selections.drinks.map(
                                             (drink, j) => (
                                                 <div
-                                                    className="text-xs text-muted-foreground"
+                                                    className="text-[10px] text-muted-foreground leading-tight"
                                                     key={j}
                                                 >
-                                                    {drink.recipeName}
+                                                    • {drink.recipeName}
                                                 </div>
                                             )
                                         )}
@@ -110,10 +110,10 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
                             {order.orderInfo?.individualItems.map((item) => (
                                 <div
                                     key={item.recipeName}
-                                    className="flex justify-between items-start gap-2"
+                                    className="flex justify-between items-start gap-1"
                                 >
                                     <div className="flex-1">
-                                        <div className="font-bold text-lg">
+                                        <div className="font-bold text-sm">
                                             {item.quantity}x {item.recipeName}
                                         </div>
                                     </div>
@@ -123,12 +123,12 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
                     </div>
 
                     {/* Footer Info */}
-                    <div className="space-y-1 text-sm mb-4 font-mono">
+                    <div className="space-y-0.5 text-xs mb-3 font-mono">
                         <div className="flex justify-between">
                             <span>Cashier ID:</span>
                             <span>{order.cashierId}</span>
                         </div>
-                        <div className="border-t-2 border-black pt-2 mt-2 flex justify-between font-bold">
+                        <div className="border-t-2 border-black pt-1.5 mt-1.5 flex justify-between font-bold">
                             <span>Total Items:</span>
                             <span>
                                 {
@@ -142,13 +142,13 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
                     {/* Complete Button */}
                     {isReady ? 
                         <Button
-                            className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800"
+                            className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
                             onClick={async () => await completeOrder(order.id)}
                         >
                             COMPLETE ORDER
                         </Button> :
                         <Button
-                            className="w-full font-bold text-base py-6 bg-black text-white hover:bg-gray-800" disabled
+                            className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800" disabled
                         >
                             COMPLETE ORDER
                         </Button>

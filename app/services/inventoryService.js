@@ -16,13 +16,22 @@ export const getInventoryById = async (id) => {
 };
 
 export const createInventory = async (inventoryItem) => {
-    const [createdInventory] = await db
-        .insert(inventory)
-        .values(inventoryItem)
-        .returning();
-    return createdInventory;
+    console.log("Creating inventory item: ", inventoryItem);
+    try {
+        const [createdInventory] = await db
+            .insert(inventory)
+            .values(inventoryItem)
+            .returning();
+        console.log("Created inventory item: ", createdInventory);
+        return createdInventory;
+    } catch (error) {
+        console.error("Database error details:", error);
+        console.error("Error message:", error.message);
+        console.error("Error code:", error.code);
+        console.error("Error detail:", error.detail);
+        throw error;
+    }
 };
-
 export const updateInventory = async (id, inventoryItem) => {
     const updatedInventory = await db
         .update(inventory)
@@ -45,7 +54,12 @@ export const consumeInventory = async (inventoryId, quantity) => {
         throw new Error("Inventory not found: " + inventoryId);
     }
     if (inventoryItem[0].currentStock < quantity) {
-        console.log("Insufficient inventory: ", inventoryItem[0].name, inventoryItem[0].currentStock, quantity);
+        console.log(
+            "Insufficient inventory: ",
+            inventoryItem[0].name,
+            inventoryItem[0].currentStock,
+            quantity
+        );
         throw new Error(
             "Insufficient inventory: " +
                 inventoryItem[0].name +

@@ -64,6 +64,11 @@ export function AppSidebar({
       title: "Appetizers",
       icon: Cookie,
       href: "/home/appetizer",
+    },
+    {
+      title: "Manager View",
+      icon: ChefHat, 
+      href: "/employee/manager" 
     }
   ]
 
