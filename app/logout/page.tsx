@@ -31,7 +31,7 @@ function LogoutPage() {
                         : "opacity-0 scale-90"
                 }`}
             >
-                Thank you for visiting Panda Express 🫵🤣
+                Thank you valued customer
                 <span
                     className={`inline-block animate-bounce ml-2 ${
                         loaded ? "opacity-100" : "opacity-0"
