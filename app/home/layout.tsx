@@ -334,7 +334,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
                                 <span className={`font-semibold tracking-wide ${textClasses}`}>Weather</span>
                                 <span className={`text-white/80 ${textClasses}`}>
-                                    {temperature}°F • {precipitation}" rain • {windSpeed} mph • {windDirection}°
+                                    {temperature?.toFixed(2)}°F • {precipitation?.toFixed(2)}" rain
                                 </span>
                             </div>
 

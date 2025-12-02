@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MealCard from "../components/app-mealcard";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 
 const options = [
