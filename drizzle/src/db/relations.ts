@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm/relations";
 import { employees, orders, inventory, expenses, recipes, cooked, invRecJunc, recOrderJunc, roles } from "./schema";
 
-export const ordersRelations = relations(orders, ({one, many}) => ({
+export const ordersRelations = relations(orders, ({ one, many }) => ({
 	employee: one(employees, {
 		fields: [orders.cashierId],
 		references: [employees.id]
@@ -9,7 +9,7 @@ export const ordersRelations = relations(orders, ({one, many}) => ({
 	recOrderJuncs: many(recOrderJunc),
 }));
 
-export const employeesRelations = relations(employees, ({one, many}) => ({
+export const employeesRelations = relations(employees, ({ one, many }) => ({
 	orders: many(orders),
 	role: one(roles, {
 		fields: [employees.roleId],
@@ -17,32 +17,32 @@ export const employeesRelations = relations(employees, ({one, many}) => ({
 	}),
 }));
 
-export const expensesRelations = relations(expenses, ({one}) => ({
+export const expensesRelations = relations(expenses, ({ one }) => ({
 	inventory: one(inventory, {
 		fields: [expenses.itemId],
 		references: [inventory.id]
 	}),
 }));
 
-export const inventoryRelations = relations(inventory, ({many}) => ({
+export const inventoryRelations = relations(inventory, ({ many }) => ({
 	expenses: many(expenses),
 	invRecJuncs: many(invRecJunc),
 }));
 
-export const cookedRelations = relations(cooked, ({one}) => ({
+export const cookedRelations = relations(cooked, ({ one }) => ({
 	recipe: one(recipes, {
 		fields: [cooked.recipeId],
 		references: [recipes.id]
 	}),
 }));
 
-export const recipesRelations = relations(recipes, ({many}) => ({
+export const recipesRelations = relations(recipes, ({ many }) => ({
 	cookeds: many(cooked),
 	invRecJuncs: many(invRecJunc),
 	recOrderJuncs: many(recOrderJunc),
 }));
 
-export const invRecJuncRelations = relations(invRecJunc, ({one}) => ({
+export const invRecJuncRelations = relations(invRecJunc, ({ one }) => ({
 	inventory: one(inventory, {
 		fields: [invRecJunc.inventoryId],
 		references: [inventory.id]
@@ -53,7 +53,7 @@ export const invRecJuncRelations = relations(invRecJunc, ({one}) => ({
 	}),
 }));
 
-export const recOrderJuncRelations = relations(recOrderJunc, ({one}) => ({
+export const recOrderJuncRelations = relations(recOrderJunc, ({ one }) => ({
 	recipe: one(recipes, {
 		fields: [recOrderJunc.recipeId],
 		references: [recipes.id]
@@ -64,6 +64,6 @@ export const recOrderJuncRelations = relations(recOrderJunc, ({one}) => ({
 	}),
 }));
 
-export const rolesRelations = relations(roles, ({many}) => ({
+export const rolesRelations = relations(roles, ({ many }) => ({
 	employees: many(employees),
 }));

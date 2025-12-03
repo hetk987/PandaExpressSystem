@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge"
 import { OrderInfo, RecipeQuantityMap, RecipeSelection } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+    return twMerge(clsx(inputs))
 }
 
 export function extractRecipeQuantities(order: OrderInfo): RecipeQuantityMap {
@@ -43,8 +43,8 @@ export function getCSTTimestamp(): string {
     const cstOffset = -6 * 60; // in minutes
     // Adjust from local time to UTC, then to CST
     const cstTime = new Date(
-        now.getTime() + 
-        (cstOffset * 60 * 1000) + 
+        now.getTime() +
+        (cstOffset * 60 * 1000) +
         (now.getTimezoneOffset() * 60 * 1000)
     );
     return cstTime.toISOString();

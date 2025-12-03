@@ -9,6 +9,7 @@ import { Button } from "@/app/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 interface Selection {
     type: RecipeType;
@@ -35,6 +36,7 @@ export default function Build({
     const [mealtypes, setMealtypes] = useState<MealType[]>([]);
     const [currentMenu, setCurrentMenu] = useState<RecipeType>();
     const [selection, setSelection] = useState<Selection>();
+    const [isLoading, setIsLoading] = useState(true);
     const [mealSelections, setMealSelections] = useState<MealSelections>({
         entrees: [],
         sides: [],
@@ -45,15 +47,19 @@ export default function Build({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                let response = await fetch(`/api/recipes`);
-                if (response.ok) {
-                    const data = await response.json();
+                // Fetch both APIs in parallel for better performance
+                const [recipesResponse, mealtypesResponse] = await Promise.all([
+                    fetch(`/api/recipes`),
+                    fetch(`/api/mealtypes`)
+                ]);
+
+                if (recipesResponse.ok) {
+                    const data = await recipesResponse.json();
                     setRecipes(data);
                 }
 
-                response = await fetch(`/api/mealtypes`);
-                if (response.ok) {
-                    const data = await response.json();
+                if (mealtypesResponse.ok) {
+                    const data = await mealtypesResponse.json();
                     setMealtypes(data);
                 }
 
@@ -64,6 +70,8 @@ export default function Build({
                 });
             } catch (error) {
                 console.error("Failed to fetch links");
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -197,6 +205,33 @@ export default function Build({
 
         router.push("/home/build");
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-row">
+                <div className="w-full">
+                    <div className="pt-5 pl-5">
+                        <Skeleton className="h-10 w-64" />
+                    </div>
+                    <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <Skeleton key={i} className="h-48 w-full rounded-lg" />
+                        ))}
+                    </div>
+                </div>
+                <div className="w-70">
+                    <div className="pt-5 pl-5">
+                        <Skeleton className="h-10 w-48" />
+                    </div>
+                    <div className="flex flex-col p-10 gap-10 mb-10">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-row">

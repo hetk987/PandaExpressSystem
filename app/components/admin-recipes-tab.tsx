@@ -12,6 +12,7 @@ import {
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Separator } from "@/app/components/ui/separator";
+import { Switch } from "@/app/components/ui/switch";
 import {
     Table,
     TableBody,
@@ -91,6 +92,7 @@ export default function AdminRecipesTab() {
             ordersPerBatch: 1,
             type: null,
             image: "",
+            premium: false,
         });
         setIngredients([]);
         setRecError(null);
@@ -290,13 +292,17 @@ export default function AdminRecipesTab() {
                         <TableHead>Type</TableHead>
                         <TableHead>Price/Serving</TableHead>
                         <TableHead>Orders/Batch</TableHead>
+                        <TableHead>Premium</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {recipes.length === 0 && !recLoading && (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center text-sm">
+                            <TableCell
+                                colSpan={6}
+                                className="text-center text-sm"
+                            >
                                 No recipes found.
                             </TableCell>
                         </TableRow>
@@ -310,6 +316,17 @@ export default function AdminRecipesTab() {
                                 ${rec.pricePerServing.toFixed(2)}
                             </TableCell>
                             <TableCell>{rec.ordersPerBatch}</TableCell>
+                            <TableCell>
+                                <span
+                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                        rec.premium
+                                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200"
+                                            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                    }`}
+                                >
+                                    {rec.premium ? "Premium" : "Standard"}
+                                </span>
+                            </TableCell>
                             <TableCell className="text-right">
                                 <Button
                                     size="sm"
@@ -375,7 +392,8 @@ export default function AdminRecipesTab() {
                                             type="number"
                                             step="0.01"
                                             value={
-                                                selectedRecipe.pricePerServing === 0
+                                                selectedRecipe.pricePerServing ===
+                                                0
                                                     ? ""
                                                     : selectedRecipe.pricePerServing
                                             }
@@ -384,7 +402,9 @@ export default function AdminRecipesTab() {
                                                     "pricePerServing",
                                                     e.target.value === ""
                                                         ? 0
-                                                        : Number(e.target.value) || 0
+                                                        : Number(
+                                                              e.target.value
+                                                          ) || 0
                                                 )
                                             }
                                             placeholder="0.00"
@@ -399,7 +419,8 @@ export default function AdminRecipesTab() {
                                             id="rec-orders"
                                             type="number"
                                             value={
-                                                selectedRecipe.ordersPerBatch === 0
+                                                selectedRecipe.ordersPerBatch ===
+                                                0
                                                     ? ""
                                                     : selectedRecipe.ordersPerBatch
                                             }
@@ -408,7 +429,9 @@ export default function AdminRecipesTab() {
                                                     "ordersPerBatch",
                                                     e.target.value === ""
                                                         ? 1
-                                                        : Number(e.target.value) || 1
+                                                        : Number(
+                                                              e.target.value
+                                                          ) || 1
                                                 )
                                             }
                                             placeholder="1"
@@ -456,6 +479,35 @@ export default function AdminRecipesTab() {
                                                 )
                                             }
                                         />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label htmlFor="rec-premium">
+                                            Premium Item
+                                        </Label>
+                                        <div className="flex items-center gap-3 h-10">
+                                            <Switch
+                                                id="rec-premium"
+                                                checked={selectedRecipe.premium}
+                                                onCheckedChange={(checked) =>
+                                                    updateSelectedRecipe(
+                                                        "premium",
+                                                        checked
+                                                    )
+                                                }
+                                            />
+                                            <span
+                                                className={`text-sm ${
+                                                    selectedRecipe.premium
+                                                        ? "text-amber-600 dark:text-amber-400 font-medium"
+                                                        : "text-muted-foreground"
+                                                }`}
+                                            >
+                                                {selectedRecipe.premium
+                                                    ? "Premium"
+                                                    : "Standard"}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -525,8 +577,9 @@ export default function AdminRecipesTab() {
                                                 value={newIngredientId}
                                                 onChange={(e) =>
                                                     setNewIngredientId(
-                                                        Number(e.target.value) ||
-                                                            0
+                                                        Number(
+                                                            e.target.value
+                                                        ) || 0
                                                     )
                                                 }
                                             >
@@ -624,4 +677,3 @@ export default function AdminRecipesTab() {
         </div>
     );
 }
-

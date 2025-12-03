@@ -4,9 +4,11 @@ import { useState } from "react";
 
 import { MealType } from "@/lib/types";
 import MealCard from "@/app/components/app-mealcard";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 export default function Home() {
     const [mealtypes, setMealtypes] = useState<MealType[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     // fetch meal types
     useEffect(() => {
@@ -23,11 +25,23 @@ export default function Home() {
                 }
             } catch (error) {
                 console.error("Failed to fetch links");
+            } finally {
+                setIsLoading(false);
             }
         }
 
         fetchData();
     }, []);
+
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-48 w-full rounded-lg" />
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">

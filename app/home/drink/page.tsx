@@ -8,11 +8,13 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 export default function Home() {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const [quantity, setQuantity] = useState<number>(1);
+    const [isLoading, setIsLoading] = useState(true);
     const { addIndividualItem } = useCart();
     const { addItemWithToast } = useAddToCartToast();
     const { textClasses } = useAccessibilityStyles();
@@ -28,6 +30,8 @@ export default function Home() {
                 }
             } catch (error) {
                 console.error("Failed to fetch links");
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -60,6 +64,18 @@ export default function Home() {
             }
         );
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col">
+                <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="h-48 w-full rounded-lg" />
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col">

@@ -4,7 +4,13 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/auth/auth-context";
 import { Button } from "@/app/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { UserCircle, Lock, ArrowLeft } from "lucide-react";
@@ -49,7 +55,7 @@ export default function EmployeeLoginPage() {
                 setError(data.error || "Invalid Login PIN");
                 return;
             }
-            
+
             login(data.name || `Employee-${pin}`, data.roleId);
         } catch (err) {
             console.error("Login error:", err);
@@ -123,7 +129,9 @@ export default function EmployeeLoginPage() {
                                     key={num}
                                     type="button"
                                     variant="outline"
-                                    onClick={() => handleNumberPad(num.toString())}
+                                    onClick={() =>
+                                        handleNumberPad(num.toString())
+                                    }
                                     className="h-16 text-2xl font-semibold hover:bg-neutral-100 rounded-xl"
                                 >
                                     {num}
@@ -169,4 +177,3 @@ export default function EmployeeLoginPage() {
         </div>
     );
 }
-

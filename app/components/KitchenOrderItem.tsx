@@ -13,8 +13,13 @@ import { toast } from "sonner";
 
 import { useMemo } from "react";
 
-export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cooked[] }) {
-
+export function KitchenOrderItem({
+    order,
+    cooked,
+}: {
+    order: Order;
+    cooked: Cooked[];
+}) {
     async function completeOrder(id: number): Promise<void> {
         const response = await fetch(`/api/orders/complete/${id}`, {
             method: "PUT",
@@ -26,28 +31,26 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
         }
     }
 
-    const orderItems = useMemo(() => { 
+    const orderItems = useMemo(() => {
         if (!order.orderInfo) return [];
         return extractRecipeQuantities(order.orderInfo);
     }, [order]);
 
-    const isReady = useMemo(
-        () => {
-            for (const [recipe, quantity] of Object.entries(orderItems)) {
-                const stock = cooked.find(
-                    (c) => +c.recipeId === +recipe
-                )?.currentStock;
+    const isReady = useMemo(() => {
+        for (const [recipe, quantity] of Object.entries(orderItems)) {
+            const stock = cooked.find(
+                (c) => +c.recipeId === +recipe
+            )?.currentStock;
 
-                if (!stock || quantity > stock) {
-                    return false;
-                }
+            if (!stock || quantity > stock) {
+                return false;
             }
-            return true;
         }
-    , [orderItems, cooked]);
+        return true;
+    }, [orderItems, cooked]);
 
     return (
-        <div className="w-full max-w-xs mx-auto">
+        <div className="w-full max-w-md mx-auto">
             <Card className="border-2 border-black">
                 {/* Header - Order Number and Time */}
                 <CardHeader className="border-b-2 border-black pb-1.5 pt-3 px-3">
@@ -131,29 +134,34 @@ export function KitchenOrderItem({ order, cooked }: { order: Order, cooked: Cook
                         <div className="border-t-2 border-black pt-1.5 mt-1.5 flex justify-between font-bold">
                             <span>Total Items:</span>
                             <span>
-                                {
-                                (order.orderInfo?.individualItems?.reduce((sum, item) => sum + item.quantity, 0) ?? 0) + 
-                                (order.orderInfo?.meals?.reduce((sum, item) => sum + item.quantity, 0) ?? 0)
-                                }
+                                {(order.orderInfo?.individualItems?.reduce(
+                                    (sum, item) => sum + item.quantity,
+                                    0
+                                ) ?? 0) +
+                                    (order.orderInfo?.meals?.reduce(
+                                        (sum, item) => sum + item.quantity,
+                                        0
+                                    ) ?? 0)}
                             </span>
                         </div>
                     </div>
 
                     {/* Complete Button */}
-                    {isReady ? 
+                    {isReady ? (
                         <Button
                             className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
                             onClick={async () => await completeOrder(order.id)}
                         >
                             COMPLETE ORDER
-                        </Button> :
+                        </Button>
+                    ) : (
                         <Button
-                            className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800" disabled
+                            className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
+                            disabled
                         >
                             COMPLETE ORDER
                         </Button>
-                    }
-                    
+                    )}
                 </CardContent>
             </Card>
         </div>

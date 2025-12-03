@@ -7,11 +7,13 @@ import { useCart } from "@/app/providers/cart-provider";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 export default function Home() {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
     const [quantity, setQuantity] = useState<number>(1);
+    const [isLoading, setIsLoading] = useState(true);
     const { addIndividualItem } = useCart();
     const { addItemWithToast } = useAddToCartToast();
 
@@ -26,6 +28,8 @@ export default function Home() {
                 }
             } catch (error) {
                 console.error("Failed to fetch links");
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -58,6 +62,24 @@ export default function Home() {
             }
         );
     };
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col">
+                <div className="h-full bg-white p-6">
+                    <div className="mb-6 flex items-center justify-between">
+                        <Skeleton className="h-8 w-64" />
+                        <Skeleton className="h-12 w-24" />
+                    </div>
+                    <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col">

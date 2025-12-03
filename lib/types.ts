@@ -78,11 +78,11 @@ export type Recipe = {
     pricePerServing: number;
     ordersPerBatch: number;
     type: RecipeType | null;
+    premium: boolean;
 }
 
 export type RecipeType = "Side" | "Entree" | "Drink";
 
-// Order Info JSON Structure Types
 export type RecipeSelection = {
     recipeId: number;
     recipeName: string;

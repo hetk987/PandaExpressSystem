@@ -5,9 +5,11 @@ import { useState } from "react";
 import { MealType } from "@/lib/types";
 import CashierCard from "@/app/components/app-cashier-card";
 import { Button } from "@/app/components/ui/button";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 export default function Home() {
   const [mealtypes, setMealtypes] = useState<MealType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // fetch meal types
   useEffect(() => {
@@ -24,11 +26,29 @@ export default function Home() {
               }
           } catch (error) {
               console.error("Failed to fetch links");
-          } 
+          } finally {
+              setIsLoading(false);
+          }
       }
 
       fetchData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="h-full bg-white p-6">
+            <div className="mb-6 flex items-center justify-between">
+                <Skeleton className="h-8 w-64" />
+                <Skeleton className="h-12 w-24" />
+            </div>
+            <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                ))}
+            </div>
+        </div>
+    );
+  }
 
   return (
     <div className="h-full bg-white p-6">
