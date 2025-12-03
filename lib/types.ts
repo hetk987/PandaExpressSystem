@@ -81,7 +81,7 @@ export type Recipe = {
     premium: boolean;
 }
 
-export type RecipeType = "Side" | "Entree" | "Drink";
+export type RecipeType = "Side" | "Entree" | "Drink" | "Appetizer";
 
 export type RecipeSelection = {
     recipeId: number;

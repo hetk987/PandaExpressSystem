@@ -346,10 +346,21 @@ export default function Build({
             {/* Main Content - Recipe Selection */}
             <div className="flex-1 bg-white p-6 overflow-y-auto">
                 <div className="mb-6">
-                    <h2 className="text-2xl font-bold text-neutral-900">
-                        Select {selection?.type}{" "}
+                    <div className="mb-6 flex items-center justify-between">
+                        <h2 className="text-2xl font-bold text-neutral-900">
+                            Select {selection?.type}{" "}
                         {selection ? selection.num + 1 : ""}
-                    </h2>
+                        </h2>
+
+                        <a href="/employee/cashier">
+                            <Button
+                                variant="default"
+                                className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
+                            >
+                                Home
+                            </Button>
+                        </a>
+                    </div>
                 </div>
                 <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl">
                     {recipes

@@ -67,7 +67,7 @@ export default function Home() {
                 </a>
             </div>
             <div className="grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl">
-                {mealtypes.map((item, i) => (
+                {mealtypes.filter(item => item.typeName != "Drink" && item.typeName != "A La Carte").map((item, i) => (
                     <a href={`/employee/cashier/build/${item.typeName}`} key={i}>
                       <CashierCard name={item.typeName} />
                     </a>
