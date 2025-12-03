@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/ui/button";
 import { ShoppingCart, LogIn } from "lucide-react";
+import Image from "next/image";
 
 export default function Home() {
     const router = useRouter();
@@ -34,8 +35,14 @@ export default function Home() {
                 {/* Logo and Brand */}
                 <div className="text-center mb-12 animate-fade-in">
                     <div className="inline-block mb-6">
-                        <div className="h-32 w-32 rounded-full bg-white flex items-center justify-center shadow-2xl animate-bounce-slow">
-                            <span className="text-7xl">🐼</span>
+                        <div className="h-32 w-32 rounded-full bg-white flex items-center justify-center shadow-2xl animate-bounce-slow overflow-hidden">
+                            <Image 
+                                src="/Panda Express/round_logo.png" 
+                                alt="Panda Express Logo" 
+                                width={128} 
+                                height={128}
+                                className="object-cover"
+                            />
                         </div>
                     </div>
                     <h1 className="text-7xl font-bold text-white mb-4 drop-shadow-lg">

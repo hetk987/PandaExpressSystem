@@ -13,13 +13,13 @@ import {
   SidebarMenuButton,
 } from "@/app/components/ui/sidebar"
 import { 
-  Home, 
   Utensils, 
   Cookie, 
   Coffee, 
   ChefHat,
   Accessibility
 } from "lucide-react"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { AccessibilitySheet } from "./app-accessibility-sheet"
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles"
@@ -74,7 +74,13 @@ export function AppSidebar({
           <SidebarMenuItem className="text-white">
             <SidebarMenuButton size="lg" asChild isActive={pathname === "/home"}>
               <a href="/home" className={`font-bold text-lg ${textClasses}`}>
-                <Home className="size-5" />
+                <Image 
+                  src="/Panda Express/round_logo.png" 
+                  alt="Panda Express Logo" 
+                  width={24} 
+                  height={24}
+                  className="rounded-sm"
+                />
                 <span>Panda Express</span>
               </a>
             </SidebarMenuButton>
