@@ -95,7 +95,52 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     const tax = useMemo(() => +(subtotal * 0.095).toFixed(2), [subtotal]);
     const total = useMemo(() => +(subtotal + tax).toFixed(2), [subtotal, tax]);
 
+    const totalItemCount = useMemo(() => {
+        const mealsCount = meals.reduce((sum, meal) => sum + meal.quantity, 0);
+        const itemsCount = individualItems.reduce((sum, item) => sum + item.quantity, 0);
+        return mealsCount + itemsCount;
+    }, [meals, individualItems]);
+
     const handlePay = async () => {
+        // If Card payment method is selected, use Stripe checkout
+        if (selectedPayment === 1) {
+            try {
+                const response = await fetch("/api/checkout/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        meals: meals,
+                        individualItems: individualItems,
+                        subtotal: subtotal,
+                        tax: tax,
+                        total: total,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    toast.error("Failed to create checkout session");
+                    console.error("Failed to create checkout session: " + error.error);
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.url) {
+                    // Redirect to Stripe checkout
+                    window.location.href = data.url;
+                } else {
+                    toast.error("Failed to get checkout URL");
+                }
+            } catch (error) {
+                toast.error("Failed to initiate payment");
+                console.error("Error initiating Stripe checkout:", error);
+            }
+            return;
+        }
+
+        // For other payment methods, use existing flow
         const orderInfo: OrderInfo = {
             meals: meals,
             individualItems: individualItems,
@@ -340,9 +385,14 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
 
                             <Sheet>
                             <SheetTrigger asChild>
-                                    <Button className="fixed bottom-16 right-6 h-16 px-8 bg-panda-dark-red text-white font-bold text-xl rounded-full shadow-2xl hover:bg-panda-dark-red hover:scale-110 transition-all z-50 flex items-center gap-2">
+                                    <Button className="fixed bottom-16 right-6 h-16 px-8 bg-panda-dark-red text-white font-bold text-xl rounded-full shadow-2xl hover:bg-panda-dark-red hover:scale-110 transition-all z-50 flex items-center gap-2 relative">
                                     <ShoppingCart className="h-6 w-6" />
                                     Checkout
+                                    {totalItemCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-yellow-400 text-panda-dark-red font-bold text-sm rounded-full h-6 w-6 flex items-center justify-center ring-2 ring-white">
+                                            {totalItemCount}
+                                        </span>
+                                    )}
                                 </Button>
                             </SheetTrigger>
                                 <SheetContent className="bg-bright-red text-white">
