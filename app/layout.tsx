@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "Panda Express PoS System",
   description: "Point of Sale System for Panda Express",
   generator: "v0.app",
+  icons: {
+    icon: "/Panda Express/round_logo.png",
+    shortcut: "/Panda Express/round_logo.png",
+    apple: "/Panda Express/round_logo.png",
+  },
 };
 
 export default function RootLayout({
@@ -22,14 +27,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Kedebideri:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></link>
+      </head>
       <body
-        className={`${_geist.className} ${_geistMono.className} antialiased`}
+        className={`kedebideri-regular antialiased`}
       >
         {/* All global client-side providers (Auth, theme, etc.) */}
         <ClientProviders>
             {children}
         </ClientProviders>
-        <Toaster position="top-right" richColors/>
+        <Toaster position="top-center" richColors/>
         
         {/* Vercel Analytics */}
         <Analytics />

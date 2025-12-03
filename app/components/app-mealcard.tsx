@@ -1,6 +1,4 @@
 import Image from "next/image"
-import React from "react";
-
 import {
   Item,
   ItemContent,
@@ -9,18 +7,21 @@ import {
   ItemHeader,
   ItemTitle,
 } from "@/app/components/ui/item"
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 
 const MealCard = (props: {
     name: string,
-    image?: string,
+    image?: string | null,
     key?: number
     className?: string
 }) => {
+  const { textClasses } = useAccessibilityStyles();
+
   return (
     <Item
         key={props.name}
         variant="outline"
-        className={`shadow-md bg-red-500 p-0 overflow-hidden rounded-lg ${props.className}`}
+        className={`shadow-md bg-red-500 p-0 overflow-hidden rounded-lg ${textClasses} ${props.className}`}
         >
         <ItemHeader className="p-0 bg-white">
             {props.image ?
@@ -36,7 +37,7 @@ const MealCard = (props: {
         </ItemHeader>
 
         <ItemContent className="bg-red-500 text-white flex items-center justify-center p-3 pt-0">
-            <ItemTitle className="text-md font-semibold text-center min-h-10">{props.name}</ItemTitle>
+            <ItemTitle className={`text-md font-semibold text-center min-h-10 ${textClasses}`}>{props.name}</ItemTitle>
         </ItemContent>
     </Item>
   );

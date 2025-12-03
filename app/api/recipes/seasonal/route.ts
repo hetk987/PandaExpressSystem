@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
         const result = await createSeasonalMenuItem(body.recipe, body.inventoryItems);
         return NextResponse.json(result, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to create seasonal menu item: ' + error.message }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        return NextResponse.json({ error: 'Failed to create seasonal menu item: ' + errorMessage }, { status: 500 });
     }
 }
 

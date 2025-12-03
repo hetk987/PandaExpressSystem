@@ -13,15 +13,16 @@ import {
   SidebarMenuButton,
 } from "@/app/components/ui/sidebar"
 import { 
-  Home, 
   Utensils, 
   Cookie, 
   Coffee, 
   ChefHat,
   Accessibility
 } from "lucide-react"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { AccessibilitySheet } from "./app-accessibility-sheet"
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles"
 
 interface AppSidebarProps {
   temperature?: number;
@@ -37,6 +38,7 @@ export function AppSidebar({
   windDirection 
 }: AppSidebarProps) {
   const pathname = usePathname()
+  const { textClasses } = useAccessibilityStyles()
   const menuItems = [
     {
       title: "Build Your Own",
@@ -62,22 +64,23 @@ export function AppSidebar({
       title: "Appetizers",
       icon: Cookie,
       href: "/home/appetizer",
-    },
-    {
-      title: "Manager View",
-      icon: ChefHat, // Can be changed later
-      href: "/home/manager" // TODO: Add file 
     }
   ]
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
+        <SidebarHeader className="border-b border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem className="text-white">
             <SidebarMenuButton size="lg" asChild isActive={pathname === "/home"}>
-              <a href="/home" className="font-bold text-lg">
-                <Home className="size-5" />
+              <a href="/home" className={`font-bold text-lg ${textClasses}`}>
+                <Image 
+                  src="/Panda Express/round_logo.png" 
+                  alt="Panda Express Logo" 
+                  width={24} 
+                  height={24}
+                  className="rounded-sm"
+                />
                 <span>Panda Express</span>
               </a>
             </SidebarMenuButton>
@@ -94,7 +97,7 @@ export function AppSidebar({
                   <SidebarMenuButton
                     asChild
                     tooltip={item.title}
-                    className="text-white hover:text-black border rounded-md"
+                    className={`text-white hover:text-black border rounded-md ${textClasses}`}
                     isActive={pathname.startsWith(item.href)}
                     size="lg"
                   >
@@ -111,7 +114,7 @@ export function AppSidebar({
                 windSpeed={windSpeed}
                 windDirection={windDirection}
                 trigger={
-                  <SidebarMenuButton size="lg" className="text-white hover:text-black border rounded-md w-full">
+                  <SidebarMenuButton size="lg" className={`text-white hover:text-black border rounded-md w-full ${textClasses}`}>
                     <Accessibility className="size-5" />
                     <span>Accessibility</span>
                   </SidebarMenuButton>
@@ -127,7 +130,7 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="sm">
               <a href="/home" className="text-muted-foreground hover:text-foreground">
-                <span className="text-xs text-white">© 2024 Panda Express</span>
+                <span className={`text-xs text-white ${textClasses}`}>© 2024 Panda Express</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

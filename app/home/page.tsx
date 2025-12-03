@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import MealCard from "../components/app-mealcard";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 const options = [
     { href: "build", title: "Build Your Own" },
@@ -15,16 +14,20 @@ const options = [
 ];
 
 export default function Home() {
-    const router = useRouter();
     const { data: session, status } = useSession();
-
-    // Redirect if not logged in
-    useEffect(() => {
-        if (status === "unauthenticated") router.push("/");
-    }, [status, router]);
+    const { textClasses } = useAccessibilityStyles();
 
     if (status === "loading") {
-        return <p>Loading...</p>;
+        return (
+            <div className="min-h-screen flex flex-col items-center bg-neutral-50 p-10 w-full">
+                <Skeleton className="h-12 w-64 mb-8" />
+                <div className="grid grid-cols-5 gap-10 w-full max-w-6xl">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <Skeleton key={i} className="h-48 w-full rounded-lg" />
+                    ))}
+                </div>
+            </div>
+        );
     }
 
     if (!session) {
@@ -36,12 +39,8 @@ export default function Home() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center bg-neutral-50 p-10 w-full">
-            <h1 className="text-4xl font-bold text-neutral-900 mb-8">
-                Welcome, {session.user?.name || "Employee"}!
-            </h1>
-
-            <div className="grid grid-cols-5 gap-10 w-full max-w-6xl">
+        <div className="flex flex-col">
+            <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
                 {options.map((item, i) => (
                     <a href={`/home/${item.href}`} key={i}>
                         <MealCard name={item.title} image={"/images/image.png"}/>

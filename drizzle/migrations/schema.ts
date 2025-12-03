@@ -89,32 +89,6 @@ export const recOrderJunc = pgTable("rec_order_junc", {
 		}),
 ]);
 
-export const recipes = pgTable("recipes", {
-	name: text().notNull(),
-	image: text(),
-	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	pricePerServing: real().notNull(),
-	ordersPerBatch: integer().notNull(),
-	type: recipeType(),
-});
-
-export const employees = pgTable("employees", {
-	name: text().notNull(),
-	salary: real().notNull(),
-	hours: integer().notNull(),
-	password: text().notNull(),
-	isEmployed: boolean().notNull(),
-	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "employees_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	roleId: integer().notNull(),
-}, (table) => [
-	foreignKey({
-			columns: [table.roleId],
-			foreignColumns: [roles.id],
-			name: "employees_roleId_fkey"
-		}),
-	check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
-]);
-
 export const roles = pgTable("roles", {
 	name: text().notNull(),
 	canDiscount: boolean().notNull(),
@@ -126,6 +100,34 @@ export const roles = pgTable("roles", {
 	check("roles_canRestock_check", sql`"canRestock" = ANY (ARRAY[true, false])`),
 	check("roles_canEditEmployees_check", sql`"canEditEmployees" = ANY (ARRAY[true, false])`),
 ]);
+
+export const employees = pgTable("employees", {
+	name: text().notNull(),
+	salary: real().notNull(),
+	hours: integer().notNull(),
+	password: text().notNull(),
+	isEmployed: boolean().notNull(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "employees_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	roleId: integer().notNull(),
+	email: text(),
+}, (table) => [
+	foreignKey({
+			columns: [table.roleId],
+			foreignColumns: [roles.id],
+			name: "employees_roleId_fkey"
+		}),
+	check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
+]);
+
+export const recipes = pgTable("recipes", {
+	name: text().notNull(),
+	image: text(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	pricePerServing: real().notNull(),
+	ordersPerBatch: integer().notNull(),
+	type: recipeType(),
+	premium: boolean().default(false),
+});
 
 export const mealTypes = pgTable("meal_types", {
 	typeName: text().primaryKey().notNull(),

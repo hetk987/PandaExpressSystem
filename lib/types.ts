@@ -7,11 +7,14 @@ export type Role = {
 }
 
 export type Employee = {
-    id: number;
+    id?: number;
     name: string;
     salary: number;
     hours: number;
     password: string;
+    isEmployed: boolean;
+    roleId: number;
+    role?: Role;
 }
 
 export type Order = {
@@ -25,7 +28,7 @@ export type Order = {
 }
 
 export type Inventory = {
-    id: number;
+    id?: number;
     name: string;
     batchPurchaseCost: number;
     currentStock: number;
@@ -70,16 +73,16 @@ export type RecOrderJunc = {
 
 export type Recipe = {
     name: string;
-    image: string;
-    id: number;
+    image: string | null;
+    id?: number;
     pricePerServing: number;
     ordersPerBatch: number;
-    type: RecipeType;
+    type: RecipeType | null;
+    premium: boolean;
 }
 
-export type RecipeType = "Side" | "Entree" | "Drink";
+export type RecipeType = "Side" | "Entree" | "Drink" | "Appetizer";
 
-// Order Info JSON Structure Types
 export type RecipeSelection = {
     recipeId: number;
     recipeName: string;

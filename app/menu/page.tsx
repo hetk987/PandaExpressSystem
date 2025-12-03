@@ -2,23 +2,74 @@
 
 import type { Recipe, MealType } from "@/lib/types";
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/app/components/ui/skeleton";
 
 export default function KitchenPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [mealTypes, setMealTypes] = useState<MealType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const r1 = await fetch("/api/recipes");
-      const d1 = await r1.json();
-      setRecipes(d1);
-
-      const r2 = await fetch("/api/mealtypes");
-      const d2 = await r2.json();
-      setMealTypes(d2);
+      try {
+        // Fetch both APIs in parallel for better performance
+        const [r1, r2] = await Promise.all([
+          fetch("/api/recipes"),
+          fetch("/api/mealtypes")
+        ]);
+        
+        const [d1, d2] = await Promise.all([
+          r1.json(),
+          r2.json()
+        ]);
+        
+        setRecipes(d1);
+        setMealTypes(d2);
+      } catch (error) {
+        console.error("Failed to fetch menu data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen overflow-hidden bg-orange-50 p-4">
+        <div className="flex flex-row gap-10 items-start">
+          <div className="flex flex-col min-w-[360px]">
+            <Skeleton className="h-10 w-48 mb-4" />
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-10">
+            <div className="flex flex-row gap-10">
+              <div className="flex flex-col min-w-[580px]">
+                <Skeleton className="h-10 w-48 mb-4" />
+                <div className="grid grid-cols-3 gap-4">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <Skeleton key={i} className="h-48 w-44 rounded-xl" />
+                  ))}
+                </div>
+              </div>
+              <div className="flex flex-col min-w-[580px]">
+                <Skeleton className="h-10 w-48 mb-4" />
+                <div className="grid grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-48 w-44 rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const price = (n: number) => n.toFixed(2);
 

@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/app/components/card";
-import { Button } from "@/app/components/button";
+import { Card, CardContent } from "@/app/components/ui/card";
+import { Button } from "@/app/components/ui/button";
 import {
     Carousel,
     CarouselContent,
     CarouselItem,
     CarouselNext,
     CarouselPrevious,
-} from "@/app/components/carousel";
+} from "@/app/components/ui/carousel";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,7 +18,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-} from "@/app/components/alert-dialog";
+} from "@/app/components/ui/alert-dialog";
 import { Cooked, Recipe, Inventory } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -67,8 +67,8 @@ export const KitchenCarousel = ({ cooked }: { cooked: Cooked[] }) => {
                 } else if (inInv.currentStock < inv.inventoryQuantity) {
                     missing.push({
                         id: -1,
-                        inventoryId: inInv.id,
-                        recipeId: recipe.id,
+                        inventoryId: inInv.id!,
+                        recipeId: recipe.id!,
                         inventoryQuantity:
                             inv.inventoryQuantity - inInv.currentStock,
                         inventoryName: inInv.name,

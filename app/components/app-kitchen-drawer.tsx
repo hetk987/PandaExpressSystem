@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Cooked } from "@/lib/types";
-import { Button } from "@/app/components/button";
+import { Button } from "@/app/components/ui/button";
 import {
     Drawer,
     DrawerClose,
@@ -12,7 +12,7 @@ import {
     DrawerHeader,
     DrawerTitle,
     DrawerTrigger,
-} from "@/app/components/drawer";
+} from "@/app/components/ui/drawer";
 import { KitchenCarousel } from "./app-kitchen-carousel";
 
 export const KitchenDrawer = ({ cooked }: { cooked: Cooked[] }) => {
@@ -21,9 +21,9 @@ export const KitchenDrawer = ({ cooked }: { cooked: Cooked[] }) => {
             <DrawerTrigger asChild>
                 <Button
                     variant="outline"
-                    className="font-mono border-2 border-black hover:bg-black hover:text-white transition-all"
+                    className="font-mono border-2 border-black bg-yellow-400 hover:bg-yellow-300 hover:text-white transition-all text-base font-bold px-6 py-6 shadow-lg"
                 >
-                    Open Kitchen
+                    🍳 STOCK COOKED
                 </Button>
             </DrawerTrigger>
 
