@@ -2,7 +2,6 @@
 
 import MealCard from "../components/app-mealcard";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 import { Skeleton } from "@/app/components/ui/skeleton";
 
@@ -15,14 +14,8 @@ const options = [
 ];
 
 export default function Home() {
-    const router = useRouter();
     const { data: session, status } = useSession();
     const { textClasses } = useAccessibilityStyles();
-
-    // Redirect if not logged in
-    useEffect(() => {
-        if (status === "unauthenticated") router.push("/");
-    }, [status, router]);
 
     if (status === "loading") {
         return (
