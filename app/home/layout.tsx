@@ -362,20 +362,20 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <SidebarProvider>
+            <SidebarProvider className="h-screen overflow-hidden">
                 <AppSidebar 
                     temperature={temperature}
                     precipitation={precipitation}
                     windSpeed={windSpeed}
                     windDirection={windDirection}
                 />
-                <SidebarInset>
-                    <div className="flex flex-col flex-1">
-                        <main className="flex-1 overflow-y-auto">
+                <SidebarInset className="h-full">
+                    <div className="flex flex-col h-full">
+                        <main className="flex-1 overflow-y-auto min-h-0">
                             {children}
                         </main>
 
-                        <footer className="bg-dark-red text-white h-15 flex items-center justify-between px-6">
+                        <footer className="sticky bottom-0 bg-dark-red text-white h-15 flex items-center justify-between px-6">
                             <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
                                 <span className={`font-semibold tracking-wide ${textClasses}`}>Weather</span>
                                 <span className={`text-white/80 ${textClasses}`}>
