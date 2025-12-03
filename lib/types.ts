@@ -80,7 +80,7 @@ export type Recipe = {
     type: RecipeType | null;
 }
 
-export type RecipeType = "Side" | "Entree" | "Drink";
+export type RecipeType = "Side" | "Entree" | "Drink" | "Appetizer";
 
 // Order Info JSON Structure Types
 export type RecipeSelection = {
