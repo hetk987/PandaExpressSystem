@@ -234,8 +234,8 @@ export default function Build({
     }
 
     return (
-        <div className="flex flex-row">
-            <div className="w-full">
+        <div className="flex flex-row h-full">
+            <div className="w-full overflow-y-auto">
                 <div className="pt-5 pl-5">
                     <h2 className={`text-3xl font-bold ${textClasses}`}>{`Select ${
                         selection?.type
@@ -262,7 +262,8 @@ export default function Build({
                     </div>
                 )}
             </div>
-            <div className="w-70">
+            {/* right sidebar that shows the meal name and the entrees, sides, and drinks that have been selected */}
+            <div className="w-70 h-full overflow-y-auto flex flex-col">
                 <div className="pt-5 pl-5">
                     <h2 className={`text-3xl font-bold ${textClasses}`}>{mealName}</h2>
                 </div>
