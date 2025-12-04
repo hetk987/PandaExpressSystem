@@ -10,6 +10,17 @@ import { useRouter } from "next/navigation";
 import { useAddToCartToast } from "@/hooks/use-add-to-cart-toast";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 import { Skeleton } from "@/app/components/ui/skeleton";
+import { Input } from "@/app/components/ui/input";
+import { cn } from "@/lib/utils";
+import {
+    ShoppingCart,
+    RotateCcw,
+    Check,
+    ChefHat,
+    Coffee,
+    Salad,
+} from "lucide-react";
+import Image from "next/image";
 
 interface Selection {
     type: RecipeType;
@@ -34,6 +45,7 @@ export default function Build({
     const { textClasses } = useAccessibilityStyles();
     const [recipes, setRecipes] = useState<Recipe[]>([]);
     const [mealtypes, setMealtypes] = useState<MealType[]>([]);
+    const [quantity, setQuantity] = useState<number>(1);
     const [currentMenu, setCurrentMenu] = useState<RecipeType>();
     const [selection, setSelection] = useState<Selection>();
     const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +62,7 @@ export default function Build({
                 // Fetch both APIs in parallel for better performance
                 const [recipesResponse, mealtypesResponse] = await Promise.all([
                     fetch(`/api/recipes`),
-                    fetch(`/api/mealtypes`)
+                    fetch(`/api/mealtypes`),
                 ]);
 
                 if (recipesResponse.ok) {
@@ -68,7 +80,7 @@ export default function Build({
                     type: "Entree",
                     num: 0,
                 });
-            } catch (error) {
+            } catch {
                 console.error("Failed to fetch links");
             } finally {
                 setIsLoading(false);
@@ -103,6 +115,17 @@ export default function Build({
         const drinksComplete =
             mealSelections.drinks.filter(Boolean).length === mealtype.drinks;
         return entreesComplete && sidesComplete && drinksComplete;
+    }, [mealtype, mealSelections]);
+
+    // Calculate progress
+    const progress = useMemo(() => {
+        if (!mealtype) return 0;
+        const total = mealtype.entrees + mealtype.sides + mealtype.drinks;
+        const completed =
+            mealSelections.entrees.filter(Boolean).length +
+            mealSelections.sides.filter(Boolean).length +
+            mealSelections.drinks.filter(Boolean).length;
+        return Math.round((completed / total) * 100);
     }, [mealtype, mealSelections]);
 
     const handleRecipeClick = (recipe: Recipe) => {
@@ -188,17 +211,18 @@ export default function Build({
             () => {
                 addMeal({
                     mealType: mealtype.typeName,
-                    quantity: 1,
+                    quantity: quantity,
                     price: mealtype.price,
                     selections: selections,
                 });
             },
             {
                 onSuccess: () => {
-                    // Reset selections
+                    // Reset selections and quantity
                     setMealSelections({ entrees: [], sides: [], drinks: [] });
                     setSelection({ type: "Entree", num: 0 });
                     setCurrentMenu("Entree");
+                    setQuantity(1);
                 },
             }
         );
@@ -206,26 +230,41 @@ export default function Build({
         router.push("/home/build");
     };
 
+    const getIconForType = (type: RecipeType) => {
+        switch (type) {
+            case "Entree":
+                return ChefHat;
+            case "Side":
+                return Salad;
+            case "Drink":
+                return Coffee;
+            default:
+                return ChefHat;
+        }
+    };
+
     if (isLoading) {
         return (
-            <div className="flex flex-row">
-                <div className="w-full">
-                    <div className="pt-5 pl-5">
-                        <Skeleton className="h-10 w-64" />
-                    </div>
-                    <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
+            <div className="flex flex-row h-full bg-gradient-to-br from-neutral-50 to-neutral-100">
+                <div className="flex-1 p-8">
+                    <Skeleton className="h-12 w-64 mb-8" />
+                    <div className="grid grid-cols-4 gap-6">
                         {Array.from({ length: 8 }).map((_, i) => (
-                            <Skeleton key={i} className="h-48 w-full rounded-lg" />
+                            <Skeleton
+                                key={i}
+                                className="aspect-square w-full rounded-xl"
+                            />
                         ))}
                     </div>
                 </div>
-                <div className="w-70">
-                    <div className="pt-5 pl-5">
-                        <Skeleton className="h-10 w-48" />
-                    </div>
-                    <div className="flex flex-col p-10 gap-10 mb-10">
+                <div className="w-80 bg-white/50 backdrop-blur-sm border-l border-neutral-200 p-6">
+                    <Skeleton className="h-10 w-48 mb-6" />
+                    <div className="space-y-4">
                         {Array.from({ length: 3 }).map((_, i) => (
-                            <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                            <Skeleton
+                                key={i}
+                                className="h-24 w-full rounded-xl"
+                            />
                         ))}
                     </div>
                 </div>
@@ -234,140 +273,568 @@ export default function Build({
     }
 
     return (
-        <div className="flex flex-row h-full">
-            <div className="w-full overflow-y-auto">
-                <div className="pt-5 pl-5">
-                    <h2 className={`text-3xl font-bold ${textClasses}`}>{`Select ${
-                        selection?.type
-                    } ${selection ? selection.num + 1 : ""}`}</h2>
+        <div className="flex flex-row h-full bg-gradient-to-br from-neutral-50 via-white to-neutral-100">
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-y-auto">
+                {/* Header with progress */}
+                <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-neutral-200/50 px-8 py-4">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                            {(() => {
+                                const Icon = getIconForType(
+                                    selection?.type || "Entree"
+                                );
+                                return (
+                                    <div className="size-10 rounded-xl bg-tamu-maroon/10 flex items-center justify-center">
+                                        <Icon className="size-5 text-tamu-maroon" />
+                                    </div>
+                                );
+                            })()}
+                            <div>
+                                <h2
+                                    className={cn(
+                                        "text-2xl font-bold text-neutral-900",
+                                        textClasses
+                                    )}
+                                >
+                                    Select {selection?.type}{" "}
+                                    {selection ? selection.num + 1 : ""}
+                                </h2>
+                                <p
+                                    className={cn(
+                                        "text-sm text-neutral-500",
+                                        textClasses
+                                    )}
+                                >
+                                    Choose your {selection?.type?.toLowerCase()}{" "}
+                                    from the options below
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            {/* Progress indicator */}
+                            <div className="flex items-center gap-2">
+                                <div className="w-32 h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-tamu-maroon to-tamu-maroon-light rounded-full transition-all duration-500 ease-out"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
+                                <span
+                                    className={cn(
+                                        "text-sm font-medium text-neutral-600",
+                                        textClasses
+                                    )}
+                                >
+                                    {progress}%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="grid grid-cols-4 gap-10 p-10 w-full mb-10">
-                    {recipes
-                        .filter((r) => r.type === currentMenu)
-                        .map((item, i) => (
-                            <button
-                                key={i}
-                                onClick={() => handleRecipeClick(item)}
-                                className="cursor-pointer"
-                            >
-                                <MealCard name={item.name} image={item.image} />
-                            </button>
-                        ))}
+
+                {/* Recipe Grid */}
+                <div className="p-8">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                        {recipes
+                            .filter((r) => r.type === currentMenu)
+                            .map((item, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleRecipeClick(item)}
+                                    className="cursor-pointer transition-transform duration-200 active:scale-95"
+                                >
+                                    <MealCard
+                                        name={item.name}
+                                        image={item.image}
+                                    />
+                                </button>
+                            ))}
+                    </div>
                 </div>
+
+                {/* Bottom Action Bar - Only when complete */}
                 {isComplete && (
-                    <div className="px-5 pb-5">
-                        <Button onClick={handleAddToCart} className="w-full">
-                            Add to Cart
-                        </Button>
+                    <div className="fixed bottom-20 left-0 right-0 z-20 px-8">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-200/50 p-6">
+                                <div className="flex items-center justify-between gap-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="size-12 rounded-xl bg-green-500/10 flex items-center justify-center">
+                                            <Check className="size-6 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <h3
+                                                className={cn(
+                                                    "text-lg font-bold text-neutral-900",
+                                                    textClasses
+                                                )}
+                                            >
+                                                {mealName} Ready!
+                                            </h3>
+                                            <p
+                                                className={cn(
+                                                    "text-neutral-500",
+                                                    textClasses
+                                                )}
+                                            >
+                                                ${mealtype?.price.toFixed(2)}{" "}
+                                                each
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2 bg-neutral-100 rounded-xl px-3 py-2">
+                                            <label
+                                                className={cn(
+                                                    "text-sm font-medium text-neutral-600",
+                                                    textClasses
+                                                )}
+                                            >
+                                                Qty:
+                                            </label>
+                                            <Input
+                                                type="number"
+                                                min="1"
+                                                value={quantity}
+                                                onChange={(e) =>
+                                                    setQuantity(
+                                                        Math.max(
+                                                            1,
+                                                            parseInt(
+                                                                e.target.value
+                                                            ) || 1
+                                                        )
+                                                    )
+                                                }
+                                                className="w-16 h-8 text-center border-0 bg-white"
+                                            />
+                                        </div>
+
+                                        <div className="h-8 w-px bg-neutral-200" />
+
+                                        <p
+                                            className={cn(
+                                                "text-xl font-bold text-neutral-900 min-w-[80px]",
+                                                textClasses
+                                            )}
+                                        >
+                                            $
+                                            {mealtype &&
+                                                (
+                                                    mealtype.price * quantity
+                                                ).toFixed(2)}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Button
+                                            variant="outline"
+                                            onClick={() => {
+                                                setMealSelections({
+                                                    entrees: [],
+                                                    sides: [],
+                                                    drinks: [],
+                                                });
+                                                setSelection({
+                                                    type: "Entree",
+                                                    num: 0,
+                                                });
+                                                setCurrentMenu("Entree");
+                                            }}
+                                            className="gap-2 border-neutral-300 hover:bg-neutral-100"
+                                        >
+                                            <RotateCcw className="size-4" />
+                                            Reset
+                                        </Button>
+                                        <Button
+                                            onClick={handleAddToCart}
+                                            className="gap-2 bg-tamu-maroon hover:bg-tamu-maroon-dark text-white px-6 shadow-lg shadow-tamu-maroon/25"
+                                        >
+                                            <ShoppingCart className="size-4" />
+                                            Add to Cart
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
-            {/* right sidebar that shows the meal name and the entrees, sides, and drinks that have been selected */}
-            <div className="w-70 h-full overflow-y-auto flex flex-col">
-                <div className="pt-5 pl-5">
-                    <h2 className={`text-3xl font-bold ${textClasses}`}>{mealName}</h2>
+
+            {/* Right Sidebar - Selection Summary */}
+            <div className="w-80 h-full border-l border-neutral-200/50 bg-gradient-to-b from-white to-neutral-50/50 backdrop-blur-sm flex flex-col">
+                {/* Sidebar Header */}
+                <div className="p-6 border-b border-neutral-200/50">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="size-10 rounded-xl bg-tamu-maroon flex items-center justify-center shadow-lg shadow-tamu-maroon/20">
+                            <ChefHat className="size-5 text-white" />
+                        </div>
+                        <div>
+                            <h2
+                                className={cn(
+                                    "text-xl font-bold text-neutral-900",
+                                    textClasses
+                                )}
+                            >
+                                {mealName}
+                            </h2>
+                            <p
+                                className={cn(
+                                    "text-sm text-neutral-500",
+                                    textClasses
+                                )}
+                            >
+                                ${mealtype?.price.toFixed(2)}
+                            </p>
+                        </div>
+                    </div>
+                    {/* Mini progress bar */}
+                    <div className="mt-4">
+                        <div className="flex justify-between text-xs text-neutral-500 mb-1">
+                            <span>Progress</span>
+                            <span>{progress}% complete</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-neutral-200 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-gradient-to-r from-tamu-maroon to-tamu-maroon-light rounded-full transition-all duration-500"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                    </div>
                 </div>
-                <div className="flex flex-col p-10 gap-10 mb-10">
-                    {entrees?.map((e, i) => {
-                        const selectedRecipe = mealSelections.entrees[i];
-                        return (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    setCurrentMenu("Entree");
-                                    setSelection({
-                                        type: "Entree",
-                                        num: i,
-                                    });
-                                }}
-                            >
-                                <MealCard
-                                    name={
-                                        selectedRecipe
-                                            ? selectedRecipe.name
-                                            : `Entree ${i + 1}`
-                                    }
-                                    image={
-                                        selectedRecipe
-                                            ? selectedRecipe.image
-                                            : undefined
-                                    }
-                                    className={`cursor-pointer ${
-                                        selection &&
-                                        selection.type == "Entree" &&
-                                        selection.num == i
-                                            ? "border-yellow-300 border-3"
-                                            : ""
-                                    }`}
-                                />
-                            </button>
-                        );
-                    })}
-                    {sides?.map((e, i) => {
-                        const selectedRecipe = mealSelections.sides[i];
-                        return (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    setCurrentMenu("Side");
-                                    setSelection({
-                                        type: "Side",
-                                        num: i,
-                                    });
-                                }}
-                            >
-                                <MealCard
-                                    name={
-                                        selectedRecipe
-                                            ? selectedRecipe.name
-                                            : `Side ${i + 1}`
-                                    }
-                                    image={
-                                        selectedRecipe
-                                            ? selectedRecipe.image
-                                            : undefined
-                                    }
-                                    className={`cursor-pointer ${
-                                        selection &&
-                                        selection.type == "Side" &&
-                                        selection.num == i
-                                            ? "border-yellow-300 border-3"
-                                            : ""
-                                    }`}
-                                />
-                            </button>
-                        );
-                    })}
-                    {drinks?.map((e, i) => {
-                        const selectedRecipe = mealSelections.drinks[i];
-                        return (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    setCurrentMenu("Drink");
-                                    setSelection({
-                                        type: "Drink",
-                                        num: i,
-                                    });
-                                }}
-                            >
-                                <MealCard
-                                    name={
-                                        selectedRecipe
-                                            ? selectedRecipe.name
-                                            : `Drink ${i + 1}`
-                                    }
-                                    className={`cursor-pointer ${
-                                        selection &&
-                                        selection.type == "Drink" &&
-                                        selection.num == i
-                                            ? "border-yellow-300 border-3"
-                                            : ""
-                                    }`}
-                                />
-                            </button>
-                        );
-                    })}
+
+                {/* Selection Items */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                    {/* Entrees Section */}
+                    {entrees.length > 0 && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 px-2">
+                                <ChefHat className="size-4 text-tamu-maroon" />
+                                <span
+                                    className={cn(
+                                        "text-xs font-semibold uppercase tracking-wider text-neutral-500",
+                                        textClasses
+                                    )}
+                                >
+                                    Entrees
+                                </span>
+                            </div>
+                            {entrees.map((_, i) => {
+                                const selectedRecipe =
+                                    mealSelections.entrees[i];
+                                const isSelected =
+                                    selection?.type === "Entree" &&
+                                    selection.num === i;
+                                return (
+                                    <button
+                                        key={`entree-${i}`}
+                                        onClick={() => {
+                                            setCurrentMenu("Entree");
+                                            setSelection({
+                                                type: "Entree",
+                                                num: i,
+                                            });
+                                        }}
+                                        className={cn(
+                                            "w-full p-3 rounded-xl text-left transition-all duration-200",
+                                            "border-2",
+                                            isSelected
+                                                ? "border-tamu-maroon bg-tamu-maroon/5 shadow-md"
+                                                : selectedRecipe
+                                                ? "border-green-500/50 bg-green-50/50"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {selectedRecipe ? (
+                                                <div className="size-10 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
+                                                    {selectedRecipe.image ? (
+                                                        <Image
+                                                            src={
+                                                                selectedRecipe.image
+                                                            }
+                                                            alt={
+                                                                selectedRecipe.name
+                                                            }
+                                                            width={40}
+                                                            height={40}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <ChefHat className="size-5 text-neutral-400" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className={cn(
+                                                        "size-10 rounded-lg flex items-center justify-center shrink-0",
+                                                        isSelected
+                                                            ? "bg-tamu-maroon/10"
+                                                            : "bg-neutral-100"
+                                                    )}
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            "text-lg font-semibold",
+                                                            isSelected
+                                                                ? "text-tamu-maroon"
+                                                                : "text-neutral-400"
+                                                        )}
+                                                    >
+                                                        {i + 1}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p
+                                                    className={cn(
+                                                        "font-medium truncate",
+                                                        selectedRecipe
+                                                            ? "text-neutral-900"
+                                                            : "text-neutral-500",
+                                                        textClasses
+                                                    )}
+                                                >
+                                                    {selectedRecipe?.name ||
+                                                        `Select Entree ${
+                                                            i + 1
+                                                        }`}
+                                                </p>
+                                            </div>
+                                            {selectedRecipe && (
+                                                <Check className="size-4 text-green-500 shrink-0" />
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Sides Section */}
+                    {sides.length > 0 && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 px-2">
+                                <Salad className="size-4 text-tamu-maroon" />
+                                <span
+                                    className={cn(
+                                        "text-xs font-semibold uppercase tracking-wider text-neutral-500",
+                                        textClasses
+                                    )}
+                                >
+                                    Sides
+                                </span>
+                            </div>
+                            {sides.map((_, i) => {
+                                const selectedRecipe = mealSelections.sides[i];
+                                const isSelected =
+                                    selection?.type === "Side" &&
+                                    selection.num === i;
+                                return (
+                                    <button
+                                        key={`side-${i}`}
+                                        onClick={() => {
+                                            setCurrentMenu("Side");
+                                            setSelection({
+                                                type: "Side",
+                                                num: i,
+                                            });
+                                        }}
+                                        className={cn(
+                                            "w-full p-3 rounded-xl text-left transition-all duration-200",
+                                            "border-2",
+                                            isSelected
+                                                ? "border-tamu-maroon bg-tamu-maroon/5 shadow-md"
+                                                : selectedRecipe
+                                                ? "border-green-500/50 bg-green-50/50"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {selectedRecipe ? (
+                                                <div className="size-10 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
+                                                    {selectedRecipe.image ? (
+                                                        <Image
+                                                            src={
+                                                                selectedRecipe.image
+                                                            }
+                                                            alt={
+                                                                selectedRecipe.name
+                                                            }
+                                                            width={40}
+                                                            height={40}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <Salad className="size-5 text-neutral-400" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className={cn(
+                                                        "size-10 rounded-lg flex items-center justify-center shrink-0",
+                                                        isSelected
+                                                            ? "bg-tamu-maroon/10"
+                                                            : "bg-neutral-100"
+                                                    )}
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            "text-lg font-semibold",
+                                                            isSelected
+                                                                ? "text-tamu-maroon"
+                                                                : "text-neutral-400"
+                                                        )}
+                                                    >
+                                                        {i + 1}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p
+                                                    className={cn(
+                                                        "font-medium truncate",
+                                                        selectedRecipe
+                                                            ? "text-neutral-900"
+                                                            : "text-neutral-500",
+                                                        textClasses
+                                                    )}
+                                                >
+                                                    {selectedRecipe?.name ||
+                                                        `Select Side ${i + 1}`}
+                                                </p>
+                                            </div>
+                                            {selectedRecipe && (
+                                                <Check className="size-4 text-green-500 shrink-0" />
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+
+                    {/* Drinks Section */}
+                    {drinks.length > 0 && (
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 px-2">
+                                <Coffee className="size-4 text-tamu-maroon" />
+                                <span
+                                    className={cn(
+                                        "text-xs font-semibold uppercase tracking-wider text-neutral-500",
+                                        textClasses
+                                    )}
+                                >
+                                    Drinks
+                                </span>
+                            </div>
+                            {drinks.map((_, i) => {
+                                const selectedRecipe = mealSelections.drinks[i];
+                                const isSelected =
+                                    selection?.type === "Drink" &&
+                                    selection.num === i;
+                                return (
+                                    <button
+                                        key={`drink-${i}`}
+                                        onClick={() => {
+                                            setCurrentMenu("Drink");
+                                            setSelection({
+                                                type: "Drink",
+                                                num: i,
+                                            });
+                                        }}
+                                        className={cn(
+                                            "w-full p-3 rounded-xl text-left transition-all duration-200",
+                                            "border-2",
+                                            isSelected
+                                                ? "border-tamu-maroon bg-tamu-maroon/5 shadow-md"
+                                                : selectedRecipe
+                                                ? "border-green-500/50 bg-green-50/50"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 hover:shadow-sm"
+                                        )}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            {selectedRecipe ? (
+                                                <div className="size-10 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
+                                                    {selectedRecipe.image ? (
+                                                        <Image
+                                                            src={
+                                                                selectedRecipe.image
+                                                            }
+                                                            alt={
+                                                                selectedRecipe.name
+                                                            }
+                                                            width={40}
+                                                            height={40}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center">
+                                                            <Coffee className="size-5 text-neutral-400" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    className={cn(
+                                                        "size-10 rounded-lg flex items-center justify-center shrink-0",
+                                                        isSelected
+                                                            ? "bg-tamu-maroon/10"
+                                                            : "bg-neutral-100"
+                                                    )}
+                                                >
+                                                    <span
+                                                        className={cn(
+                                                            "text-lg font-semibold",
+                                                            isSelected
+                                                                ? "text-tamu-maroon"
+                                                                : "text-neutral-400"
+                                                        )}
+                                                    >
+                                                        {i + 1}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="flex-1 min-w-0">
+                                                <p
+                                                    className={cn(
+                                                        "font-medium truncate",
+                                                        selectedRecipe
+                                                            ? "text-neutral-900"
+                                                            : "text-neutral-500",
+                                                        textClasses
+                                                    )}
+                                                >
+                                                    {selectedRecipe?.name ||
+                                                        `Select Drink ${i + 1}`}
+                                                </p>
+                                            </div>
+                                            {selectedRecipe && (
+                                                <Check className="size-4 text-green-500 shrink-0" />
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Sidebar Footer */}
+                <div className="p-4 border-t border-neutral-200/50 bg-white/50">
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push("/home/build")}
+                        className="w-full border-neutral-300 hover:bg-neutral-100"
+                    >
+                        ← Back to Meals
+                    </Button>
                 </div>
             </div>
         </div>

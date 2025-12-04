@@ -3,10 +3,8 @@
 import React from "react";
 import {
     Sheet,
-    SheetClose,
     SheetContent,
     SheetDescription,
-    SheetFooter,
     SheetHeader,
     SheetTitle,
     SheetTrigger,
@@ -14,13 +12,81 @@ import {
 import { Button } from "@/app/components/ui/button";
 import { Switch } from "@/app/components/ui/switch";
 import { Label } from "@/app/components/ui/label";
-import { Card, CardContent } from "@/app/components/ui/card";
 import { Separator } from "@/app/components/ui/separator";
 import { WeatherWidget } from "./app-weather-widget";
 import { useAccessibility, TextSize } from "@/app/providers/accessibility-provider";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
 import { cn } from "@/lib/utils";
-import { Type, Accessibility, X } from "lucide-react";
+import { Type, Accessibility, Cloud, Thermometer, Wind, Droplets, Sun, CloudRain, Snowflake, CloudSun } from "lucide-react";
+
+// Helper function to get weather theme based on conditions
+function getWeatherTheme(temperature?: number, precipitation?: number) {
+    const isRainy = precipitation && precipitation > 0.1;
+    
+    if (isRainy) {
+        return {
+            gradient: "from-slate-600 via-slate-700 to-slate-800",
+            icon: CloudRain,
+            iconColor: "text-blue-300",
+            label: "Rainy",
+            detailBg: "bg-slate-500/30",
+            detailBorder: "border-slate-400/30",
+        };
+    }
+    
+    if (!temperature) {
+        return {
+            gradient: "from-sky-400 via-sky-500 to-sky-600",
+            icon: Cloud,
+            iconColor: "text-white",
+            label: "Unknown",
+            detailBg: "bg-sky-400/30",
+            detailBorder: "border-sky-300/30",
+        };
+    }
+    
+    if (temperature > 85) {
+        return {
+            gradient: "from-orange-400 via-orange-500 to-red-500",
+            icon: Sun,
+            iconColor: "text-yellow-200",
+            label: "Hot",
+            detailBg: "bg-orange-400/30",
+            detailBorder: "border-orange-300/30",
+        };
+    }
+    
+    if (temperature > 70) {
+        return {
+            gradient: "from-amber-400 via-yellow-400 to-orange-400",
+            icon: Sun,
+            iconColor: "text-yellow-100",
+            label: "Warm",
+            detailBg: "bg-amber-400/30",
+            detailBorder: "border-amber-300/30",
+        };
+    }
+    
+    if (temperature > 50) {
+        return {
+            gradient: "from-sky-400 via-cyan-400 to-teal-400",
+            icon: CloudSun,
+            iconColor: "text-white",
+            label: "Cool",
+            detailBg: "bg-sky-400/30",
+            detailBorder: "border-sky-300/30",
+        };
+    }
+    
+    return {
+        gradient: "from-blue-500 via-indigo-500 to-purple-600",
+        icon: Snowflake,
+        iconColor: "text-blue-200",
+        label: "Cold",
+        detailBg: "bg-blue-400/30",
+        detailBorder: "border-blue-300/30",
+    };
+}
 
 interface AccessibilitySheetProps {
     temperature?: number;
@@ -40,11 +106,11 @@ export function AccessibilitySheet({
     const { textSize, isBold, setTextSize, setIsBold } = useAccessibility();
     const { textClasses } = useAccessibilityStyles();
 
-    const textSizeOptions: { value: TextSize; label: string }[] = [
-        { value: "small", label: "Small" },
-        { value: "medium", label: "Medium" },
-        { value: "large", label: "Large" },
-        { value: "extra-large", label: "Extra Large" },
+    const textSizeOptions: { value: TextSize; label: string; description: string }[] = [
+        { value: "small", label: "Small", description: "Compact text" },
+        { value: "medium", label: "Medium", description: "Default size" },
+        { value: "large", label: "Large", description: "Easier to read" },
+        { value: "extra-large", label: "Extra Large", description: "Maximum readability" },
     ];
 
     return (
@@ -54,76 +120,84 @@ export function AccessibilitySheet({
             </SheetTrigger>
             <SheetContent 
                 side="right" 
-                className="bg-gradient-to-br from-slate-50 to-slate-100 w-full sm:max-w-2xl overflow-y-auto border-l border-slate-200"
+                className="bg-maroon-gradient text-white w-full sm:max-w-md overflow-y-auto border-l border-white/10 p-0"
             >
-                <div className="mx-auto w-full max-w-4xl h-full flex flex-col">
-                    <SheetHeader className="space-y-3 pb-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2.5 bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg">
-                                    <Accessibility className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <SheetTitle className={`text-2xl font-bold text-slate-900 text-left ${textClasses}`}>
-                                        Accessibility Settings
-                                    </SheetTitle>
-                                    <SheetDescription className={`text-slate-600 text-sm text-left ${textClasses}`}>
-                                        Customize your viewing experience
-                                    </SheetDescription>
-                                </div>
+                <div className="h-full flex flex-col">
+                    {/* Header with glass effect */}
+                    <SheetHeader className="p-6 border-b border-white/10 bg-white/5 backdrop-blur-sm">
+                        <div className="flex items-center gap-4">
+                            <div className="size-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shadow-lg border border-white/20">
+                                <Accessibility className="size-6 text-white" />
+                            </div>
+                            <div>
+                                <SheetTitle className={cn("text-xl font-bold text-white text-left", textClasses)}>
+                                    Accessibility
+                                </SheetTitle>
+                                <SheetDescription className={cn("text-white/70 text-sm text-left", textClasses)}>
+                                    Customize your experience
+                                </SheetDescription>
                             </div>
                         </div>
                     </SheetHeader>
 
-                    <div className="flex-1 space-y-6 overflow-y-auto pb-6">
-                        {/* Accessibility Controls Card */}
-                        <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <CardContent className="p-6 space-y-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <Type className="w-5 h-5 text-red-600" />
-                                    <h3 className={`text-lg font-semibold text-slate-900 ${textClasses}`}>
-                                        Text Preferences
-                                    </h3>
+                    {/* Content */}
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        {/* Text Preferences Card */}
+                        <div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 overflow-hidden">
+                            <div className="p-4 border-b border-white/10 flex items-center gap-3">
+                                <div className="size-8 rounded-lg bg-white/15 flex items-center justify-center">
+                                    <Type className="size-4 text-white" />
                                 </div>
-                                
-                                <Separator className="bg-slate-200" />
-                                
+                                <h3 className={cn("font-semibold text-white", textClasses)}>
+                                    Text Preferences
+                                </h3>
+                            </div>
+                            
+                            <div className="p-4 space-y-4">
                                 {/* Text Size Selector */}
                                 <div className="space-y-3">
-                                    <Label className={`text-sm font-medium text-slate-700 ${textClasses}`}>
+                                    <Label className={cn("text-sm font-medium text-white/80", textClasses)}>
                                         Font Size
                                     </Label>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 gap-2">
                                         {textSizeOptions.map((option) => (
-                                            <Button
+                                            <button
                                                 key={option.value}
-                                                variant={textSize === option.value ? "default" : "outline"}
                                                 onClick={() => setTextSize(option.value)}
                                                 className={cn(
-                                                    `w-full transition-all duration-200 font-medium ${textClasses}`,
+                                                    "p-3 rounded-xl text-left transition-all duration-200 border",
                                                     textSize === option.value
-                                                        ? "bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 shadow-md"
-                                                        : "bg-white text-slate-700 hover:bg-slate-50 border-slate-300 hover:border-red-300"
+                                                        ? "bg-white text-tamu-maroon border-white shadow-lg"
+                                                        : "bg-white/5 text-white border-white/15 hover:bg-white/15 hover:border-white/25"
                                                 )}
                                             >
-                                                {option.label}
-                                            </Button>
+                                                <span className={cn("font-semibold block", textClasses)}>
+                                                    {option.label}
+                                                </span>
+                                                <span className={cn(
+                                                    "text-xs",
+                                                    textSize === option.value ? "text-tamu-maroon/70" : "text-white/60",
+                                                    textClasses
+                                                )}>
+                                                    {option.description}
+                                                </span>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                <Separator className="bg-slate-200" />
+                                <Separator className="bg-white/10" />
 
                                 {/* Bold Text Toggle */}
-                                <div className="flex items-center justify-between p-4 rounded-lg bg-slate-50 border border-slate-200">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
                                     <div className="space-y-0.5">
                                         <Label 
                                             htmlFor="bold-toggle" 
-                                            className={`text-sm font-medium text-slate-900 cursor-pointer ${textClasses}`}
+                                            className={cn("text-sm font-medium text-white cursor-pointer", textClasses)}
                                         >
                                             Bold Text
                                         </Label>
-                                        <p className={`text-xs text-slate-600 ${textClasses}`}>
+                                        <p className={cn("text-xs text-white/60", textClasses)}>
                                             Make all text appear bolder
                                         </p>
                                     </div>
@@ -131,47 +205,116 @@ export function AccessibilitySheet({
                                         id="bold-toggle"
                                         checked={isBold}
                                         onCheckedChange={setIsBold}
-                                        className="data-[state=checked]:bg-red-600"
+                                        className="data-[state=checked]:bg-white data-[state=checked]:text-tamu-maroon"
                                     />
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
-                        {/* Weather Widget Card */}
-                        <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                            <CardContent className="p-6">
-                                <div className="mb-4">
-                                    <h3 className={`text-lg font-semibold text-slate-900 ${textClasses}`}>
-                                        Current Weather
-                                    </h3>
-                                    <p className={`text-sm text-slate-600 ${textClasses}`}>
-                                        Real-time weather conditions
-                                    </p>
+                        {/* Weather Card - Dynamic Theme */}
+                        {(() => {
+                            const theme = getWeatherTheme(temperature, precipitation);
+                            const WeatherIcon = theme.icon;
+                            return (
+                                <div className={cn(
+                                    "rounded-xl overflow-hidden shadow-lg",
+                                    `bg-gradient-to-br ${theme.gradient}`
+                                )}>
+                                    {/* Header */}
+                                    <div className="p-4 border-b border-white/20 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                                <WeatherIcon className={cn("size-5", theme.iconColor)} />
+                                            </div>
+                                            <div>
+                                                <h3 className={cn("font-semibold text-white", textClasses)}>
+                                                    Current Weather
+                                                </h3>
+                                                <p className={cn("text-xs text-white/70", textClasses)}>
+                                                    College Station, TX
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className={cn(
+                                            "px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white",
+                                            textClasses
+                                        )}>
+                                            {theme.label}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Main Temperature Display */}
+                                    <div className="p-6">
+                                        <div className="flex items-center justify-center mb-6">
+                                            <div className="text-center">
+                                                <div className="flex items-center justify-center gap-1 mb-2">
+                                                    <WeatherIcon className={cn("size-12", theme.iconColor)} />
+                                                </div>
+                                                <div className="flex items-baseline justify-center gap-1">
+                                                    <span className="text-6xl font-bold text-white drop-shadow-lg">
+                                                        {temperature?.toFixed(0) ?? "--"}
+                                                    </span>
+                                                    <span className="text-3xl text-white/80">°F</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Weather Details Grid */}
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className={cn(
+                                                "p-3 rounded-xl text-center backdrop-blur-sm",
+                                                theme.detailBg,
+                                                `border ${theme.detailBorder}`
+                                            )}>
+                                                <Thermometer className="size-5 text-white/80 mx-auto mb-1" />
+                                                <p className={cn("text-xs text-white/70 mb-0.5", textClasses)}>Feels Like</p>
+                                                <p className={cn("font-semibold text-white", textClasses)}>
+                                                    {temperature?.toFixed(0) ?? "--"}°
+                                                </p>
+                                            </div>
+                                            <div className={cn(
+                                                "p-3 rounded-xl text-center backdrop-blur-sm",
+                                                theme.detailBg,
+                                                `border ${theme.detailBorder}`
+                                            )}>
+                                                <Droplets className="size-5 text-white/80 mx-auto mb-1" />
+                                                <p className={cn("text-xs text-white/70 mb-0.5", textClasses)}>Rain</p>
+                                                <p className={cn("font-semibold text-white", textClasses)}>
+                                                    {precipitation?.toFixed(2) ?? "--"}"
+                                                </p>
+                                            </div>
+                                            <div className={cn(
+                                                "p-3 rounded-xl text-center backdrop-blur-sm",
+                                                theme.detailBg,
+                                                `border ${theme.detailBorder}`
+                                            )}>
+                                                <Wind className="size-5 text-white/80 mx-auto mb-1" />
+                                                <p className={cn("text-xs text-white/70 mb-0.5", textClasses)}>Wind</p>
+                                                <p className={cn("font-semibold text-white", textClasses)}>
+                                                    {windSpeed?.toFixed(0) ?? "--"} mph
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                
-                                <Separator className="mb-6 bg-slate-200" />
-                                
-                                <WeatherWidget
-                                    temperature={temperature}
-                                    precipitation={precipitation}
-                                    windSpeed={windSpeed}
-                                    windDirection={windDirection}
-                                />
-                            </CardContent>
-                        </Card>
-                    </div>
+                            );
+                        })()}
 
-                    {/* <SheetFooter className="border-t border-slate-200 pt-4 mt-auto bg-gradient-to-br from-slate-50 to-slate-100">
-                        <SheetClose asChild>
-                            <Button 
-                                className="w-full bg-gradient-to-r from-slate-700 to-slate-900 text-white hover:from-slate-800 hover:to-black transition-all shadow-md hover:shadow-lg font-medium"
-                                size="lg"
-                            >
-                                <X className="w-4 h-4 mr-2" />
-                                Close Settings
-                            </Button>
-                        </SheetClose>
-                    </SheetFooter> */}
+                        {/* Preview Card */}
+                        <div className="rounded-xl bg-white/10 backdrop-blur-sm border border-white/15 overflow-hidden">
+                            <div className="p-4 border-b border-white/10">
+                                <h3 className={cn("font-semibold text-white", textClasses)}>
+                                    Text Preview
+                                </h3>
+                            </div>
+                            <div className="p-4">
+                                <p className={cn("text-white/90 leading-relaxed", textClasses)}>
+                                    This is how your text will appear throughout the application. 
+                                    Adjust the settings above to find what works best for you.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </SheetContent>
         </Sheet>

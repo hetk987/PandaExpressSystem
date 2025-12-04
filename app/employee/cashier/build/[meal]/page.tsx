@@ -258,7 +258,7 @@ export default function Build({
                             }}
                             className={`w-full p-3 rounded text-left text-sm font-semibold transition-all ${
                                 isSelected
-                                    ? "bg-panda-red text-white shadow-md"
+                                    ? "bg-tamu-maroon text-white shadow-md"
                                     : selectedRecipe
                                     ? "bg-white text-neutral-900 border-2 border-green-500"
                                     : "bg-white text-neutral-700 border-2 border-neutral-300"
@@ -289,7 +289,7 @@ export default function Build({
                             }}
                             className={`w-full p-3 rounded text-left text-sm font-semibold transition-all ${
                                 isSelected
-                                    ? "bg-panda-red text-white shadow-md"
+                                    ? "bg-tamu-maroon text-white shadow-md"
                                     : selectedRecipe
                                     ? "bg-white text-neutral-900 border-2 border-green-500"
                                     : "bg-white text-neutral-700 border-2 border-neutral-300"
@@ -320,7 +320,7 @@ export default function Build({
                             }}
                             className={`w-full p-3 rounded text-left text-sm font-semibold transition-all ${
                                 isSelected
-                                    ? "bg-panda-red text-white shadow-md"
+                                    ? "bg-tamu-maroon text-white shadow-md"
                                     : selectedRecipe
                                     ? "bg-white text-neutral-900 border-2 border-green-500"
                                     : "bg-white text-neutral-700 border-2 border-neutral-300"
@@ -355,7 +355,7 @@ export default function Build({
                         <a href="/employee/cashier">
                             <Button
                                 variant="default"
-                                className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
+                                className="px-6 py-3 text-lg font-bold bg-tamu-maroon hover:bg-tamu-maroon-dark text-white shadow-md rounded-md transition-colors duration-300"
                             >
                                 Home
                             </Button>

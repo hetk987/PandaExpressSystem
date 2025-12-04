@@ -9,11 +9,11 @@ const CashierCard = (props: {
     <div
         className={`
             aspect-square 
-            bg-panda-red 
-            hover:bg-panda-dark-red 
+            bg-tamu-maroon 
+            hover:bg-tamu-maroon-dark 
             active:scale-95
             transition-all 
-            duration-150 
+            duration-200 
             rounded-lg 
             shadow-md 
             hover:shadow-lg
@@ -24,7 +24,7 @@ const CashierCard = (props: {
             cursor-pointer
             border-2
             border-transparent
-            hover:border-panda-light-red
+            hover:border-tamu-maroon-light
             ${props.className || ''}
         `}
     >

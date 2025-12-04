@@ -144,9 +144,9 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             </main>
 
             {/* Right Side Order Panel */}
-            <div className="w-96 bg-neutral-100 border-l-4 border-panda-red flex flex-col">
+            <div className="w-96 bg-neutral-100 border-l-4 border-tamu-maroon flex flex-col">
                 {/* Order Header */}
-                <div className="bg-panda-red text-white p-3 flex items-center justify-between">
+                <div className="bg-tamu-maroon text-white p-3 flex items-center justify-between">
                     <h2 className="text-lg font-bold">Current Order</h2>
                 </div>
 
@@ -203,7 +203,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         onClick={() => handleRemoveItem(item)}
                                         variant="ghost"
                                         size="icon"
-                                        className="absolute bottom-2 right-2 h-7 w-7 text-neutral-500 hover:text-panda-red hover:bg-red-50"
+                                        className="absolute bottom-2 right-2 h-7 w-7 text-neutral-500 hover:text-tamu-maroon hover:bg-tamu-maroon/10"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -240,7 +240,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             className={cn(
                                 "h-12 justify-center border-2 bg-white text-neutral-700 hover:bg-neutral-50 font-semibold",
                                 selectedPayment === 1 &&
-                                    "border-panda-red bg-red-50 text-panda-red ring-2 ring-panda-red ring-offset-1"
+                                    "border-tamu-maroon bg-tamu-maroon/10 text-tamu-maroon ring-2 ring-tamu-maroon ring-offset-1"
                             )}
                         >
                             <CreditCard className="h-4 w-4 mr-1" />
@@ -254,7 +254,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             className={cn(
                                 "h-12 justify-center border-2 bg-white text-neutral-700 hover:bg-neutral-50 font-semibold",
                                 selectedPayment === 2 &&
-                                    "border-panda-red bg-red-50 text-panda-red ring-2 ring-panda-red ring-offset-1"
+                                    "border-tamu-maroon bg-tamu-maroon/10 text-tamu-maroon ring-2 ring-tamu-maroon ring-offset-1"
                             )}
                         >
                             <IdCard className="h-4 w-4 mr-1" />
@@ -275,7 +275,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         <Button
                             disabled={selectedPayment === null || orderItems.length === 0}
                             onClick={handlePay}
-                            className="h-12 w-full bg-panda-red hover:bg-panda-dark-red text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="h-12 w-full bg-tamu-maroon hover:bg-tamu-maroon-dark text-white font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-300"
                         >
                             Pay ${total.toFixed(2)}
                         </Button>

@@ -98,7 +98,9 @@ export default function Home() {
                     <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <div>
-                                <h3 className={`text-xl font-bold ${textClasses}`}>
+                                <h3
+                                    className={`text-xl font-bold ${textClasses}`}
+                                >
                                     {selectedRecipe.name}
                                 </h3>
                                 <p className={`text-gray-600 ${textClasses}`}>
@@ -107,7 +109,9 @@ export default function Home() {
                                 </p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <label className={`text-sm font-medium ${textClasses}`}>
+                                <label
+                                    className={`text-sm font-medium ${textClasses}`}
+                                >
                                     Quantity:
                                 </label>
                                 <Input
@@ -127,7 +131,9 @@ export default function Home() {
                             </div>
                         </div>
                         <div className="flex gap-4 items-center">
-                            <p className={`text-lg font-semibold ${textClasses}`}>
+                            <p
+                                className={`text-lg font-semibold ${textClasses}`}
+                            >
                                 Total: $
                                 {(
                                     selectedRecipe.pricePerServing * quantity
