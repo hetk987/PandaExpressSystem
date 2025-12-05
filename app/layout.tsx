@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "Panda Express PoS System",
   description: "Point of Sale System for Panda Express",
   generator: "v0.app",
+  icons: {
+    icon: "/Panda Express/round_logo.png",
+    shortcut: "/Panda Express/round_logo.png",
+    apple: "/Panda Express/round_logo.png",
+  },
 };
 
 export default function RootLayout({

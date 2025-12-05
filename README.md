@@ -18,6 +18,21 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Environment Variables
+
+For Stripe checkout integration, add the following environment variables to your `.env` file:
+
+- `STRIPE_SECRET_KEY` - Your Stripe secret key (test mode key for development)
+- `NEXT_PUBLIC_APP_URL` - Base URL of your application (e.g., `http://localhost:3000` for local development or your production URL)
+
+Example `.env` file:
+```
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+**Note:** The Stripe integration is currently configured for test mode. Use test mode keys from your Stripe dashboard.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

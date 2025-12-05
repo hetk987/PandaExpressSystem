@@ -21,7 +21,7 @@ export default function EmployeeLoginSection() {
     // Auto redirect if logged in
     useEffect(() => {
         if (session) {
-            router.push("/home");
+            router.push("/employee/kitchen");
         }
     }, [session, router]);
 
@@ -61,7 +61,7 @@ export default function EmployeeLoginSection() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex justify-center">
-                    <Link href="/home">
+                    <Link href="/employee/kitchen">
                         <Button className="bg-neutral-900 hover:bg-neutral-800 text-white px-6 py-3 rounded-lg">
                             Go Now
                         </Button>
@@ -111,7 +111,7 @@ export default function EmployeeLoginSection() {
                     </div>
                     <div className="space-y-4 mb-6">
                         <Button
-                            onClick={() => googleSignIn("google", { callbackUrl: "/home" })}
+                            onClick={() => googleSignIn("google", { callbackUrl: "/employee/kitchen" })}
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl"
                         >
                             Sign in with Google

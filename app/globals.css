@@ -29,19 +29,33 @@
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
-    --sidebar: var(--panda-red);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: var(--panda-red);
+    --sidebar: var(--tamu-maroon);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: var(--tamu-maroon);
     --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar-accent: rgba(255, 255, 255, 0.15);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: rgba(255, 255, 255, 0.2);
+    --sidebar-ring: rgba(255, 255, 255, 0.3);
 
-    /* Panda Express Brand Colors */
-    --panda-red: #f11315;
-    --panda-dark-red: #990001;
-    --panda-light-red: #f43f41;
+    /* Texas A&M Brand Colors */
+    --tamu-maroon: #500000;
+    --tamu-maroon-dark: #3c0000;
+    --tamu-maroon-light: #732626;
+    --tamu-maroon-glow: rgba(80, 0, 0, 0.6);
+    
+    /* Legacy aliases for compatibility */
+    --panda-red: var(--tamu-maroon);
+    --panda-dark-red: var(--tamu-maroon-dark);
+    --panda-light-red: var(--tamu-maroon-light);
+    
+    /* Glassmorphism Variables */
+    --glass-bg: rgba(80, 0, 0, 0.85);
+    --glass-bg-light: rgba(115, 38, 38, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --glass-blur: 12px;
+    
     --neutral-50: oklch(0.99 0 0);
     --neutral-100: oklch(0.97 0 0);
     --neutral-200: oklch(0.922 0 0);
@@ -124,13 +138,23 @@
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
 
-    /* Panda Express Brand Colors */
-    --color-panda-red: var(--panda-red);
-    --color-panda-dark-red: var(--panda-dark-red);
-    --color-panda-light-red: var(--panda-light-red);
-    /* Aliases for shorter class names */
-    --color-dark-red: var(--panda-dark-red);
-    --color-bright-red: var(--panda-red);
+    /* Texas A&M Brand Colors */
+    --color-tamu-maroon: var(--tamu-maroon);
+    --color-tamu-maroon-dark: var(--tamu-maroon-dark);
+    --color-tamu-maroon-light: var(--tamu-maroon-light);
+    
+    /* Legacy aliases for compatibility */
+    --color-panda-red: var(--tamu-maroon);
+    --color-panda-dark-red: var(--tamu-maroon-dark);
+    --color-panda-light-red: var(--tamu-maroon-light);
+    --color-dark-red: var(--tamu-maroon-dark);
+    --color-bright-red: var(--tamu-maroon);
+    
+    /* Glassmorphism utilities */
+    --color-glass-bg: var(--glass-bg);
+    --color-glass-bg-light: var(--glass-bg-light);
+    --color-glass-border: var(--glass-border);
+    
     --color-neutral-50: var(--neutral-50);
     --color-neutral-100: var(--neutral-100);
     --color-neutral-200: var(--neutral-200);
@@ -181,4 +205,52 @@
   font-family: "Kedebideri", sans-serif;
   font-weight: 900;
   font-style: normal;
+}
+
+/* Glassmorphism Utility Classes */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-light {
+  background: var(--glass-bg-light);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.glass-card-active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Maroon gradient backgrounds */
+.bg-maroon-gradient {
+  background: linear-gradient(135deg, var(--tamu-maroon) 0%, var(--tamu-maroon-dark) 100%);
+}
+
+.bg-maroon-gradient-light {
+  background: linear-gradient(135deg, var(--tamu-maroon-light) 0%, var(--tamu-maroon) 100%);
 }

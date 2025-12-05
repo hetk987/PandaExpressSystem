@@ -25,7 +25,7 @@ export default function Home() {
                 <a href="/employee/cashier">
                     <Button
                         variant="default"
-                        className="px-6 py-3 text-lg font-bold bg-panda-red hover:bg-panda-dark-red text-white shadow-md rounded-md"
+                        className="px-6 py-3 text-lg font-bold bg-tamu-maroon hover:bg-tamu-maroon-dark text-white shadow-md rounded-md transition-colors duration-300"
                     >
                         Home
                     </Button>

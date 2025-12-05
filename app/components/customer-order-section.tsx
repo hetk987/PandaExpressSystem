@@ -16,8 +16,8 @@ export default function CustomerOrderSection() {
     <Card className="border-2 border-neutral-200 shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader className="space-y-4 pb-8">
         <div className="flex items-center justify-center">
-          <div className="rounded-full bg-panda-red/10 p-6">
-            <ShoppingCart className="h-16 w-16 text-panda-red" />
+          <div className="rounded-full bg-tamu-maroon/10 p-6">
+            <ShoppingCart className="h-16 w-16 text-tamu-maroon" />
           </div>
         </div>
         <div className="text-center">
@@ -30,14 +30,14 @@ export default function CustomerOrderSection() {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="flex items-start gap-3 rounded-lg bg-neutral-50 p-4">
-            <Utensils className="h-5 w-5 text-panda-red mt-0.5" />
+            <Utensils className="h-5 w-5 text-tamu-maroon mt-0.5" />
             <div>
               <h3 className="font-semibold text-neutral-900">Fresh & Delicious</h3>
               <p className="text-sm text-neutral-600">Choose from our wide selection of Chinese cuisine</p>
             </div>
           </div>
           <div className="flex items-start gap-3 rounded-lg bg-neutral-50 p-4">
-            <Clock className="h-5 w-5 text-panda-red mt-0.5" />
+            <Clock className="h-5 w-5 text-tamu-maroon mt-0.5" />
             <div>
               <h3 className="font-semibold text-neutral-900">Quick Service</h3>
               <p className="text-sm text-neutral-600">Fast ordering and preparation for your convenience</p>
@@ -48,7 +48,7 @@ export default function CustomerOrderSection() {
         <Button
           onClick={handleStartOrder}
           size="lg"
-          className="w-full bg-panda-red hover:bg-panda-dark-red text-white font-semibold text-lg py-6 rounded-xl shadow-md hover:shadow-lg transition-all"
+          className="w-full bg-tamu-maroon hover:bg-tamu-maroon-dark text-white font-semibold text-lg py-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
         >
           Start Your Order
         </Button>

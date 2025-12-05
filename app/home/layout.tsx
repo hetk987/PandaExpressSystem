@@ -95,7 +95,52 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     const tax = useMemo(() => +(subtotal * 0.095).toFixed(2), [subtotal]);
     const total = useMemo(() => +(subtotal + tax).toFixed(2), [subtotal, tax]);
 
+    const totalItemCount = useMemo(() => {
+        const mealsCount = meals.reduce((sum, meal) => sum + meal.quantity, 0);
+        const itemsCount = individualItems.reduce((sum, item) => sum + item.quantity, 0);
+        return mealsCount + itemsCount;
+    }, [meals, individualItems]);
+
     const handlePay = async () => {
+        // If Card payment method is selected, use Stripe checkout
+        if (selectedPayment === 1) {
+            try {
+                const response = await fetch("/api/checkout/create", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        meals: meals,
+                        individualItems: individualItems,
+                        subtotal: subtotal,
+                        tax: tax,
+                        total: total,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    toast.error("Failed to create checkout session");
+                    console.error("Failed to create checkout session: " + error.error);
+                    return;
+                }
+
+                const data = await response.json();
+                if (data.url) {
+                    // Redirect to Stripe checkout
+                    window.location.href = data.url;
+                } else {
+                    toast.error("Failed to get checkout URL");
+                }
+            } catch (error) {
+                toast.error("Failed to initiate payment");
+                console.error("Error initiating Stripe checkout:", error);
+            }
+            return;
+        }
+
+        // For other payment methods, use existing flow
         const orderInfo: OrderInfo = {
             meals: meals,
             individualItems: individualItems,
@@ -300,13 +345,13 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                     <AlertDialogHeader>
                         <AlertDialogTitle className={textClasses}>Are you still ordering?</AlertDialogTitle>
                         <AlertDialogDescription className={textClasses}>
-                            You haven't moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
+                            You haven&apos;t moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel 
                             onClick={handleCancel}
-                            className={`bg-destructive text-destructive-foreground hover:bg-destructive/90 font-semibold ${textClasses}`}
+                            className={`bg-tamu-maroon-dark text-white hover:bg-tamu-maroon-dark/90 hover:text-white cursor-pointer font-semibold ${textClasses}`}
                         >
                             Cancel Order ({cancelCountdown})
                         </AlertDialogCancel>
@@ -317,35 +362,80 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 </AlertDialogContent>
             </AlertDialog>
 
-            <SidebarProvider>
+            <SidebarProvider className="h-screen overflow-hidden">
                 <AppSidebar 
                     temperature={temperature}
                     precipitation={precipitation}
                     windSpeed={windSpeed}
                     windDirection={windDirection}
                 />
-                <SidebarInset>
-                    <div className="flex flex-col flex-1">
-                        <main className="flex-1 overflow-y-auto">
+                <SidebarInset className="h-full">
+                    <div className="flex flex-col h-full">
+                        <main className="flex-1 overflow-y-auto min-h-0">
                             {children}
                         </main>
 
-                        <footer className="bg-dark-red text-white h-15 flex items-center justify-between px-6">
-                            <div className="flex-1 flex flex-col items-center justify-center text-sm leading-tight">
-                                <span className={`font-semibold tracking-wide ${textClasses}`}>Weather</span>
-                                <span className={`text-white/80 ${textClasses}`}>
-                                    {temperature?.toFixed(2)}°F • {precipitation?.toFixed(2)}" rain
-                                </span>
+                        <footer className="sticky bottom-0 bg-maroon-gradient text-white h-18 flex items-center justify-between px-6 border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]">
+                            {/* Weather Info - Left */}
+                            <div className="flex items-center gap-3 min-w-[160px]">
+                                <div className="size-10 rounded-lg bg-white/10 flex items-center justify-center">
+                                    <span className="text-lg">🌤️</span>
+                                </div>
+                                <div className="flex flex-col text-sm leading-tight">
+                                    <span className={`font-semibold tracking-wide ${textClasses}`}>
+                                        {temperature?.toFixed(0)}°F
+                                    </span>
+                                    <span className={`text-white/70 text-xs ${textClasses}`}>
+                                        {precipitation?.toFixed(2)}" rain
+                                    </span>
+                                </div>
                             </div>
 
+                            {/* Cart Summary - Center */}
+                            <div className="flex items-center gap-4">
+                                {totalItemCount > 0 ? (
+                                    <div className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2 backdrop-blur-sm">
+                                        <div className="flex items-center gap-2">
+                                            <ShoppingCart className="h-5 w-5 text-white/80" />
+                                            <span className={`font-medium ${textClasses}`}>
+                                                {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
+                                            </span>
+                                        </div>
+                                        <div className="w-px h-6 bg-white/20" />
+                                        <span className={`font-bold text-lg ${textClasses}`}>
+                                            ${total.toFixed(2)}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 text-white/60">
+                                        <ShoppingCart className="h-5 w-5" />
+                                        <span className={`text-sm ${textClasses}`}>Your cart is empty</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Checkout Button - Right */}
                             <Sheet>
                             <SheetTrigger asChild>
-                                    <Button className="fixed bottom-16 right-6 h-16 px-8 bg-panda-dark-red text-white font-bold text-xl rounded-full shadow-2xl hover:bg-panda-dark-red hover:scale-110 transition-all z-50 flex items-center gap-2">
-                                    <ShoppingCart className="h-6 w-6" />
+                                <Button 
+                                    className={cn(
+                                        "h-12 px-6 font-bold text-lg rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2",
+                                        totalItemCount > 0 
+                                            ? "bg-white text-tamu-maroon hover:bg-white/90 hover:scale-105 hover:shadow-xl"
+                                            : "bg-white/20 text-white/80 hover:bg-white/30 cursor-pointer",
+                                        textClasses
+                                    )}
+                                >
+                                    <ShoppingCart className="h-5 w-5" />
                                     Checkout
+                                    {totalItemCount > 0 && (
+                                        <span className="ml-1 bg-tamu-maroon text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                                            {totalItemCount}
+                                        </span>
+                                    )}
                                 </Button>
                             </SheetTrigger>
-                                <SheetContent className="bg-bright-red text-white">
+                                <SheetContent className="bg-maroon-gradient text-white border-l border-white/10">
                                     <SheetHeader className="border-b border-white/30 p-4">
                                         <SheetTitle className={`text-2xl text-white ${textClasses}`}>
                                             Your Order
@@ -460,8 +550,8 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         </div>
                                     </div>
 
-                                    <SheetFooter className="flex flex-row justify-between items-center border-t border-white/20 p-4">
-                                            <Button onClick={handleClearCart} variant="outline" className={`bg-panda-dark-red cursor-pointer hover:bg-panda-dark-red/90 hover:text-white hover:border-panda-light-red/60 ${textClasses}`}>
+                                    <SheetFooter className="flex flex-row justify-between items-center border-t border-white/10 bg-white/5 backdrop-blur-sm p-4">
+                                            <Button onClick={handleClearCart} variant="outline" className={`bg-tamu-maroon-dark cursor-pointer hover:bg-tamu-maroon-dark/90 hover:text-white border-white/20 hover:border-white/40 transition-all duration-300 ${textClasses}`}>
                                                 <Trash2 className="size-4" />
                                                 Clear Cart
                                             </Button>
@@ -471,7 +561,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                     orderItems.length === 0
                                                 }
                                                 onClick={handlePay}
-                                                className={`cursor-pointer hover:bg-white/90 ${textClasses}`}
+                                                className={`cursor-pointer bg-white text-tamu-maroon hover:bg-white/90 font-semibold transition-all duration-300 ${textClasses}`}
                                                 >
                                                 Pay ${total.toFixed(2)}
                                             </Button>

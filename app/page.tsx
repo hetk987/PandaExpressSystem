@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/app/components/ui/button";
 import { ShoppingCart, LogIn } from "lucide-react";
+import Image from "next/image";
 
 export default function Home() {
     const router = useRouter();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-panda-red via-panda-dark-red to-neutral-900 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-tamu-maroon via-tamu-maroon-dark to-neutral-900 relative overflow-hidden">
             {/* Animated background elements */}
             <div className="absolute inset-0 opacity-10">
                 <div className="absolute top-20 left-20 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
@@ -34,8 +35,14 @@ export default function Home() {
                 {/* Logo and Brand */}
                 <div className="text-center mb-12 animate-fade-in">
                     <div className="inline-block mb-6">
-                        <div className="h-32 w-32 rounded-full bg-white flex items-center justify-center shadow-2xl animate-bounce-slow">
-                            <span className="text-7xl">🐼</span>
+                        <div className="h-32 w-32 rounded-full bg-white flex items-center justify-center shadow-2xl animate-bounce-slow overflow-hidden">
+                            <Image 
+                                src="/Panda Express/round_logo.png" 
+                                alt="Panda Express Logo" 
+                                width={128} 
+                                height={128}
+                                className="object-cover"
+                            />
                         </div>
                     </div>
                     <h1 className="text-7xl font-bold text-white mb-4 drop-shadow-lg">
@@ -51,7 +58,7 @@ export default function Home() {
                     <Button
                         onClick={() => router.push("/home/build")}
                         size="lg"
-                        className="bg-white text-panda-dark-red hover:bg-neutral-100 text-2xl font-bold py-8 px-16 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 group"
+                        className="bg-white text-tamu-maroon hover:bg-neutral-100 text-2xl font-bold py-8 px-16 rounded-2xl shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 group"
                     >
                         <ShoppingCart className="h-8 w-8 mr-4 group-hover:animate-bounce" />
                         Touch to Start Your Order

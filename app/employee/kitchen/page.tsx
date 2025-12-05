@@ -7,6 +7,7 @@ import { KitchenOrderItem } from "@/app/components/KitchenOrderItem";
 import { KitchenDrawer } from "@/app/components/app-kitchen-drawer";
 import type { Order, Cooked } from "@/lib/types";
 import { Skeleton } from "@/app/components/ui/skeleton";
+import {signOut} from "next-auth/react";
 
 export default function KitchenPage() {
     const [selectedMealType, setSelectedMealType] = useState<string>("All");
@@ -38,35 +39,8 @@ export default function KitchenPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-white">
-                {/* Header Skeleton */}
-                <div className="border-b border-black bg-white px-6 py-4 flex flex-row justify-between items-center">
-                    <div>
-                        <Skeleton className="h-8 w-64 mb-2" />
-                        <Skeleton className="h-5 w-32" />
-                    </div>
-                    <Skeleton className="h-14 w-56" />
-                </div>
-
-                {/* Filter Skeleton */}
-                <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-                    <div className="flex gap-2">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton key={i} className="h-10 w-32" />
-                        ))}
-                    </div>
-                </div>
-
-                {/* Orders Grid Skeleton */}
-                <div className="p-6">
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="break-inside-avoid mb-6">
-                                <Skeleton className="h-72 w-full rounded-lg" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+            <div className="flex items-center justify-center min-h-screen font-mono text-gray-500">
+                Loading kitchen data...
             </div>
         );
     }
@@ -94,22 +68,30 @@ export default function KitchenPage() {
 
             {/* Meal Type Filter */}
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
-                <div className="flex gap-2 flex-wrap">
-                    {mealTypes.map((type) => (
-                        <button
-                            key={type}
-                            onClick={() => setSelectedMealType(type)}
-                            className={`
-                                px-4 py-2 font-mono font-bold text-sm border-2 transition-all
-                                ${selectedMealType === type 
-                                    ? 'bg-black text-white border-black' 
-                                    : 'bg-white text-black border-black hover:bg-gray-100'
-                                }
-                            `}
-                        >
-                            {type.toUpperCase()}
-                        </button>
-                    ))}
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex gap-2 flex-wrap">
+                        {mealTypes.map((type) => (
+                            <button
+                                key={type}
+                                onClick={() => setSelectedMealType(type)}
+                                className={`
+                                    px-4 py-2 font-mono font-bold text-sm border-2 transition-all
+                                    ${selectedMealType === type 
+                                        ? 'bg-black text-white border-black' 
+                                        : 'bg-white text-black border-black hover:bg-gray-100'
+                                    }
+                                `}
+                            >
+                                {type.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+                    <button
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800 transition"
+                    >
+                        Logout
+                    </button>
                 </div>
             </div>
 

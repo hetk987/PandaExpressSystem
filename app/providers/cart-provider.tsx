@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { MealOrder, IndividualItem } from "@/lib/types";
 import { toast } from "sonner";
 
@@ -53,27 +53,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [meals, individualItems, isInitialized]);
 
-  const addMeal = (meal: MealOrder) => {
+  const addMeal = useCallback((meal: MealOrder) => {
     setMeals((prev) => [...prev, meal]);
-  };
+  }, []);
 
-  const addIndividualItem = (item: IndividualItem) => {
+  const addIndividualItem = useCallback((item: IndividualItem) => {
     setIndividualItems((prev) => [...prev, item]);
-  };
+  }, []);
 
-  const removeMeal = (index: number) => {
+  const removeMeal = useCallback((index: number) => {
     setMeals((prev) => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const removeIndividualItem = (index: number) => {
+  const removeIndividualItem = useCallback((index: number) => {
     setIndividualItems((prev) => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setMeals([]);
     setIndividualItems([]);
     localStorage.removeItem(CART_STORAGE_KEY);
-  };
+  }, []);
 
   return (
     <CartContext.Provider

@@ -33,7 +33,7 @@ function LoginContent() {
         const res = await signIn("credentials", {
             password: pin,
             redirect: false,
-            callbackUrl: "/home",
+            callbackUrl: "/employee/kitchen",
         });
 
         setLoading(false);
@@ -41,7 +41,7 @@ function LoginContent() {
         if (res?.error) {
             setError("Invalid PIN");
         } else {
-            window.location.href = "/home";
+            window.location.href = "/employee/kitchen";
         }
     };
 
@@ -79,7 +79,7 @@ function LoginContent() {
                         </p>
                     )}
                     <Button
-                        onClick={() => signIn("google", { callbackUrl: "/home" })}
+                        onClick={() => signIn("google", { callbackUrl: "/employee/kitchen" })}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg rounded-xl"
                     >
                         Sign in with Google
