@@ -182,15 +182,13 @@ export default function Build({
             })),
         };
 
-        await addMealWithToast(
-            () => {
-                addMeal({
-                    mealType: mealtype.typeName,
-                    quantity: 1,
-                    price: mealtype.price,
-                    selections: selections,
-                });
-            },
+        const success = await addMealWithToast(
+            () => addMeal({
+                mealType: mealtype.typeName,
+                quantity: 1,
+                price: mealtype.price,
+                selections: selections,
+            }),
             {
                 onSuccess: () => {
                     // Reset selections
@@ -201,7 +199,9 @@ export default function Build({
             }
         );
         
-        router.push("/employee/cashier/build");
+        if (success) {
+            router.push("/employee/cashier/build");
+        }
     };
 
     if (isLoading) {
