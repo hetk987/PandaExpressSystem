@@ -44,6 +44,11 @@ export function AppSidebar({
   
   const menuItems = [
     {
+      title: "Chat",
+      icon: MessageCircle,
+      href: "/home/chat",
+    },
+    {
       title: "Build Your Own",
       icon: ChefHat,
       href: "/home/build",
@@ -67,11 +72,6 @@ export function AppSidebar({
       title: "Appetizers",
       icon: Sparkles,
       href: "/home/appetizer",
-    },
-    {
-      title: "Chat",
-      icon: MessageCircle,
-      href: "/home/chat",
     }
   ]
 
