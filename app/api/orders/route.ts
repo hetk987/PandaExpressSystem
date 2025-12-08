@@ -65,6 +65,23 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+        // Validate optional customerPhone field
+        if (body.customerPhone !== undefined && body.customerPhone !== null) {
+            if (typeof body.customerPhone !== 'string') {
+                return NextResponse.json(
+                    { error: 'customerPhone must be a string' },
+                    { status: 400 }
+                );
+            }
+            // Basic phone number validation (at least 10 digits)
+            const phoneDigits = body.customerPhone.replace(/\D/g, '');
+            if (phoneDigits.length > 0 && phoneDigits.length < 10) {
+                return NextResponse.json(
+                    { error: 'customerPhone must be a valid phone number with at least 10 digits' },
+                    { status: 400 }
+                );
+            }
+        }
         const newOrder = await createOrder(body);
         return NextResponse.json(newOrder, { status: 201 });
     } catch (error) {

@@ -1,7 +1,7 @@
 import { pgTable, foreignKey, real, integer, text, boolean, jsonb, check, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
-export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink'])
+export const recipeType = pgEnum("recipe_type", ['Side', 'Entree', 'Drink', 'Appetizer'])
 
 
 export const orders = pgTable("orders", {

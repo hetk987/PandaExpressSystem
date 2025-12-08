@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { meals, individualItems, subtotal, tax, total } = body;
+        const { meals, individualItems, subtotal, tax, total, customerPhone } = body;
 
         // Validate required fields
         if (!meals || !individualItems || subtotal === undefined || tax === undefined || total === undefined) {
@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
                 cashierId: cashierId,
                 orderInfo: orderInfo,
                 isCompleted: false,
+                customerPhone: customerPhone || undefined,
             }),
         });
 

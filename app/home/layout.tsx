@@ -12,7 +12,14 @@ import {
     SheetTrigger,
 } from "@/app/components/ui/sheet";
 import { Button } from "@/app/components/ui/button";
-import { CreditCard, IdCard, ShoppingCart, Smartphone, Trash2 } from "lucide-react";
+import {
+    CreditCard,
+    IdCard,
+    Phone,
+    ShoppingCart,
+    Smartphone,
+    Trash2,
+} from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { cn, getCSTTimestamp } from "@/lib/utils";
 import { CartProvider, useCart } from "../providers/cart-provider";
@@ -38,21 +45,30 @@ const IDLE_TIMEOUT = 30000; // 30 seconds
 const COUNTDOWN_SECONDS = 7; // 7 seconds
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
-    const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
+    const {
+        meals,
+        individualItems,
+        clearCart,
+        removeMeal,
+        removeIndividualItem,
+    } = useCart();
     const router = useRouter();
-    const { textClasses } = useAccessibilityStyles(); 
+    const { textClasses } = useAccessibilityStyles();
     const paymentMethods = [
         { id: 1, name: "Card", icon: CreditCard },
         { id: 2, name: "Student Card", icon: IdCard },
         { id: 3, name: "Mobile Pay", icon: Smartphone },
     ];
     const [selectedPayment, setSelectedPayment] = useState<number | null>(null);
-    
+    const [customerPhone, setCustomerPhone] = useState<string>("");
+
     // Idle detection state
     const [showIdleDialog, setShowIdleDialog] = useState(false);
     const [cancelCountdown, setCancelCountdown] = useState(5);
     const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const countdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+        null
+    );
 
     // Transform cart data to display format
     const orderItems = useMemo(() => {
@@ -97,7 +113,10 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
 
     const totalItemCount = useMemo(() => {
         const mealsCount = meals.reduce((sum, meal) => sum + meal.quantity, 0);
-        const itemsCount = individualItems.reduce((sum, item) => sum + item.quantity, 0);
+        const itemsCount = individualItems.reduce(
+            (sum, item) => sum + item.quantity,
+            0
+        );
         return mealsCount + itemsCount;
     }, [meals, individualItems]);
 
@@ -116,13 +135,16 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         subtotal: subtotal,
                         tax: tax,
                         total: total,
+                        customerPhone: customerPhone.trim() || undefined,
                     }),
                 });
 
                 if (!response.ok) {
                     const error = await response.json();
                     toast.error("Failed to create checkout session");
-                    console.error("Failed to create checkout session: " + error.error);
+                    console.error(
+                        "Failed to create checkout session: " + error.error
+                    );
                     return;
                 }
 
@@ -154,13 +176,15 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 cashierId: 2,
                 orderInfo: orderInfo,
                 isCompleted: false,
+                customerPhone: customerPhone.trim() || undefined,
             }),
         });
 
         if (response.ok) {
             toast.success("Order placed successfully");
             clearCart();
-            router.push('/logout');
+            console.log();
+            router.push("/logout/" + (await response.json()).id);
         } else {
             const error = await response.json();
             toast.error("Failed to place order");
@@ -169,14 +193,14 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
     };
 
     const handleClearCart = () => {
-        clearCart();    
+        clearCart();
         toast.success("Cart cleared successfully");
     };
 
-    const handleRemoveItem = (item: typeof orderItems[0]) => {
+    const handleRemoveItem = (item: (typeof orderItems)[0]) => {
         // Extract index from item.id (format: "meal-0" or "item-0")
         const index = parseInt(item.id.split("-")[1]);
-        
+
         if (item.kind === "meal") {
             removeMeal(index);
             toast.success("Meal removed from cart");
@@ -198,12 +222,12 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             if (idleTimerRef.current) {
                 clearTimeout(idleTimerRef.current);
             }
-            
+
             // If dialog is showing, don't reset
             if (showIdleDialog) {
                 return;
             }
-            
+
             // Set new timer for IDLE_TIMEOUT seconds
             idleTimerRef.current = setTimeout(() => {
                 setShowIdleDialog(true);
@@ -235,15 +259,15 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             }
             return;
         }
-        
+
         // Start countdown when dialog opens
         let currentCount = COUNTDOWN_SECONDS;
         setCancelCountdown(COUNTDOWN_SECONDS);
-        
+
         const interval = setInterval(() => {
             currentCount -= 1;
             setCancelCountdown(currentCount);
-            
+
             if (currentCount <= 0) {
                 clearInterval(interval);
                 countdownTimerRef.current = null;
@@ -304,7 +328,12 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             const params = {
                 latitude: 30.628,
                 longitude: -96.3344,
-                current: ["temperature_2m", "precipitation", "wind_speed_10m", "wind_direction_10m"],
+                current: [
+                    "temperature_2m",
+                    "precipitation",
+                    "wind_speed_10m",
+                    "wind_direction_10m",
+                ],
                 timezone: "auto",
                 wind_speed_unit: "mph",
                 temperature_unit: "fahrenheit",
@@ -321,7 +350,9 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             // Note: The order of weather variables in the URL query and the indices below need to match!
             const weatherData = {
                 current: {
-                    time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
+                    time: new Date(
+                        (Number(current.time()) + utcOffsetSeconds) * 1000
+                    ),
                     temperature_2m: current.variables(0)!.value(),
                     precipitation: current.variables(1)!.value(),
                     wind_speed_10m: current.variables(2)!.value(),
@@ -333,7 +364,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             setPrecipitation(weatherData.current.precipitation);
             setWindSpeed(weatherData.current.wind_speed_10m);
             setWindDirection(weatherData.current.wind_direction_10m);
-        }
+        };
 
         fetchData();
     }, []);
@@ -343,19 +374,27 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             <AlertDialog open={showIdleDialog} onOpenChange={setShowIdleDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle className={textClasses}>Are you still ordering?</AlertDialogTitle>
+                        <AlertDialogTitle className={textClasses}>
+                            Are you still ordering?
+                        </AlertDialogTitle>
                         <AlertDialogDescription className={textClasses}>
-                            You haven&apos;t moved your mouse in a while. Are you still placing an order? Your order will be automatically cancelled in {cancelCountdown} second{cancelCountdown !== 1 ? 's' : ''}.
+                            You haven&apos;t moved your mouse in a while. Are
+                            you still placing an order? Your order will be
+                            automatically cancelled in {cancelCountdown} second
+                            {cancelCountdown !== 1 ? "s" : ""}.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel 
+                        <AlertDialogCancel
                             onClick={handleCancel}
                             className={`bg-tamu-maroon-dark text-white hover:bg-tamu-maroon-dark/90 hover:text-white cursor-pointer font-semibold ${textClasses}`}
                         >
                             Cancel Order ({cancelCountdown})
                         </AlertDialogCancel>
-                        <AlertDialogAction onClick={handleContinue} className={textClasses}>
+                        <AlertDialogAction
+                            onClick={handleContinue}
+                            className={textClasses}
+                        >
                             Continue Ordering
                         </AlertDialogAction>
                     </AlertDialogFooter>
@@ -363,7 +402,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             </AlertDialog>
 
             <SidebarProvider className="h-screen overflow-hidden">
-                <AppSidebar 
+                <AppSidebar
                     temperature={temperature}
                     precipitation={precipitation}
                     windSpeed={windSpeed}
@@ -382,10 +421,14 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                     <span className="text-lg">🌤️</span>
                                 </div>
                                 <div className="flex flex-col text-sm leading-tight">
-                                    <span className={`font-semibold tracking-wide ${textClasses}`}>
+                                    <span
+                                        className={`font-semibold tracking-wide ${textClasses}`}
+                                    >
                                         {temperature?.toFixed(0)}°F
                                     </span>
-                                    <span className={`text-white/70 text-xs ${textClasses}`}>
+                                    <span
+                                        className={`text-white/70 text-xs ${textClasses}`}
+                                    >
                                         {precipitation?.toFixed(2)}&quot; rain
                                     </span>
                                 </div>
@@ -397,47 +440,60 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                     <div className="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2 backdrop-blur-sm">
                                         <div className="flex items-center gap-2">
                                             <ShoppingCart className="h-5 w-5 text-white/80" />
-                                            <span className={`font-medium ${textClasses}`}>
-                                                {totalItemCount} {totalItemCount === 1 ? 'item' : 'items'}
+                                            <span
+                                                className={`font-medium ${textClasses}`}
+                                            >
+                                                {totalItemCount}{" "}
+                                                {totalItemCount === 1
+                                                    ? "item"
+                                                    : "items"}
                                             </span>
                                         </div>
                                         <div className="w-px h-6 bg-white/20" />
-                                        <span className={`font-bold text-lg ${textClasses}`}>
+                                        <span
+                                            className={`font-bold text-lg ${textClasses}`}
+                                        >
                                             ${total.toFixed(2)}
                                         </span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-2 text-white/60">
                                         <ShoppingCart className="h-5 w-5" />
-                                        <span className={`text-sm ${textClasses}`}>Your cart is empty</span>
+                                        <span
+                                            className={`text-sm ${textClasses}`}
+                                        >
+                                            Your cart is empty
+                                        </span>
                                     </div>
                                 )}
                             </div>
 
                             {/* Checkout Button - Right */}
                             <Sheet>
-                            <SheetTrigger asChild>
-                                <Button 
-                                    className={cn(
-                                        "h-12 px-6 font-bold text-lg rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2",
-                                        totalItemCount > 0 
-                                            ? "bg-white text-tamu-maroon hover:bg-white/90 hover:scale-105 hover:shadow-xl"
-                                            : "bg-white/20 text-white/80 hover:bg-white/30 cursor-pointer",
-                                        textClasses
-                                    )}
-                                >
-                                    <ShoppingCart className="h-5 w-5" />
-                                    Checkout
-                                    {totalItemCount > 0 && (
-                                        <span className="ml-1 bg-tamu-maroon text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center">
-                                            {totalItemCount}
-                                        </span>
-                                    )}
-                                </Button>
-                            </SheetTrigger>
+                                <SheetTrigger asChild>
+                                    <Button
+                                        className={cn(
+                                            "h-12 px-6 font-bold text-lg rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2",
+                                            totalItemCount > 0
+                                                ? "bg-white text-tamu-maroon hover:bg-white/90 hover:scale-105 hover:shadow-xl"
+                                                : "bg-white/20 text-white/80 hover:bg-white/30 cursor-pointer",
+                                            textClasses
+                                        )}
+                                    >
+                                        <ShoppingCart className="h-5 w-5" />
+                                        Checkout
+                                        {totalItemCount > 0 && (
+                                            <span className="ml-1 bg-tamu-maroon text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                                                {totalItemCount}
+                                            </span>
+                                        )}
+                                    </Button>
+                                </SheetTrigger>
                                 <SheetContent className="bg-maroon-gradient text-white border-l border-white/10">
                                     <SheetHeader className="border-b border-white/30 p-4">
-                                        <SheetTitle className={`text-2xl text-white ${textClasses}`}>
+                                        <SheetTitle
+                                            className={`text-2xl text-white ${textClasses}`}
+                                        >
                                             Your Order
                                         </SheetTitle>
                                     </SheetHeader>
@@ -446,7 +502,9 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
                                             {orderItems.length === 0 ? (
                                                 <div className="px-4 py-8 text-center text-white/70">
-                                                    <p className={textClasses}>Your cart is empty</p>
+                                                    <p className={textClasses}>
+                                                        Your cart is empty
+                                                    </p>
                                                 </div>
                                             ) : (
                                                 <div className="divide-y divide-white/10">
@@ -457,44 +515,71 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                         >
                                                             <div className="flex items-center justify-between">
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className={`font-semibold ${textClasses}`}>
+                                                                    <span
+                                                                        className={`font-semibold ${textClasses}`}
+                                                                    >
                                                                         {item.kind ===
                                                                         "meal"
                                                                             ? item.name
                                                                             : "Individual A-la-carte"}
                                                                     </span>
-                                                                    <span className={`text-xs text-white/70 ${textClasses}`}>
-                                                                        {item.quantity}x
+                                                                    <span
+                                                                        className={`text-xs text-white/70 ${textClasses}`}
+                                                                    >
+                                                                        {
+                                                                            item.quantity
+                                                                        }
+                                                                        x
                                                                     </span>
                                                                 </div>
-                                                                <div className={`text-right font-medium ${textClasses}`}>
+                                                                <div
+                                                                    className={`text-right font-medium ${textClasses}`}
+                                                                >
                                                                     <span>
                                                                         $
                                                                         {(
                                                                             item.price *
                                                                             item.quantity
-                                                                        ).toFixed(2)}
+                                                                        ).toFixed(
+                                                                            2
+                                                                        )}
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            {item.kind === "meal" && (
-                                                                <ul className={`mt-1 list-disc list-inside text-sm text-white/85 ${textClasses}`}>
+                                                            {item.kind ===
+                                                                "meal" && (
+                                                                <ul
+                                                                    className={`mt-1 list-disc list-inside text-sm text-white/85 ${textClasses}`}
+                                                                >
                                                                     {item.components.map(
                                                                         (c) => (
-                                                                            <li key={c}>
-                                                                                {c}
+                                                                            <li
+                                                                                key={
+                                                                                    c
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    c
+                                                                                }
                                                                             </li>
                                                                         )
                                                                     )}
                                                                 </ul>
                                                             )}
-                                                            {item.kind === "ala" && (
-                                                                <div className={`mt-1 text-sm text-white/85 ${textClasses}`}>
+                                                            {item.kind ===
+                                                                "ala" && (
+                                                                <div
+                                                                    className={`mt-1 text-sm text-white/85 ${textClasses}`}
+                                                                >
                                                                     {item.name}
                                                                 </div>
                                                             )}
                                                             <Button
-                                                                onClick={() => handleRemoveItem(item)}
+                                                                onClick={() =>
+                                                                    handleRemoveItem(
+                                                                        item
+                                                                    )
+                                                                }
                                                                 variant="ghost"
                                                                 size="icon"
                                                                 className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
@@ -508,63 +593,115 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         </div>
 
                                         <div className="space-y-2 rounded-md bg-white/5 p-4">
-                                            <div className={`flex justify-between text-white/90 ${textClasses}`}>
+                                            <div
+                                                className={`flex justify-between text-white/90 ${textClasses}`}
+                                            >
                                                 <span>Subtotal</span>
-                                                <span>${subtotal.toFixed(2)}</span>
+                                                <span>
+                                                    ${subtotal.toFixed(2)}
+                                                </span>
                                             </div>
-                                            <div className={`flex justify-between text-white/90 ${textClasses}`}>
+                                            <div
+                                                className={`flex justify-between text-white/90 ${textClasses}`}
+                                            >
                                                 <span>Tax</span>
                                                 <span>${tax.toFixed(2)}</span>
                                             </div>
                                             <div className="h-px bg-white/20" />
-                                            <div className={`flex justify-between text-lg font-semibold ${textClasses}`}>
+                                            <div
+                                                className={`flex justify-between text-lg font-semibold ${textClasses}`}
+                                            >
                                                 <span>Total</span>
                                                 <span>${total.toFixed(2)}</span>
                                             </div>
                                         </div>
 
+                                        {/* Phone Number Input for SMS Notifications */}
+                                        <div className="space-y-2">
+                                            <p
+                                                className={`text-sm uppercase tracking-wide text-white/80 ${textClasses}`}
+                                            >
+                                                Phone Number (optional)
+                                            </p>
+                                            <p
+                                                className={`text-xs text-white/60 ${textClasses}`}
+                                            >
+                                                Get a text when your order is
+                                                ready
+                                            </p>
+                                            <div className="relative">
+                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+                                                <input
+                                                    type="tel"
+                                                    placeholder="(555) 123-4567"
+                                                    value={customerPhone}
+                                                    onChange={(e) =>
+                                                        setCustomerPhone(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className={`w-full pl-10 pr-4 py-3 rounded-lg bg-white/10 border border-white/20 
+                                                        text-white placeholder:text-white/40 focus:outline-none focus:border-white/40
+                                                        focus:ring-1 focus:ring-white/30 transition-all duration-200 ${textClasses}`}
+                                                />
+                                            </div>
+                                        </div>
+
                                         <div className="space-y-3">
-                                            <p className={`text-sm uppercase tracking-wide text-white/80 ${textClasses}`}>
+                                            <p
+                                                className={`text-sm uppercase tracking-wide text-white/80 ${textClasses}`}
+                                            >
                                                 Payment method
                                             </p>
                                             <div className="grid grid-cols-2 gap-3">
-                                                {paymentMethods.map((method) => (
-                                                    <Button
-                                                        onClick={() =>
-                                                            setSelectedPayment(method.id)
-                                                        }
-                                                        key={method.id}
-                                                        variant="outline"
-                                                        className={cn(
-                                                            `justify-center border-white/60 bg-white/10 text-white hover:bg-white/20 ${textClasses}`,
-                                                            selectedPayment === method.id &&
-                                                                "border-white bg-white/20 ring-2 ring-white/80",
-                                                            method.id === 3 && "col-span-2"
-                                                        )}
-                                                    >
-                                                        <method.icon className="size-4" />
-                                                        {method.name}
-                                                    </Button>
-                                                ))}
+                                                {paymentMethods.map(
+                                                    (method) => (
+                                                        <Button
+                                                            onClick={() =>
+                                                                setSelectedPayment(
+                                                                    method.id
+                                                                )
+                                                            }
+                                                            key={method.id}
+                                                            variant="outline"
+                                                            className={cn(
+                                                                `justify-center border-white/60 bg-white/10 text-white hover:bg-white/20 ${textClasses}`,
+                                                                selectedPayment ===
+                                                                    method.id &&
+                                                                    "border-white bg-white/20 ring-2 ring-white/80",
+                                                                method.id ===
+                                                                    3 &&
+                                                                    "col-span-2"
+                                                            )}
+                                                        >
+                                                            <method.icon className="size-4" />
+                                                            {method.name}
+                                                        </Button>
+                                                    )
+                                                )}
                                             </div>
                                         </div>
                                     </div>
 
                                     <SheetFooter className="flex flex-row justify-between items-center border-t border-white/10 bg-white/5 backdrop-blur-sm p-4">
-                                            <Button onClick={handleClearCart} variant="outline" className={`bg-tamu-maroon-dark cursor-pointer hover:bg-tamu-maroon-dark/90 hover:text-white border-white/20 hover:border-white/40 transition-all duration-300 ${textClasses}`}>
-                                                <Trash2 className="size-4" />
-                                                Clear Cart
-                                            </Button>
-                                            <Button
-                                                disabled={
-                                                    selectedPayment === null ||
-                                                    orderItems.length === 0
-                                                }
-                                                onClick={handlePay}
-                                                className={`cursor-pointer bg-white text-tamu-maroon hover:bg-white/90 font-semibold transition-all duration-300 ${textClasses}`}
-                                                >
-                                                Pay ${total.toFixed(2)}
-                                            </Button>
+                                        <Button
+                                            onClick={handleClearCart}
+                                            variant="outline"
+                                            className={`bg-tamu-maroon-dark cursor-pointer hover:bg-tamu-maroon-dark/90 hover:text-white border-white/20 hover:border-white/40 transition-all duration-300 ${textClasses}`}
+                                        >
+                                            <Trash2 className="size-4" />
+                                            Clear Cart
+                                        </Button>
+                                        <Button
+                                            disabled={
+                                                selectedPayment === null ||
+                                                orderItems.length === 0
+                                            }
+                                            onClick={handlePay}
+                                            className={`cursor-pointer bg-white text-tamu-maroon hover:bg-white/90 font-semibold transition-all duration-300 ${textClasses}`}
+                                        >
+                                            Pay ${total.toFixed(2)}
+                                        </Button>
                                     </SheetFooter>
                                 </SheetContent>
                             </Sheet>
@@ -572,8 +709,6 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                     </div>
                 </SidebarInset>
             </SidebarProvider>
-
-            
         </div>
     );
 }
