@@ -207,15 +207,13 @@ export default function Build({
             })),
         };
 
-        await addMealWithToast(
-            () => {
-                addMeal({
-                    mealType: mealtype.typeName,
-                    quantity: quantity,
-                    price: mealtype.price,
-                    selections: selections,
-                });
-            },
+        const success = await addMealWithToast(
+            () => addMeal({
+                mealType: mealtype.typeName,
+                quantity: quantity,
+                price: mealtype.price,
+                selections: selections,
+            }),
             {
                 onSuccess: () => {
                     // Reset selections and quantity
@@ -227,7 +225,9 @@ export default function Build({
             }
         );
 
-        router.push("/home/build");
+        if (success) {
+            router.push("/home/build");
+        }
     };
 
     const getIconForType = (type: RecipeType) => {

@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-    function middleware(req) {
+    function proxy(req) {
         const token = req.nextauth.token;
         const path = req.nextUrl.pathname;
 
@@ -27,17 +27,17 @@ export default withAuth(
         callbacks: {
             authorized: ({ token, req }) => {
                 const path = req.nextUrl.pathname;
-                
+
                 // Allow access to login page without authentication
                 if (path === "/login") {
                     return true;
                 }
-                
+
                 // For protected routes, require authentication
                 if (path.startsWith("/employee/")) {
                     return !!token;
                 }
-                
+
                 // Allow all other routes
                 return true;
             },

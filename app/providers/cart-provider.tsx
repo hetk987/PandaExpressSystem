@@ -1,17 +1,22 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
 import { MealOrder, IndividualItem } from "@/lib/types";
 import { toast } from "sonner";
+import { APP_CONFIG } from "@/lib/config";
 
 interface CartContextType {
   meals: MealOrder[];
   individualItems: IndividualItem[];
-  addMeal: (meal: MealOrder) => void;
-  addIndividualItem: (item: IndividualItem) => void;
+  addMeal: (meal: MealOrder) => boolean;
+  addIndividualItem: (item: IndividualItem) => boolean;
   removeMeal: (index: number) => void;
   removeIndividualItem: (index: number) => void;
   clearCart: () => void;
+  totalItemCount: number;
+  isAtLimit: boolean;
+  canAddItems: (quantity: number) => boolean;
+  maxItems: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -53,13 +58,40 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [meals, individualItems, isInitialized]);
 
-  const addMeal = useCallback((meal: MealOrder) => {
-    setMeals((prev) => [...prev, meal]);
-  }, []);
+  // Calculate total item count
+  const totalItemCount = useMemo(() => {
+    const mealsCount = meals.reduce((sum, meal) => sum + meal.quantity, 0);
+    const itemsCount = individualItems.reduce((sum, item) => sum + item.quantity, 0);
+    return mealsCount + itemsCount;
+  }, [meals, individualItems]);
 
-  const addIndividualItem = useCallback((item: IndividualItem) => {
+  // Check if cart is at the limit
+  const isAtLimit = useMemo(() => {
+    return totalItemCount >= APP_CONFIG.KIOSK_MAX_ITEMS;
+  }, [totalItemCount]);
+
+  // Check if a quantity can be added
+  const canAddItems = useCallback((quantity: number) => {
+    return totalItemCount + quantity <= APP_CONFIG.KIOSK_MAX_ITEMS;
+  }, [totalItemCount]);
+
+  const addMeal = useCallback((meal: MealOrder): boolean => {
+    if (!canAddItems(meal.quantity)) {
+      toast.error(`Cannot add ${meal.quantity} item(s). Maximum ${APP_CONFIG.KIOSK_MAX_ITEMS} items allowed per order.`);
+      return false;
+    }
+    setMeals((prev) => [...prev, meal]);
+    return true;
+  }, [canAddItems]);
+
+  const addIndividualItem = useCallback((item: IndividualItem): boolean => {
+    if (!canAddItems(item.quantity)) {
+      toast.error(`Cannot add ${item.quantity} item(s). Maximum ${APP_CONFIG.KIOSK_MAX_ITEMS} items allowed per order.`);
+      return false;
+    }
     setIndividualItems((prev) => [...prev, item]);
-  }, []);
+    return true;
+  }, [canAddItems]);
 
   const removeMeal = useCallback((index: number) => {
     setMeals((prev) => prev.filter((_, i) => i !== index));
@@ -85,6 +117,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
         removeMeal,
         removeIndividualItem,
         clearCart,
+        totalItemCount,
+        isAtLimit,
+        canAddItems,
+        maxItems: APP_CONFIG.KIOSK_MAX_ITEMS,
       }}
     >
       {children}

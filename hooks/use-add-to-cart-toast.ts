@@ -3,6 +3,7 @@ import { MealOrder, IndividualItem, OrderInfo } from "@/lib/types";
 
 interface AddToCartOptions {
   onSuccess?: () => void;
+  onLimitReached?: () => void;
   successMessage?: string;
   loadingMessage?: string;
   errorMessage?: string;
@@ -10,63 +11,55 @@ interface AddToCartOptions {
 
 export function useAddToCartToast() {
   const addItemWithToast = async (
-    addItem: () => void,
+    addItem: () => boolean,
     options: AddToCartOptions = {}
   ) => {
     const {
       onSuccess,
+      onLimitReached,
       successMessage = "Item has been added to cart",
-      loadingMessage = "Adding to cart...",
-      errorMessage = "Failed to add item to cart",
     } = options;
 
-    const addToCartPromise = new Promise<void>((resolve, reject) => {
-      try {
-        addItem();
-        resolve();
+    try {
+      const success = addItem();
+      if (success) {
+        toast.success(successMessage);
         onSuccess?.();
-      } catch (error) {
-        reject(error);
+      } else {
+        // Limit was reached - cart provider already shows error toast
+        onLimitReached?.();
       }
-    });
-
-    toast.promise(addToCartPromise, {
-      loading: loadingMessage,
-      success: successMessage,
-      error: errorMessage,
-    });
-
-    return addToCartPromise;
+      return success;
+    } catch (error) {
+      toast.error("Failed to add item to cart");
+      return false;
+    }
   };
 
   const addMealWithToast = async (
-    addMeal: () => void,
+    addMeal: () => boolean,
     options: AddToCartOptions = {}
   ) => {
     const {
       onSuccess,
+      onLimitReached,
       successMessage = "Meal has been added to cart",
-      loadingMessage = "Adding to cart...",
-      errorMessage = "Failed to add meal to cart",
     } = options;
 
-    const addToCartPromise = new Promise<void>((resolve, reject) => {
-      try {
-        addMeal();
-        resolve();
+    try {
+      const success = addMeal();
+      if (success) {
+        toast.success(successMessage);
         onSuccess?.();
-      } catch (error) {
-        reject(error);
+      } else {
+        // Limit was reached - cart provider already shows error toast
+        onLimitReached?.();
       }
-    });
-
-    toast.promise(addToCartPromise, {
-      loading: loadingMessage,
-      success: successMessage,
-      error: errorMessage,
-    });
-
-    return addToCartPromise;
+      return success;
+    } catch (error) {
+      toast.error("Failed to add meal to cart");
+      return false;
+    }
   };
 
   const addOrderInfoWithToast = async (

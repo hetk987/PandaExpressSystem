@@ -10,8 +10,10 @@ import { Button } from "@/app/components/ui/button";
 import { Order, Cooked } from "@/lib/types";
 import { extractRecipeQuantities } from "@/lib/utils";
 import { toast } from "sonner";
+import { useSWRConfig } from "swr";
+import { Trash2 } from "lucide-react";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export function KitchenOrderItem({
     order,
@@ -20,14 +22,39 @@ export function KitchenOrderItem({
     order: Order;
     cooked: Cooked[];
 }) {
+    const { mutate } = useSWRConfig();
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
     async function completeOrder(id: number): Promise<void> {
         const response = await fetch(`/api/orders/complete/${id}`, {
             method: "PUT",
         });
         if (response.ok) {
             toast.success("Order completed successfully");
+            mutate("/api/orders/incomplete");
         } else {
             toast.error("Failed to complete order");
+        }
+    }
+
+    async function deleteOrder(id: number): Promise<void> {
+        setIsDeleting(true);
+        try {
+            const response = await fetch(`/api/orders/${id}`, {
+                method: "DELETE",
+            });
+            if (response.ok) {
+                toast.success("Order deleted successfully");
+                mutate("/api/orders/incomplete");
+            } else {
+                toast.error("Failed to delete order");
+            }
+        } catch (error) {
+            toast.error("Failed to delete order");
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
         }
     }
 
@@ -59,7 +86,19 @@ export function KitchenOrderItem({
                             ORDER #{order.id}
                         </CardTitle>
                         <span className="text-xs font-mono">
-                            {order.orderTime}
+                            {new Date(order.orderTime).toLocaleDateString(
+                                "en-US",
+                                {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                }
+                            ) +
+                                " " +
+                                new Date(order.orderTime).toLocaleTimeString(
+                                    "en-US",
+                                    { hour: "2-digit", minute: "2-digit" }
+                                )}
                         </span>
                     </div>
                 </CardHeader>
@@ -146,22 +185,54 @@ export function KitchenOrderItem({
                         </div>
                     </div>
 
-                    {/* Complete Button */}
-                    {isReady ? (
-                        <Button
-                            className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
-                            onClick={async () => await completeOrder(order.id)}
-                        >
-                            COMPLETE ORDER
-                        </Button>
-                    ) : (
-                        <Button
-                            className="w-full font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
-                            disabled
-                        >
-                            COMPLETE ORDER
-                        </Button>
-                    )}
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                        {isReady ? (
+                            <Button
+                                className="flex-1 font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
+                                onClick={async () =>
+                                    await completeOrder(order.id)
+                                }
+                            >
+                                COMPLETE ORDER
+                            </Button>
+                        ) : (
+                            <Button
+                                className="flex-1 font-bold text-sm py-4 bg-black text-white hover:bg-gray-800"
+                                disabled
+                            >
+                                COMPLETE ORDER
+                            </Button>
+                        )}
+
+                        {showDeleteConfirm ? (
+                            <div className="flex gap-1">
+                                <Button
+                                    className="font-bold text-sm py-4 bg-red-600 text-white hover:bg-red-700"
+                                    onClick={async () =>
+                                        await deleteOrder(order.id)
+                                    }
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? "..." : "YES"}
+                                </Button>
+                                <Button
+                                    className="font-bold text-sm py-4 bg-gray-500 text-white hover:bg-gray-600"
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    disabled={isDeleting}
+                                >
+                                    NO
+                                </Button>
+                            </div>
+                        ) : (
+                            <Button
+                                className="font-bold text-sm py-4 bg-red-600 text-white hover:bg-red-700"
+                                onClick={() => setShowDeleteConfirm(true)}
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </div>

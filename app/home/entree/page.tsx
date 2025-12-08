@@ -47,15 +47,14 @@ export default function Home() {
         if (!selectedRecipe) return;
 
         await addItemWithToast(
-            () => {
+            () =>
                 addIndividualItem({
                     recipeId: selectedRecipe.id!,
                     recipeName: selectedRecipe.name,
                     recipeType: "Entree",
                     quantity: quantity,
                     price: selectedRecipe.pricePerServing,
-                });
-            },
+                }),
             {
                 onSuccess: () => {
                     setSelectedRecipe(null);
