@@ -17,7 +17,8 @@ import {
   Coffee, 
   ChefHat,
   Accessibility,
-  Sparkles
+  Sparkles,
+  MessageCircle
 } from "lucide-react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -66,6 +67,11 @@ export function AppSidebar({
       title: "Appetizers",
       icon: Sparkles,
       href: "/home/appetizer",
+    },
+    {
+      title: "Chat",
+      icon: MessageCircle,
+      href: "/home/chat",
     }
   ]
 

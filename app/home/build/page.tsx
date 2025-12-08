@@ -45,7 +45,7 @@ export default function Home() {
 
     return (
         <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
-            {mealtypes.filter(item => item.typeName != "Drink" && item.typeName != "A La Carte").map((item, i) => (
+            {mealtypes.filter(item => item.typeName != "Drink" && item.typeName != "A La Carte" && !item.typeName.includes("Party")).map((item, i) => (
                 <a href={`/home/build/${item.typeName}`} key={i}>
                     <MealCard name={item.typeName} image={item.imageFilePath} key={i}/>
                 </a>

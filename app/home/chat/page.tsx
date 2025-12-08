@@ -1,15 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useCart } from "@/app/providers/cart-provider";
 import { MealOrder, IndividualItem, OrderInfo, MealType, Recipe } from "@/lib/types";
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
+import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
+import { Send } from "lucide-react";
 
 export default function TestChat() {
   const { meals, individualItems, addMeal, addIndividualItem } = useCart();
+  const { textClasses } = useAccessibilityStyles();
   const [mealtypes, setMealtypes] = useState<MealType[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Helper function to limit messages to the 10 most recent
   const addMessage = (message: { role: "user" | "assistant"; text: string }) => {
@@ -19,6 +25,11 @@ export default function TestChat() {
       return updated.slice(-10);
     });
   };
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const validateMeal = (meal: MealOrder): MealOrder | null => {
     const validMealType = mealtypes.find(mt => mt.typeName === meal.mealType);
@@ -217,81 +228,69 @@ export default function TestChat() {
   };
 
   return (
-    <div className="p-10">
-      <h1 className="text-2xl font-bold mb-4">Chat with Kiosk Bot</h1>
+    <div className="flex flex-col h-full min-h-0">
+      {/* Header */}
+      <div className="p-6 border-b border-border shrink-0">
+        <h1 className={`text-3xl font-bold text-tamu-maroon ${textClasses}`}>
+          Chat with Kiosk Bot
+        </h1>
+        <p className={`text-muted-foreground mt-1 ${textClasses}`}>
+          Ask me about menu items, place orders, or get recommendations
+        </p>
+      </div>
 
-      <div className="mb-4 space-y-2 max-h-96 overflow-y-auto border border-gray-300 rounded p-4">
+      {/* Messages Container */}
+      <div 
+        className="flex-1 overflow-y-auto p-6 space-y-4 bg-neutral-50 min-h-0"
+      >
         {messages.length === 0 && (
-          <div className="text-gray-400 text-center">
-            Start a conversation with the bot...
+          <div className={`text-center text-muted-foreground mt-12 ${textClasses}`}>
+            <div className="max-w-md mx-auto space-y-2">
+              <p className="text-lg font-medium">Start a conversation</p>
+              <p className="text-sm">
+                Try asking: &quot;I&apos;d like to order orange chicken&quot; or &quot;What entrees do you have?&quot;
+              </p>
+            </div>
           </div>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={m.role === "user" ? "text-right" : "text-left"}>
-            <span className={`inline-block p-2 rounded ${m.role === "user" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"}`}>
-              {m.text}
-            </span>
+          <div 
+            key={i} 
+            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`max-w-[80%] rounded-xl px-4 py-3 ${
+                m.role === "user"
+                  ? "bg-tamu-maroon text-white rounded-br-sm"
+                  : "bg-white text-foreground border border-border rounded-bl-sm shadow-sm"
+              } ${textClasses}`}
+            >
+              <p className="whitespace-pre-wrap wrap-break-word">{m.text}</p>
+            </div>
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
 
-      <div className="flex gap-2">
-        <input
-          className="flex-1 border border-gray-300 p-2 rounded"
-          placeholder="Type your message..."
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleSendMessage()}
-        />
-        <button 
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" 
-          onClick={handleSendMessage}
-        >
-          Send
-        </button>
-      </div>
-
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <div>
-          <h2 className="text-xl font-bold mb-2">Current Cart</h2>
-          <div className="bg-gray-100 p-4 rounded max-h-96 overflow-auto">
-            <div className="mb-4">
-              <h3 className="font-semibold">Meals ({meals.length})</h3>
-              {meals.length === 0 ? (
-                <p className="text-gray-500 text-sm">No meals in cart</p>
-              ) : (
-                <ul className="list-disc list-inside text-sm">
-                  {meals.map((meal, i) => (
-                    <li key={i}>{meal.mealType}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold">Individual Items ({individualItems.length})</h3>
-              {individualItems.length === 0 ? (
-                <p className="text-gray-500 text-sm">No individual items in cart</p>
-              ) : (
-                <ul className="list-disc list-inside text-sm">
-                  {individualItems.map((item, i) => (
-                    <li key={i}>{item.recipeType} (ID: {item.recipeId})</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+      {/* Input Container - Fixed at Bottom */}
+      <div className="sticky bottom-0 bg-white border-t border-border p-4 shadow-lg shrink-0">
+        <div className="flex gap-3 max-w-4xl mx-auto">
+          <Input
+            className={`flex-1 ${textClasses}`}
+            placeholder="Type your message..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
+          />
+          <Button 
+            className="bg-tamu-maroon hover:bg-tamu-maroon-dark text-white px-6"
+            onClick={handleSendMessage}
+            disabled={!input.trim()}
+          >
+            <Send className="h-4 w-4" />
+            <span className="sr-only">Send message</span>
+          </Button>
         </div>
-
-        <div>
-          <h2 className="text-xl font-bold mb-2">Cart JSON</h2>
-          <pre className="bg-gray-100 p-4 rounded max-h-96 overflow-auto text-xs">
-            {JSON.stringify({ meals, individualItems }, null, 2)}
-          </pre>
-        </div>
-      </div>
-
-      <div className="mt-4 text-sm text-gray-600">
-        <p>Available: {recipes.length} recipes, {mealtypes.length} meal types</p>
       </div>
     </div>
   );
