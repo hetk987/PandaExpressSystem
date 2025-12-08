@@ -27,32 +27,41 @@ export async function POST(request: NextRequest) {
         }
 
         // Validation: required fields for inv-rec-junc
-        if (!body.inventoryId || !body.recipeId || body.inventoryQuantity === undefined) {
+        if (body.inventoryId == null || body.recipeId == null || body.inventoryQuantity == null) {
             return NextResponse.json(
                 { error: 'Missing required fields: inventoryId, recipeId, inventoryQuantity' },
                 { status: 400 }
             );
         }
 
-        // Type validation
-        if (typeof body.inventoryId !== 'number' || typeof body.recipeId !== 'number' || typeof body.inventoryQuantity !== 'number') {
+        // Coerce to numbers (handles string inputs from forms)
+        const inventoryId = Number(body.inventoryId);
+        const recipeId = Number(body.recipeId);
+        const inventoryQuantity = Number(body.inventoryQuantity);
+
+        // Type validation after coercion
+        if (isNaN(inventoryId) || isNaN(recipeId) || isNaN(inventoryQuantity)) {
             return NextResponse.json(
-                { error: 'Invalid data types: inventoryId, recipeId, and inventoryQuantity must be numbers' },
+                { error: 'Invalid data types: inventoryId, recipeId, and inventoryQuantity must be valid numbers' },
                 { status: 400 }
             );
         }
-        if (body.inventoryQuantity < 0) {
+        if (inventoryQuantity < 0) {
             return NextResponse.json(
                 { error: 'inventoryQuantity must be a non-negative number' },
                 { status: 400 }
             );
         }
 
-        const newJunc = await createInvRecJunc(body);
+        const newJunc = await createInvRecJunc({
+            inventoryId,
+            recipeId,
+            inventoryQuantity
+        });
         return NextResponse.json(newJunc, { status: 201 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        
+
         // Handle database constraint errors
         if (errorMessage.includes('foreign key') || errorMessage.includes('violates foreign key')) {
             return NextResponse.json(

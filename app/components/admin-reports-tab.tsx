@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Button } from "@/app/components/ui/button";
+import { getTodayDateCST } from "@/lib/utils";
 import {
     Accordion,
     AccordionContent,
@@ -49,12 +50,6 @@ type RestockRow = {
 };
 
 export default function AdminReportsTab() {
-    // Helper function to get today's date in YYYY-MM-DD format
-    const getTodayDate = () => {
-        const today = new Date();
-        return today.toISOString().split("T")[0];
-    };
-
     // Product Usage state
     const [productUsageData, setProductUsageData] = React.useState<
         ProductUsageRow[] | null
@@ -316,7 +311,7 @@ export default function AdminReportsTab() {
                                 <Button
                                     variant="outline"
                                     onClick={() => {
-                                        const today = getTodayDate();
+                                        const today = getTodayDateCST();
                                         setProductUsageStartDate(today);
                                         setProductUsageEndDate(today);
                                     }}
@@ -422,7 +417,7 @@ export default function AdminReportsTab() {
                                 <Button
                                     variant="outline"
                                     onClick={() => {
-                                        const today = getTodayDate();
+                                        const today = getTodayDateCST();
                                         setSalesByItemStartDate(today);
                                         setSalesByItemEndDate(today);
                                     }}

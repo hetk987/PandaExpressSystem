@@ -34,18 +34,36 @@ export function extractRecipeQuantities(order: OrderInfo): RecipeQuantityMap {
 }
 
 /**
- * Returns the current timestamp in CST (Central Standard Time, UTC-6)
- * formatted as an ISO string
+ * Returns today's date in YYYY-MM-DD format using Chicago timezone
+ * Use this for HTML date inputs and date-based queries
+ */
+export function getTodayDateCST(): string {
+    const now = new Date();
+    const year = now.toLocaleString("en-US", { timeZone: "America/Chicago", year: "numeric" });
+    const month = now.toLocaleString("en-US", { timeZone: "America/Chicago", month: "2-digit" });
+    const day = now.toLocaleString("en-US", { timeZone: "America/Chicago", day: "2-digit" });
+    return `${year}-${month}-${day}`;
+}
+
+/**
+ * Returns the current timestamp in Chicago timezone formatted as an ISO string
+ * Use this for timestamps stored in the database
  */
 export function getCSTTimestamp(): string {
     const now = new Date();
-    // CST is UTC-6 hours
-    const cstOffset = -6 * 60; // in minutes
-    // Adjust from local time to UTC, then to CST
-    const cstTime = new Date(
-        now.getTime() +
-        (cstOffset * 60 * 1000) +
-        (now.getTimezoneOffset() * 60 * 1000)
-    );
-    return cstTime.toISOString();
+    // Get Chicago time components
+    const options: Intl.DateTimeFormatOptions = {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    };
+    const parts = new Intl.DateTimeFormat("en-US", options).formatToParts(now);
+    const get = (type: string) => parts.find(p => p.type === type)?.value || "00";
+
+    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}.000Z`;
 }

@@ -20,10 +20,11 @@ export const createRecipe = async (recipe) => {
 };
 
 export const updateRecipe = async (id, recipe) => {
-    const updatedRecipe = await db
+    const [updatedRecipe] = await db
         .update(recipes)
         .set(recipe)
-        .where(eq(recipes.id, id));
+        .where(eq(recipes.id, id))
+        .returning();
     return updatedRecipe;
 };
 

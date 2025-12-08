@@ -14,15 +14,7 @@ export async function GET(
 
         const ingredients = await getIngredientsByRecipeId(recipeId);
         
-        // Check if any ingredients were found
-        if (!ingredients || (Array.isArray(ingredients) && ingredients.length === 0)) {
-            return NextResponse.json(
-                { error: 'No ingredients found for this recipe' },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json(ingredients, { status: 200 });
+        return NextResponse.json(ingredients ?? [], { status: 200 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         return NextResponse.json(

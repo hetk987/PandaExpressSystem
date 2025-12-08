@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Button } from "@/app/components/ui/button";
+import { getCSTTimestamp } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
@@ -155,7 +156,7 @@ export default function AdminInventoryTab() {
                 body: JSON.stringify({
                     cost: selectedInventory.batchPurchaseCost,
                     itemId: selectedInventory.id,
-                    expenseTime: new Date().toISOString(),
+                    expenseTime: getCSTTimestamp(),
                 }),
             });
 
@@ -233,7 +234,10 @@ export default function AdminInventoryTab() {
                 <TableBody>
                     {inventory.length === 0 && !invLoading && (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center text-sm">
+                            <TableCell
+                                colSpan={5}
+                                className="text-center text-sm"
+                            >
                                 No inventory items found.
                             </TableCell>
                         </TableRow>
@@ -315,7 +319,8 @@ export default function AdminInventoryTab() {
                                         step={0.01}
                                         placeholder="0.00"
                                         value={
-                                            selectedInventory.batchPurchaseCost === 0
+                                            selectedInventory.batchPurchaseCost ===
+                                            0
                                                 ? ""
                                                 : selectedInventory.batchPurchaseCost
                                         }
@@ -349,7 +354,8 @@ export default function AdminInventoryTab() {
                                                 "currentStock",
                                                 e.target.value === ""
                                                     ? 0
-                                                    : Number(e.target.value) || 0
+                                                    : Number(e.target.value) ||
+                                                          0
                                             )
                                         }
                                         placeholder="0"
@@ -364,7 +370,8 @@ export default function AdminInventoryTab() {
                                         id="inv-daily"
                                         type="number"
                                         value={
-                                            selectedInventory.estimatedUsedPerDay === 0
+                                            selectedInventory.estimatedUsedPerDay ===
+                                            0
                                                 ? ""
                                                 : selectedInventory.estimatedUsedPerDay
                                         }
@@ -373,7 +380,8 @@ export default function AdminInventoryTab() {
                                                 "estimatedUsedPerDay",
                                                 e.target.value === ""
                                                     ? 0
-                                                    : Number(e.target.value) || 0
+                                                    : Number(e.target.value) ||
+                                                          0
                                             )
                                         }
                                         placeholder="0"
@@ -466,7 +474,11 @@ export default function AdminInventoryTab() {
                                 <Input
                                     id="restock-qty"
                                     type="number"
-                                    value={restockQuantity === 0 ? "" : restockQuantity}
+                                    value={
+                                        restockQuantity === 0
+                                            ? ""
+                                            : restockQuantity
+                                    }
                                     onChange={(e) =>
                                         setRestockQuantity(
                                             e.target.value === ""
@@ -513,4 +525,3 @@ export default function AdminInventoryTab() {
         </div>
     );
 }
-

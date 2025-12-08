@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
 import {
     Dialog,
@@ -209,26 +210,32 @@ export default function AdminRecipesTab() {
             }
 
             const savedRecipe = await res.json();
-            const recipeId = savedRecipe.id;
+            // Use the returned ID, or fall back to existing ID for updates
+            const recipeId = savedRecipe.id ?? id;
 
             // Save ingredients
             for (const ingredient of ingredients) {
                 if (!ingredient.id) {
                     // New ingredient
-                    await fetch("/api/inv-rec-junc", {
+                    const ingRes = await fetch("/api/inv-rec-junc", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            inventoryId: ingredient.inventoryId,
-                            recipeId: recipeId,
-                            inventoryQuantity: ingredient.inventoryQuantity,
+                            inventoryId: Number(ingredient.inventoryId),
+                            recipeId: Number(recipeId),
+                            inventoryQuantity: Number(ingredient.inventoryQuantity),
                         }),
                     });
+                    if (!ingRes.ok) {
+                        const errData = await ingRes.text();
+                        throw new Error(`Failed to save ingredient: ${errData}`);
+                    }
                 }
             }
 
             await fetchRecipes();
             setRecDialogOpen(false);
+            toast.success("Recipe saved successfully!");
         } catch (err: unknown) {
             setRecError(err instanceof Error ? err.message : "Unknown error");
         } finally {
@@ -255,6 +262,7 @@ export default function AdminRecipesTab() {
 
             await fetchRecipes();
             setRecDialogOpen(false);
+            toast.success("Recipe deleted successfully!");
         } catch (err: unknown) {
             setRecError(err instanceof Error ? err.message : "Unknown error");
         } finally {
