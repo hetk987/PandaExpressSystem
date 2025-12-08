@@ -386,7 +386,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                         {temperature?.toFixed(0)}°F
                                     </span>
                                     <span className={`text-white/70 text-xs ${textClasses}`}>
-                                        {precipitation?.toFixed(2)}" rain
+                                        {precipitation?.toFixed(2)}&quot; rain
                                     </span>
                                 </div>
                             </div>

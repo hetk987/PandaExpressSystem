@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         const orderId = order.id;
 
         // Get base URL for callbacks
-        const baseUrl = process.env.NEXTAUTH_APP_URL || request.headers.get('origin') || 'http://localhost:3000';
+        const baseUrl = process.env.NEXTAUTH_URL || request.headers.get('origin') || 'http://localhost:3000';
 
         // Create Stripe checkout session with only order ID in metadata
         const session = await stripe.checkout.sessions.create({
