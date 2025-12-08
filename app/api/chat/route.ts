@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     
     prompt += "AVAILABLE MEAL TYPES:\n";
     mealtypes
-      .filter(mt => mt.typeName !== "Drink" && mt.typeName !== "A La Carte")
+      .filter(mt => mt.typeName !== "Drink" && mt.typeName !== "A La Carte" && !mt.typeName.includes("Party"))
       .forEach(mt => {
         prompt += `- ${mt.typeName}: $${mt.price.toFixed(2)} (${mt.entrees} entree(s), ${mt.sides} side(s), ${mt.drinks} drink(s))\n`;
       });

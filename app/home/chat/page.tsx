@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useCart } from "@/app/providers/cart-provider";
 import { MealOrder, IndividualItem, OrderInfo, MealType, Recipe } from "@/lib/types";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
-import { Send } from "lucide-react";
+import { Send, Volume2, VolumeX } from "lucide-react";
 
 export default function TestChat() {
   const { meals, individualItems, addMeal, addIndividualItem } = useCart();
@@ -15,7 +15,33 @@ export default function TestChat() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
   const [input, setInput] = useState("");
+  const [isTTSEnabled, setIsTTSEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastBotMessageRef = useRef<string>("");
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // Text-to-speech function using browser's native API
+  const speakText = useCallback((text: string) => {
+    if (!isTTSEnabled || !text.trim()) return;
+    
+    // Stop any current speech
+    if (speechSynthesisRef.current) {
+      window.speechSynthesis.cancel();
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    speechSynthesisRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  }, [isTTSEnabled]);
+
+  const stopSpeaking = useCallback(() => {
+    window.speechSynthesis.cancel();
+    speechSynthesisRef.current = null;
+  }, []);
 
   // Helper function to limit messages to the 10 most recent
   const addMessage = (message: { role: "user" | "assistant"; text: string }) => {
@@ -30,6 +56,28 @@ export default function TestChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
+  // Speak bot messages when they arrive
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === "assistant" && lastMessage.text !== lastBotMessageRef.current) {
+      lastBotMessageRef.current = lastMessage.text;
+      if (isTTSEnabled && lastMessage.text) {
+        // Small delay to ensure message is displayed before speaking
+        setTimeout(() => {
+          speakText(lastMessage.text);
+        }, 300);
+      }
+    }
+  }, [messages, isTTSEnabled, speakText]);
+
 
   const validateMeal = (meal: MealOrder): MealOrder | null => {
     const validMealType = mealtypes.find(mt => mt.typeName === meal.mealType);
@@ -179,12 +227,13 @@ export default function TestChat() {
     fetchData();
   }, []);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend) return;
 
-    const userMessage = input;
+    const userMessage = textToSend;
     const currentMessages = messages; // Capture current messages before state update
-    addMessage({ role: "user", text: input });
+    addMessage({ role: "user", text: userMessage });
     setInput("");
 
     try {
@@ -226,6 +275,7 @@ export default function TestChat() {
       });
     }
   };
+
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -282,9 +332,35 @@ export default function TestChat() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
           />
+          
+          {/* Text-to-Speech Toggle Button */}
+          <Button
+            variant={isTTSEnabled ? "default" : "outline"}
+            className={isTTSEnabled ? "bg-tamu-maroon hover:bg-tamu-maroon-dark text-white" : ""}
+            onClick={() => {
+              setIsTTSEnabled(!isTTSEnabled);
+              if (!isTTSEnabled && window.speechSynthesis.speaking) {
+                stopSpeaking();
+              }
+            }}
+            title={isTTSEnabled ? "Disable text-to-speech" : "Enable text-to-speech"}
+          >
+            {isTTSEnabled ? (
+              <>
+                <Volume2 className="h-4 w-4 mr-2" />
+                <span className="sr-only">Disable text-to-speech</span>
+              </>
+            ) : (
+              <>
+                <VolumeX className="h-4 w-4 mr-2" />
+                <span className="sr-only">Enable text-to-speech</span>
+              </>
+            )}
+          </Button>
+          
           <Button 
             className="bg-tamu-maroon hover:bg-tamu-maroon-dark text-white px-6"
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={!input.trim()}
           >
             <Send className="h-4 w-4" />

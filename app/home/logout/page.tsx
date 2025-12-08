@@ -1,24 +1,28 @@
 "use client"
 
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 function LogoutPage() {
-    const navigate = useNavigate();
+    const router = useRouter();
 
     useEffect(() => {
-    const timer = setTimeout(() => {
-        navigate('/home'); // Redirect to the '/home' route after 3 seconds
-    }, 3000); // 3000 milliseconds = 3 seconds
+        const timer = setTimeout(() => {
+            router.push('/');
+        }, 3000);
 
-    // Clean up the timer when the component unmounts to prevent memory leaks
-    return () => clearTimeout(timer);
-    }, [navigate]); // Add navigate as a dependency to useEffect
+        return () => clearTimeout(timer);
+    }, [router]);
 
     return (
-    <div>
-        <h1>Welcome! Redirecting in 3 seconds...</h1>
-    </div>
+        <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+            <h1 className="text-4xl font-bold kedebideri-bold transform transition-all duration-1000 opacity-0 scale-90">
+                Thank you valued customer
+                <span className="inline-block animate-bounce ml-2 opacity-0">
+                    🥡
+                </span>
+            </h1>
+        </div>
     );
 }
 
