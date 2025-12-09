@@ -1,5 +1,6 @@
 import { consumeCooked } from "@/app/services/cookedService";
 import { getOrderById, updateOrder } from "@/app/services/orderService";
+import { sendOrderReadyNotification } from "@/app/services/emailService";
 import { IndividualItem, MealOrder, Order } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -37,6 +38,23 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         for (const item of individualItemOrder) {
             await consumeCooked(item.recipeId, item.quantity);
         }
+
+        // Send email notification if customer provided an email (fire-and-forget)
+        console.log("Customer email: " + order.customerEmail);
+        if (order.customerEmail) {
+            sendOrderReadyNotification(order.customerEmail, id)
+                .then((success) => {
+                    if (success) {
+                        console.log(`Email notification sent for order #${id}`);
+                    } else {
+                        console.log(`Failed to send email for order #${id}`);
+                    }
+                })
+                .catch((err) => {
+                    console.error(`Error sending email for order #${id}:`, err);
+                });
+        }
+
         return NextResponse.json({ message: 'Order completed successfully' + JSON.stringify(updatedOrder) }, { status: 200 });
 
     }

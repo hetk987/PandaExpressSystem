@@ -5,12 +5,19 @@ import { OrderInfo, MealType, Recipe, MealOrder, IndividualItem, RecipeSelection
 import { getMealTypes } from "@/app/services/mealTypeService";
 import { getRecipes } from "@/app/services/recipeService";
 
-const client = new OpenAI({
-  apiKey: process.env.OPEN_AI_SECRET
-});
+// Lazy initialization of OpenAI client to avoid build-time errors
+let client: OpenAI | null = null;
 
-if (!process.env.OPEN_AI_SECRET) {
-  console.error("OPEN_AI_SECRET is missing!");
+function getOpenAIClient(): OpenAI {
+  if (!client) {
+    if (!process.env.OPEN_AI_SECRET) {
+      throw new Error("OPEN_AI_SECRET environment variable is not set");
+    }
+    client = new OpenAI({
+      apiKey: process.env.OPEN_AI_SECRET
+    });
+  }
+  return client;
 }
 
 export async function POST(req: Request) {
@@ -157,7 +164,8 @@ export async function POST(req: Request) {
   // Add the new user message
   messages.push({ role: "user", content: userMessage });
 
-  const response = await client.chat.completions.create({
+  const openai = getOpenAIClient();
+  const response = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: messages,
     max_completion_tokens: 200,

@@ -65,6 +65,23 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
+        // Validate optional customerEmail field
+        if (body.customerEmail !== undefined && body.customerEmail !== null) {
+            if (typeof body.customerEmail !== 'string') {
+                return NextResponse.json(
+                    { error: 'customerEmail must be a string' },
+                    { status: 400 }
+                );
+            }
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (body.customerEmail.trim() !== '' && !emailRegex.test(body.customerEmail)) {
+                return NextResponse.json(
+                    { error: 'customerEmail must be a valid email address' },
+                    { status: 400 }
+                );
+            }
+        }
         const newOrder = await createOrder(body);
         return NextResponse.json(newOrder, { status: 201 });
     } catch (error) {

@@ -46,8 +46,9 @@ export function getTodayDateCST(): string {
 }
 
 /**
- * Returns the current timestamp in Chicago timezone formatted as an ISO string
+ * Returns the current timestamp in Chicago timezone formatted as an ISO-like string
  * Use this for timestamps stored in the database
+ * Note: No 'Z' suffix since the time values are in CST, not UTC
  */
 export function getCSTTimestamp(): string {
     const now = new Date();
@@ -65,5 +66,6 @@ export function getCSTTimestamp(): string {
     const parts = new Intl.DateTimeFormat("en-US", options).formatToParts(now);
     const get = (type: string) => parts.find(p => p.type === type)?.value || "00";
 
-    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}.000Z`;
+    // Don't append 'Z' - these are CST time values, not UTC
+    return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
 }

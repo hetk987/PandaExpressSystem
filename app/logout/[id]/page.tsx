@@ -1,16 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, use } from "react";
 import { CartProvider, useCart } from "@/app/providers/cart-provider";
 import Image from "next/image";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Copy, Check } from "lucide-react";
 
-function LogoutContent() {
+function LogoutContent({ params }: { params: Promise<{ id: string }> }) {
+    const { id: orderId } = use(params);
     const router = useRouter();
     const [loaded, setLoaded] = useState(false);
     const [showCheckmark, setShowCheckmark] = useState(false);
+    const [copied, setCopied] = useState(false);
     const { clearCart } = useCart();
+
+    const handleCopyOrderId = async () => {
+        try {
+            await navigator.clipboard.writeText(orderId);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy order ID:", err);
+        }
+    };
 
     useEffect(() => {
         // Clear cart only once on mount
@@ -117,6 +129,48 @@ function LogoutContent() {
                     </p>
                 </div>
 
+                {/* Order ID display */}
+                <div
+                    className={`flex flex-col items-center gap-2 transform transition-all duration-700 delay-450
+                        ${
+                            loaded
+                                ? "opacity-100 translate-y-0"
+                                : "opacity-0 translate-y-4"
+                        }`}
+                >
+                    <p className="text-sm text-white/60 uppercase tracking-wider font-medium">
+                        Order ID
+                    </p>
+                    <div
+                        onClick={handleCopyOrderId}
+                        className="flex items-center gap-3 px-5 py-3 rounded-xl 
+                            bg-white/10 border border-white/20 
+                            hover:bg-white/15 hover:border-white/30
+                            cursor-pointer transition-all duration-300 group"
+                    >
+                        <span className="text-2xl md:text-3xl font-mono font-bold text-white tracking-wider">
+                            #{orderId}
+                        </span>
+                        <div
+                            className="flex items-center justify-center w-8 h-8 rounded-lg 
+                            bg-white/10 group-hover:bg-white/20 transition-all duration-300"
+                        >
+                            {copied ? (
+                                <Check className="w-4 h-4 text-emerald-400" />
+                            ) : (
+                                <Copy className="w-4 h-4 text-white/70 group-hover:text-white" />
+                            )}
+                        </div>
+                    </div>
+                    <p
+                        className={`text-xs text-white/40 transition-all duration-300 ${
+                            copied ? "text-emerald-400" : ""
+                        }`}
+                    >
+                        {copied ? "Copied to clipboard!" : "Click to copy"}
+                    </p>
+                </div>
+
                 {/* Animated takeout box */}
                 <div
                     className={`text-6xl transform transition-all duration-700 delay-500
@@ -150,10 +204,14 @@ function LogoutContent() {
     );
 }
 
-export default function LogoutPage() {
+export default function LogoutPage({
+    params,
+}: {
+    params: Promise<{ id: string }>;
+}) {
     return (
         <CartProvider>
-            <LogoutContent />
+            <LogoutContent params={params} />
         </CartProvider>
     );
 }

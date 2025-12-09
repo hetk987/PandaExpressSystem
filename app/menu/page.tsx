@@ -5,171 +5,242 @@ import { useState, useEffect } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 
 export default function KitchenPage() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [mealTypes, setMealTypes] = useState<MealType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
+    const [mealTypes, setMealTypes] = useState<MealType[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch both APIs in parallel for better performance
-        const [r1, r2] = await Promise.all([
-          fetch("/api/recipes"),
-          fetch("/api/mealtypes")
-        ]);
-        
-        const [d1, d2] = await Promise.all([
-          r1.json(),
-          r2.json()
-        ]);
-        
-        setRecipes(d1);
-        setMealTypes(d2);
-      } catch (error) {
-        console.error("Failed to fetch menu data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [r1, r2] = await Promise.all([
+                    fetch("/api/recipes"),
+                    fetch("/api/mealtypes"),
+                ]);
 
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen overflow-hidden bg-orange-50 p-4">
-        <div className="flex flex-row gap-10 items-start">
-          <div className="flex flex-col min-w-[360px]">
-            <Skeleton className="h-10 w-48 mb-4" />
-            <div className="flex flex-col gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full rounded-xl" />
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-col gap-10">
-            <div className="flex flex-row gap-10">
-              <div className="flex flex-col min-w-[580px]">
-                <Skeleton className="h-10 w-48 mb-4" />
-                <div className="grid grid-cols-3 gap-4">
-                  {Array.from({ length: 9 }).map((_, i) => (
-                    <Skeleton key={i} className="h-48 w-44 rounded-xl" />
-                  ))}
+                const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+
+                setRecipes(d1);
+                setMealTypes(d2);
+            } catch (error) {
+                console.error("Failed to fetch menu data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen w-full bg-white p-8">
+                <div className="max-w-7xl mx-auto">
+                    <Skeleton className="h-12 w-48 mb-12 rounded-lg" />
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton
+                                key={i}
+                                className="h-32 w-full rounded-xl"
+                            />
+                        ))}
+                    </div>
+                    <Skeleton className="h-10 w-40 mb-6 rounded-lg" />
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {Array.from({ length: 10 }).map((_, i) => (
+                            <Skeleton
+                                key={i}
+                                className="h-48 w-full rounded-xl"
+                            />
+                        ))}
+                    </div>
                 </div>
-              </div>
-              <div className="flex flex-col min-w-[580px]">
-                <Skeleton className="h-10 w-48 mb-4" />
-                <div className="grid grid-cols-3 gap-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-48 w-44 rounded-xl" />
-                  ))}
-                </div>
-              </div>
             </div>
-          </div>
+        );
+    }
+
+    const price = (n: number) => n.toFixed(2);
+
+    const itemCard = (name: string, cost: number, image: string | null) => (
+        <div className="group relative bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.05] border border-stone-100">
+            <div className="relative w-full h-40 bg-gradient-to-br from-stone-50 to-stone-100 overflow-hidden">
+                <img
+                    src={
+                        image ||
+                        "/placeholder.svg?height=160&width=160&query=food"
+                    }
+                    alt={name}
+                    className="w-full h-full object-contain object-center p-2 transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute top-0 right-0 bg-[#ce123d] text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
+                    ${price(cost)}
+                </div>
+            </div>
+            <div className="p-3 bg-white">
+                <p className="text-sm font-bold text-stone-900 line-clamp-2 leading-tight">
+                    {name}
+                </p>
+            </div>
         </div>
-      </div>
     );
-  }
 
-  const price = (n: number) => n.toFixed(2);
-
-  const itemCard = (name: string, cost: number) => (
-    <div className="flex flex-col bg-white rounded-xl p-2 shadow-sm w-44 h-48">
-      <div className="w-full h-28 overflow-hidden rounded-md">
-        <img
-          src="/images/image.png"
-          alt="food"
-          className="w-full h-full object-cover object-center"
-          style={{ aspectRatio: "1 / 1" }}
-        />
-      </div>
-      <div className="flex justify-between text-xs font-semibold text-gray-900 mt-2">
-        <span>{name}</span>
-        <span className="text-red-700">${price(cost)}</span>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="h-screen w-screen overflow-x-auto overflow-y-hidden bg-orange-50 p-4 select-none">
-      <div className="flex flex-row gap-10 min-w-max items-start">
-        {/* LEFT COLUMN: Meals + Drinks */}
-        <div className="flex flex-col min-w-[360px]">
-          <h1 className="text-4xl font-extrabold text-red-700 tracking-wide uppercase mb-4">
-            Meals
-          </h1>
-
-          <div className="flex flex-col gap-4">
-            {mealTypes
-              .filter((m) => m.typeName !== "A La Carte" && m.typeName !== "Drink")
-              .map((m, i) => (
-                <div key={i} className="bg-white rounded-xl p-4 shadow-sm text-sm">
-                  <div className="flex justify-between text-xl font-bold text-red-700 mb-1">
-                    <span>{m.typeName}</span>
-                    <span>${price(m.price)}</span>
-                  </div>
-                  {m.entrees !== undefined && m.entrees != 0 && (
-                    <p className="text-gray-800 text-sm">Entrees: {m.entrees}</p>
-                  )}
-                  {m.sides !== undefined && m.sides != 0 && (
-                    <p className="text-gray-800 text-sm">Sides: {m.sides}</p>
-                  )}
-                  {m.drinks !== undefined && m.drinks != 0 && (
-                    <p className="text-gray-800 text-sm">Drinks: {m.drinks}</p>
-                  )}
+    return (
+        <div className="min-h-screen w-full bg-white">
+            <div className="bg-maroon-gradient text-white px-8 py-12 shadow-lg">
+                <div className="max-w-7xl mx-auto">
+                    <h1 className="text-5xl md:text-6xl font-black tracking-tight mb-2">
+                        Our Menu
+                    </h1>
+                    <p className="text-lg text-maroon-50 font-medium">
+                        Crafted with quality & tradition
+                    </p>
                 </div>
-              ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-10">
-          <div className="flex flex-row gap-10">
-            {/* Entrees */}
-            <div className="flex flex-col min-w-[580px]">
-              <h2 className="text-4xl font-extrabold text-red-700 tracking-wide uppercase mb-4">
-                Entrees
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {recipes
-                  .filter((r) => r.type === "Entree")
-                  .map((r, i) => (
-                    <div key={i}>{itemCard(r.name, r.pricePerServing)}</div>
-                  ))}
-              </div>
             </div>
 
-            {/* Sides */}
-            <div className="flex flex-col min-w-[580px]">
-              <h2 className="text-4xl font-extrabold text-red-700 tracking-wide uppercase mb-4">
-                Sides
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {recipes
-                  .filter((r) => r.type === "Side")
-                  .map((r, i) => (
-                    <div key={i}>{itemCard(r.name, r.pricePerServing)}</div>
-                  ))}
-              </div>
+            <div className="max-w-7xl mx-auto px-8 py-12">
+                {/* Meal Plans Section */}
+                <div className="mb-16">
+                    <h2 className="text-3xl font-black text-maroon mb-8 tracking-tight">
+                        Meal Plans
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {mealTypes
+                            .filter(
+                                (m) =>
+                                    m.typeName !== "A La Carte" &&
+                                    m.typeName !== "Drink"
+                            )
+                            .map((m, i) => (
+                                <div
+                                    key={i}
+                                    className="group bg-white rounded-xl border-2 border-[#ce123d] shadow-md hover:shadow-xl transition-all duration-300 hover:border-maroon overflow-hidden"
+                                >
+                                    <div className="bg-gradient-to-br from-[#ce123d] to-[#a50a2f] h-24 flex items-center justify-center relative overflow-hidden">
+                                        <div className="absolute inset-0 opacity-10 bg-pattern"></div>
+                                        <h3 className="text-2xl font-black text-white relative z-10 text-center px-4">
+                                            {m.typeName}
+                                        </h3>
+                                    </div>
+                                    <div className="p-4">
+                                        <div className="text-center mb-4">
+                                            <p className="text-4xl font-black text-[#ce123d]">
+                                                ${price(m.price)}
+                                            </p>
+                                            <p className="text-xs text-stone-500 font-medium mt-1 uppercase tracking-wide">
+                                                per meal
+                                            </p>
+                                        </div>
+                                        <div className="space-y-2 border-t border-stone-100 pt-4">
+                                            {m.entrees !== undefined &&
+                                                m.entrees != 0 && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-stone-700 font-semibold">
+                                                            Entrees
+                                                        </span>
+                                                        <span className="bg-[#f5e6eb] text-[#ce123d] px-3 py-1 rounded-full text-xs font-bold">
+                                                            {m.entrees}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            {m.sides !== undefined &&
+                                                m.sides != 0 && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-stone-700 font-semibold">
+                                                            Sides
+                                                        </span>
+                                                        <span className="bg-[#732626] text-white px-3 py-1 rounded-full text-xs font-bold">
+                                                            {m.sides}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            {m.drinks !== undefined &&
+                                                m.drinks != 0 && (
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-sm text-stone-700 font-semibold">
+                                                            Drinks
+                                                        </span>
+                                                        <span className="bg-stone-100 text-stone-700 px-3 py-1 rounded-full text-xs font-bold">
+                                                            {m.drinks}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+                </div>
 
-              <br/>
+                {/* Entrees Section */}
+                <div className="mb-16">
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-1 h-10 bg-gradient-to-b from-[#ce123d] to-[#500000] rounded-full"></div>
+                        <h2 className="text-3xl font-black text-maroon tracking-tight">
+                            Entrees
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        {recipes
+                            .filter((r) => r.type === "Entree")
+                            .map((r, i) => (
+                                <div key={i}>
+                                    {itemCard(
+                                        r.name,
+                                        r.pricePerServing,
+                                        r.image
+                                    )}
+                                </div>
+                            ))}
+                    </div>
+                </div>
 
-              <h2 className="text-4xl font-extrabold text-red-700 tracking-wide uppercase mb-4">
-                Drinks
-              </h2>
-              <div className="grid grid-cols-3 gap-4">
-                {recipes
-                  .filter((r) => r.type === "Drink")
-                  .map((r, i) => (
-                    <div key={i}>{itemCard(r.name, r.pricePerServing)}</div>
-                  ))}
-              </div>
+                {/* Sides & Drinks Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                    {/* Sides */}
+                    <div>
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-1 h-10 bg-gradient-to-b from-[#ce123d] to-[#500000] rounded-full"></div>
+                            <h2 className="text-3xl font-black text-maroon tracking-tight">
+                                Sides
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {recipes
+                                .filter((r) => r.type === "Side")
+                                .map((r, i) => (
+                                    <div key={i}>
+                                        {itemCard(
+                                            r.name,
+                                            r.pricePerServing,
+                                            r.image
+                                        )}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+
+                    {/* Drinks */}
+                    <div>
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-1 h-10 bg-gradient-to-b from-[#ce123d] to-[#500000] rounded-full"></div>
+                            <h2 className="text-3xl font-black text-maroon tracking-tight">
+                                Drinks
+                            </h2>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {recipes
+                                .filter((r) => r.type === "Drink")
+                                .map((r, i) => (
+                                    <div key={i}>
+                                        {itemCard(
+                                            r.name,
+                                            r.pricePerServing,
+                                            r.image
+                                        )}
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            {/* Padding on the side */}
-            <div className="min-w-0.5"></div>
-          </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

@@ -1,7 +1,7 @@
 import db from "@/drizzle/src/index";
 import { orders } from "@/drizzle/src/db/schema";
 import { eq } from "drizzle-orm";
-import { createRecOrderJunc } from "@/app/services/recOrderService";
+import { createRecOrderJunc, deleteRecOrderJuncsByOrderId } from "@/app/services/recOrderService";
 
 export const getOrders = async () => {
     const allOrders = await db.select().from(orders);
@@ -128,6 +128,9 @@ export const updateOrder = async (id, order) => {
 };
 
 export const deleteOrder = async (id) => {
+    // First delete related rec_order_junc records to avoid foreign key constraint violation
+    await deleteRecOrderJuncsByOrderId(id);
+    // Then delete the order
     const deletedOrder = await db.delete(orders).where(eq(orders.id, id));
     return deletedOrder;
 };

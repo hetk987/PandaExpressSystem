@@ -38,3 +38,10 @@ export const deleteRecOrderJunc = async (id) => {
     .where(eq(recOrderJunc.id, id));
   return deletedRecOrderJunc;
 };
+
+export const deleteRecOrderJuncsByOrderId = async (orderId) => {
+  const deleted = await db
+    .delete(recOrderJunc)
+    .where(eq(recOrderJunc.orderId, orderId));
+  return deleted;
+};
