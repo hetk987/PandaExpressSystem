@@ -15,7 +15,7 @@ import { Button } from "@/app/components/ui/button";
 import {
     CreditCard,
     IdCard,
-    Phone,
+    Mail,
     ShoppingCart,
     Smartphone,
     Trash2,
@@ -60,7 +60,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
         { id: 3, name: "Mobile Pay", icon: Smartphone },
     ];
     const [selectedPayment, setSelectedPayment] = useState<number | null>(null);
-    const [customerPhone, setCustomerPhone] = useState<string>("");
+    const [customerEmail, setCustomerEmail] = useState<string>("");
 
     // Idle detection state
     const [showIdleDialog, setShowIdleDialog] = useState(false);
@@ -135,7 +135,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                         subtotal: subtotal,
                         tax: tax,
                         total: total,
-                        customerPhone: customerPhone.trim() || undefined,
+                        customerEmail: customerEmail.trim() || undefined,
                     }),
                 });
 
@@ -176,7 +176,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 cashierId: 2,
                 orderInfo: orderInfo,
                 isCompleted: false,
-                customerPhone: customerPhone.trim() || undefined,
+                                customerEmail: customerEmail.trim() || undefined,
             }),
         });
 
@@ -616,27 +616,27 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                             </div>
                                         </div>
 
-                                        {/* Phone Number Input for SMS Notifications */}
+                                        {/* Email Input for Notifications */}
                                         <div className="space-y-2">
                                             <p
                                                 className={`text-sm uppercase tracking-wide text-white/80 ${textClasses}`}
                                             >
-                                                Phone Number (optional)
+                                                Email Address (optional)
                                             </p>
                                             <p
                                                 className={`text-xs text-white/60 ${textClasses}`}
                                             >
-                                                Get a text when your order is
+                                                Get an email when your order is
                                                 ready
                                             </p>
                                             <div className="relative">
-                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
+                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
                                                 <input
-                                                    type="tel"
-                                                    placeholder="(555) 123-4567"
-                                                    value={customerPhone}
+                                                    type="email"
+                                                    placeholder="you@example.com"
+                                                    value={customerEmail}
                                                     onChange={(e) =>
-                                                        setCustomerPhone(
+                                                        setCustomerEmail(
                                                             e.target.value
                                                         )
                                                     }

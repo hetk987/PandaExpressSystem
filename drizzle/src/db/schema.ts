@@ -12,7 +12,7 @@ export const orders = pgTable("orders", {
 	cashierId: integer().notNull(),
 	isCompleted: boolean().notNull(),
 	orderInfo: jsonb(),
-	customerPhone: text(),  // Optional phone number for SMS notifications
+	customerEmail: text(),  // Optional email for order notifications
 }, (table) => [
 	foreignKey({
 		columns: [table.cashierId],

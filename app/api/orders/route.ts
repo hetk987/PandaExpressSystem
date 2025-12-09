@@ -65,19 +65,19 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        // Validate optional customerPhone field
-        if (body.customerPhone !== undefined && body.customerPhone !== null) {
-            if (typeof body.customerPhone !== 'string') {
+        // Validate optional customerEmail field
+        if (body.customerEmail !== undefined && body.customerEmail !== null) {
+            if (typeof body.customerEmail !== 'string') {
                 return NextResponse.json(
-                    { error: 'customerPhone must be a string' },
+                    { error: 'customerEmail must be a string' },
                     { status: 400 }
                 );
             }
-            // Basic phone number validation (at least 10 digits)
-            const phoneDigits = body.customerPhone.replace(/\D/g, '');
-            if (phoneDigits.length > 0 && phoneDigits.length < 10) {
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (body.customerEmail.trim() !== '' && !emailRegex.test(body.customerEmail)) {
                 return NextResponse.json(
-                    { error: 'customerPhone must be a valid phone number with at least 10 digits' },
+                    { error: 'customerEmail must be a valid email address' },
                     { status: 400 }
                 );
             }
