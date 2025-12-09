@@ -1,28 +1,43 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useCart } from "@/app/providers/cart-provider";
 import { MealOrder, IndividualItem, OrderInfo, MealType, Recipe } from "@/lib/types";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
-import { Send } from "lucide-react";
+import { Send, Volume2, VolumeX } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import { stripMarkdown, speakText, stopSpeaking } from "@/lib/chat-tts";
+import { handleFunctionCall } from "@/lib/chat-cart-handlers";
 
 export default function TestChat() {
-  const { meals, individualItems, addMeal, addIndividualItem } = useCart();
+  const { meals, individualItems, addMeal, addIndividualItem, removeMeal, removeIndividualItem, clearCart } = useCart();
   const { textClasses } = useAccessibilityStyles();
   const [mealtypes, setMealtypes] = useState<MealType[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
   const [input, setInput] = useState("");
+  const [isTTSEnabled, setIsTTSEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const lastBotMessageRef = useRef<string>("");
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Helper function to limit messages to the 10 most recent
+  // Text-to-speech function using browser's native API
+  const handleSpeakText = useCallback((text: string) => {
+    speakText(text, isTTSEnabled, speechSynthesisRef);
+  }, [isTTSEnabled]);
+
+  const handleStopSpeaking = useCallback(() => {
+    stopSpeaking(speechSynthesisRef);
+  }, []);
+
+  // Helper function to limit messages to the 15 most recent
   const addMessage = (message: { role: "user" | "assistant"; text: string }) => {
     setMessages(prev => {
       const updated = [...prev, message];
-      // Keep only the last 10 messages
-      return updated.slice(-10);
+      // Keep only the last 15 messages
+      return updated.slice(-15);
     });
   };
 
@@ -31,126 +46,41 @@ export default function TestChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const validateMeal = (meal: MealOrder): MealOrder | null => {
-    const validMealType = mealtypes.find(mt => mt.typeName === meal.mealType);
-    if (!validMealType) {
-      console.warn("Invalid meal type:", meal.mealType);
-      return null;
-    }
-
-    const validateSelections = (selections: { entrees: any[], sides: any[], drinks: any[] }) => {
-      const filterValid = (items: any[], type: "Entree" | "Side" | "Drink") =>
-        items.filter(i => {
-          const valid = recipes.some(r => r.id === i.recipeId && r.type === type);
-          if (!valid) console.warn(`Invalid ${type}:`, i);
-          return valid;
-        });
-      
-      const validated = {
-        entrees: filterValid(selections.entrees || [], "Entree"),
-        sides: filterValid(selections.sides || [], "Side"),
-        drinks: filterValid(selections.drinks || [], "Drink")
-      };
-      
-      // Validate that counts match meal type requirements
-      if (validated.entrees.length !== validMealType.entrees) {
-        console.warn(`Meal requires ${validMealType.entrees} entrees, got ${validated.entrees.length}`);
-        return null;
-      }
-      if (validated.sides.length !== validMealType.sides) {
-        console.warn(`Meal requires ${validMealType.sides} sides, got ${validated.sides.length}`);
-        return null;
-      }
-      if (validated.drinks.length !== validMealType.drinks) {
-        console.warn(`Meal requires ${validMealType.drinks} drinks, got ${validated.drinks.length}`);
-        return null;
-      }
-      
-      return validated;
+  // Cleanup speech on unmount
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
     };
+  }, []);
 
-    const validatedSelections = validateSelections(meal.selections);
-    if (!validatedSelections) {
-      return null;
-    }
-
-    // Use the correct price from meal type if not provided or different
-    const price = validMealType.price;
-
-    return {
-      ...meal,
-      price: price,
-      quantity: meal.quantity || 1,
-      selections: validatedSelections
-    };
-  };
-
-  const validateIndividualItem = (item: IndividualItem): IndividualItem | null => {
-    const recipe = recipes.find(r => r.id === item.recipeId && r.type === item.recipeType);
-    if (!recipe) {
-      console.warn("Invalid individual item:", item);
-      return null;
-    }
-    
-    // Auto-fill price if missing or invalid
-    const price = item.price && item.price > 0 ? item.price : (recipe.pricePerServing || 0);
-    
-    return {
-      ...item,
-      price: price,
-      quantity: item.quantity || 1
-    };
-  };
-
-  const handleFunctionCall = (jsonString: string) => {
-    try {
-      console.log("Processing function call with arguments:", jsonString);
-      const args = JSON.parse(jsonString) as OrderInfo;
-
-      let addedCount = 0;
-
-      // Add valid meals
-      if (args.meals && Array.isArray(args.meals)) {
-        args.meals.forEach(m => {
-          const validMeal = validateMeal(m);
-          if (validMeal) {
-            console.log("Adding valid meal:", validMeal);
-            addMeal(validMeal);
-            addedCount++;
-          }
-        });
+  // Speak bot messages when they arrive
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === "assistant" && lastMessage.text !== lastBotMessageRef.current) {
+      lastBotMessageRef.current = lastMessage.text;
+      if (isTTSEnabled && lastMessage.text) {
+        // Small delay to ensure message is displayed before speaking
+        setTimeout(() => {
+          handleSpeakText(lastMessage.text);
+        }, 300);
       }
-
-      // Add valid individual items
-      if (args.individualItems && Array.isArray(args.individualItems)) {
-        args.individualItems.forEach(i => {
-          const validItem = validateIndividualItem(i);
-          if (validItem) {
-            console.log("Adding valid individual item:", validItem);
-            addIndividualItem(validItem);
-            addedCount++;
-          }
-        });
-      }
-
-      if (addedCount > 0) {
-        addMessage({ 
-          role: "assistant", 
-          text: `✓ Added ${addedCount} item(s) to your cart` 
-        });
-      } else {
-        addMessage({ 
-          role: "assistant", 
-          text: "⚠ No valid items were added to cart. Please check that all items and meal selections are valid." 
-        });
-      }
-    } catch (err) {
-      console.error("Failed to parse function call", err);
-      addMessage({ 
-        role: "assistant", 
-        text: "Failed to add items to cart. Please try again or rephrase your request." 
-      });
     }
+  }, [messages, isTTSEnabled, handleSpeakText]);
+
+
+  const handleFunctionCallWrapper = (functionName: string, jsonString: string) => {
+    handleFunctionCall(functionName, jsonString, {
+      addMessage,
+      addMeal,
+      addIndividualItem,
+      removeMeal,
+      removeIndividualItem,
+      clearCart,
+      meals,
+      individualItems,
+      mealtypes,
+      recipes
+    });
   };
 
   // fetch recipes and meal types
@@ -179,22 +109,29 @@ export default function TestChat() {
     fetchData();
   }, []);
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input.trim();
+    if (!textToSend) return;
 
-    const userMessage = input;
+    const userMessage = textToSend;
     const currentMessages = messages; // Capture current messages before state update
-    addMessage({ role: "user", text: input });
+    addMessage({ role: "user", text: userMessage });
     setInput("");
 
     try {
       // Send conversation history along with the new message
+      // Limit conversation history to last 15 messages
+      const limitedHistory = currentMessages.slice(-15);
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message: userMessage,
-          conversationHistory: currentMessages
+          conversationHistory: limitedHistory,
+          cart: {
+            meals: meals,
+            individualItems: individualItems
+          }
         })
       });
 
@@ -208,7 +145,7 @@ export default function TestChat() {
       // If bot sent a function call, handle it
       if (data.function_call) {
         console.log("Function call detected:", data.function_call);
-        handleFunctionCall(data.function_call.arguments);
+        handleFunctionCallWrapper(data.function_call.name, data.function_call.arguments);
       }
 
       // Display bot message
@@ -226,6 +163,7 @@ export default function TestChat() {
       });
     }
   };
+
 
   return (
     <div className="flex flex-col h-full min-h-0">
@@ -265,7 +203,40 @@ export default function TestChat() {
                   : "bg-white text-foreground border border-border rounded-bl-sm shadow-sm"
               } ${textClasses}`}
             >
-              <p className="whitespace-pre-wrap wrap-break-word">{m.text}</p>
+              {m.role === "assistant" ? (
+                <div className="markdown-content">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="whitespace-pre-wrap wrap-break-word my-2 first:mt-0 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc list-inside my-2 space-y-1 ml-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside my-2 space-y-1 ml-2">{children}</ol>,
+                      li: ({ children }) => <li className="ml-1">{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      code: ({ children, className }) => {
+                        const isInline = !className;
+                        return isInline ? (
+                          <code className="bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
+                        ) : (
+                          <code className={`block bg-neutral-100 dark:bg-neutral-800 p-3 rounded text-sm font-mono overflow-x-auto my-2 ${className || ""}`}>{children}</code>
+                        );
+                      },
+                      pre: ({ children }) => <pre className="bg-neutral-100 dark:bg-neutral-800 p-3 rounded text-sm font-mono overflow-x-auto my-2">{children}</pre>,
+                      h1: ({ children }) => <h1 className="text-xl font-bold my-3 first:mt-0">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-lg font-bold my-2.5 first:mt-0">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-base font-semibold my-2 first:mt-0">{children}</h3>,
+                      h4: ({ children }) => <h4 className="text-sm font-semibold my-1.5 first:mt-0">{children}</h4>,
+                      blockquote: ({ children }) => <blockquote className="border-l-4 border-neutral-300 dark:border-neutral-600 pl-4 italic my-2 text-neutral-600 dark:text-neutral-400">{children}</blockquote>,
+                      a: ({ children, href }) => <a href={href} className="text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300" target="_blank" rel="noopener noreferrer">{children}</a>,
+                      hr: () => <hr className="my-3 border-neutral-200 dark:border-neutral-700" />,
+                    }}
+                  >
+                    {m.text}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <p className="whitespace-pre-wrap wrap-break-word">{m.text}</p>
+              )}
             </div>
           </div>
         ))}
@@ -282,9 +253,35 @@ export default function TestChat() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
           />
+          
+          {/* Text-to-Speech Toggle Button */}
+          <Button
+            variant={isTTSEnabled ? "default" : "outline"}
+            className={isTTSEnabled ? "bg-tamu-maroon hover:bg-tamu-maroon-dark text-white" : ""}
+            onClick={() => {
+              setIsTTSEnabled(!isTTSEnabled);
+              if (!isTTSEnabled && window.speechSynthesis.speaking) {
+                handleStopSpeaking();
+              }
+            }}
+            title={isTTSEnabled ? "Disable text-to-speech" : "Enable text-to-speech"}
+          >
+            {isTTSEnabled ? (
+              <>
+                <Volume2 className="h-4 w-4 mr-2" />
+                <span className="sr-only">Disable text-to-speech</span>
+              </>
+            ) : (
+              <>
+                <VolumeX className="h-4 w-4 mr-2" />
+                <span className="sr-only">Enable text-to-speech</span>
+              </>
+            )}
+          </Button>
+          
           <Button 
             className="bg-tamu-maroon hover:bg-tamu-maroon-dark text-white px-6"
-            onClick={handleSendMessage}
+            onClick={() => handleSendMessage()}
             disabled={!input.trim()}
           >
             <Send className="h-4 w-4" />
