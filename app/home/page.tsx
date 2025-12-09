@@ -40,6 +40,7 @@ export default function Home() {
 
     return (
         <div className="flex flex-col">
+            <h1 className="sr-only">Menu Options</h1>
             <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
                 {options.map((item, i) => (
                     <a href={`/home/${item.href}`} key={i}>
