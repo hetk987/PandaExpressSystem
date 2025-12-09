@@ -11,6 +11,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/app/components/ui/sheet";
+import { ClientOnly } from "@/app/components/ui/client-only";
 import { Button } from "@/app/components/ui/button";
 import {
     CreditCard,
@@ -469,9 +470,30 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             </div>
 
                             {/* Checkout Button - Right */}
-                            <Sheet>
-                                <SheetTrigger asChild>
+                            <ClientOnly
+                                fallback={
                                     <Button
+                                        className={cn(
+                                            "h-12 px-6 font-bold text-lg rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2",
+                                            totalItemCount > 0
+                                                ? "bg-white text-tamu-maroon hover:bg-white/90 hover:scale-105 hover:shadow-xl"
+                                                : "bg-white/20 text-white/80 hover:bg-white/30 cursor-pointer",
+                                            textClasses
+                                        )}
+                                    >
+                                        <ShoppingCart className="h-5 w-5" />
+                                        Checkout
+                                        {totalItemCount > 0 && (
+                                            <span className="ml-1 bg-tamu-maroon text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                                                {totalItemCount}
+                                            </span>
+                                        )}
+                                    </Button>
+                                }
+                            >
+                                <Sheet>
+                                    <SheetTrigger asChild>
+                                        <Button
                                         className={cn(
                                             "h-12 px-6 font-bold text-lg rounded-xl shadow-lg transition-all duration-300 flex items-center gap-2",
                                             totalItemCount > 0
@@ -703,8 +725,9 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                             Pay ${total.toFixed(2)}
                                         </Button>
                                     </SheetFooter>
-                                </SheetContent>
-                            </Sheet>
+                                    </SheetContent>
+                                </Sheet>
+                            </ClientOnly>
                         </footer>
                     </div>
                 </SidebarInset>

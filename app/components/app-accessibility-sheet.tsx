@@ -9,6 +9,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/app/components/ui/sheet";
+import { ClientOnly } from "@/app/components/ui/client-only";
 import { Button } from "@/app/components/ui/button";
 import { Switch } from "@/app/components/ui/switch";
 import { Label } from "@/app/components/ui/label";
@@ -136,9 +137,10 @@ export function AccessibilitySheet({
     ];
 
     return (
-        <Sheet>
-            <SheetTrigger asChild>{trigger}</SheetTrigger>
-            <SheetContent
+        <ClientOnly fallback={trigger}>
+            <Sheet>
+                <SheetTrigger asChild>{trigger}</SheetTrigger>
+                <SheetContent
                 side="right"
                 className="bg-maroon-gradient text-white w-full sm:max-w-md overflow-y-auto border-l border-white/10 p-0"
             >
@@ -466,7 +468,8 @@ export function AccessibilitySheet({
                         })()}
                     </div>
                 </div>
-            </SheetContent>
-        </Sheet>
+                </SheetContent>
+            </Sheet>
+        </ClientOnly>
     );
 }
