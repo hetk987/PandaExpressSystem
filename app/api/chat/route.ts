@@ -160,6 +160,7 @@ export async function POST(req: Request) {
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: messages,
+    max_completion_tokens: 200,
     functions: [
       {
         name: "addToCart",
