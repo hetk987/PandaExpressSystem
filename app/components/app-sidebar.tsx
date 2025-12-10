@@ -191,7 +191,7 @@ export function AppSidebar({
       </SidebarContent>
 
       {/* Footer with subtle glass effect */}
-      <SidebarFooter className="border-t border-white/10 bg-white/5 backdrop-blur-sm py-3">
+      <SidebarFooter className="border-t border-white/10 bg-white/5 backdrop-blur-sm py-3 h-20 flex items-center justify-center">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="sm" className="hover:bg-transparent">

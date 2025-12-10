@@ -417,7 +417,7 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                             {children}
                         </main>
 
-                        <footer className="sticky bottom-0 bg-maroon-gradient text-white h-18 flex items-center justify-between px-6 border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]" role="contentinfo" aria-label="Footer">
+                        <footer className="sticky bottom-0 bg-maroon-gradient text-white h-20 flex items-center justify-between px-6 border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]" role="contentinfo" aria-label="Footer">
                             {/* Weather Info - Left */}
                             <div className="flex items-center gap-3 min-w-[160px]">
                                 <div className="size-10 rounded-lg bg-white/10 flex items-center justify-center">
