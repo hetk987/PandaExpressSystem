@@ -45,7 +45,7 @@ const MealCard = (props: {
                     <div className="relative aspect-square w-full p-3 bg-white">
                         <Image
                             src={props.image}
-                            alt={props.name}
+                            alt="A delicious meal"
                             fill
                             sizes="(max-width: 768px) 50vw, 200px"
                             className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
