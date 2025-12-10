@@ -18,7 +18,7 @@ export default function Home() {
             </div>
 
             {/* Employee Login Button - Small, in corner */}
-            <div className="absolute top-6 right-6 z-100">
+            {/* <div className="absolute top-6 right-6 z-100">
                 <Button
                     onClick={() => router.push("/login")}
                     variant="outline"
@@ -28,7 +28,7 @@ export default function Home() {
                     <LogIn className="h-4 w-4 mr-2" />
                     Employee Login
                 </Button>
-            </div>
+            </div> */}
 
             {/* Main Content */}
             <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4" onClick={() => router.push("/home/build")}>
