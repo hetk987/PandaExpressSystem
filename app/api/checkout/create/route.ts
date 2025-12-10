@@ -8,33 +8,40 @@ import { createOrder } from '@/app/services/orderService';
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY environment variable is not set');
 }
-
+console.log('Stripe KEY YES')
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
     apiVersion: '2025-11-17.clover',
 });
-
+console.log('Stripe initialized')
 export async function POST(request: NextRequest) {
+    const requestId = Date.now().toString(36);
+    console.log(`[${requestId}] [CHECKOUT] Starting checkout session creation`);
+    
     try {
         // Validate Stripe secret key is available
         const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
         if (!stripeSecretKey) {
-            console.error('STRIPE_SECRET_KEY environment variable is not set');
+            console.error(`[${requestId}] [CHECKOUT] ERROR: STRIPE_SECRET_KEY environment variable is not set`);
             return NextResponse.json(
                 { error: 'Stripe configuration error: Missing STRIPE_SECRET_KEY' },
                 { status: 500 }
             );
         }
+        console.log(`[${requestId}] [CHECKOUT] Stripe key validated (key exists: ${stripeSecretKey ? 'yes' : 'no'})`);
 
         const body = await request.json();
         const { meals, individualItems, subtotal, tax, total, customerEmail } = body;
+        console.log(`[${requestId}] [CHECKOUT] Request body received - meals: ${meals?.length || 0}, items: ${individualItems?.length || 0}, total: $${total}`);
 
         // Validate required fields
         if (!meals || !individualItems || subtotal === undefined || tax === undefined || total === undefined) {
+            console.error(`[${requestId}] [CHECKOUT] ERROR: Missing required fields`);
             return NextResponse.json(
                 { error: 'Missing required fields: meals, individualItems, subtotal, tax, total' },
                 { status: 400 }
             );
         }
+        console.log(`[${requestId}] [CHECKOUT] Request validation passed`);
 
         // Build line items for Stripe
         const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -106,6 +113,7 @@ export async function POST(request: NextRequest) {
         // Create the order in the database first (with isCompleted: false)
         // This allows us to pass only the order ID in Stripe metadata instead of the full order data
         // Direct service call avoids HTTP/HTTPS protocol issues in production
+        console.log(`[${requestId}] [CHECKOUT] Creating order in database...`);
         try {
             const order = await createOrder({
                 tax: tax,
@@ -118,6 +126,7 @@ export async function POST(request: NextRequest) {
             });
 
             const orderId = order.id;
+            console.log(`[${requestId}] [CHECKOUT] Order created successfully - ID: ${orderId}`);
 
             // Get base URL for callbacks
             // Priority: NEXTAUTH_URL > origin header > fallback
@@ -126,6 +135,9 @@ export async function POST(request: NextRequest) {
                 request.headers.get('origin') || 
                 request.nextUrl.origin ||
                 'http://localhost:3000';
+            
+            console.log(`[${requestId}] [CHECKOUT] Base URL resolved: ${baseUrl}`);
+            console.log(`[${requestId}] [CHECKOUT] Creating Stripe checkout session with ${lineItems.length} line items...`);
 
             // Create Stripe checkout session with only order ID in metadata
             const session = await stripe.checkout.sessions.create({
@@ -139,18 +151,30 @@ export async function POST(request: NextRequest) {
                 },
             });
 
+            console.log(`[${requestId}] [CHECKOUT] Stripe session created successfully - Session ID: ${session.id}`);
             return NextResponse.json({ url: session.url }, { status: 200 });
         } catch (orderError) {
-            console.error('Failed to create order:', orderError);
             const errorMessage = orderError instanceof Error ? orderError.message : 'Unknown error';
+            const errorStack = orderError instanceof Error ? orderError.stack : 'No stack trace';
+            console.error(`[${requestId}] [CHECKOUT] ERROR: Failed to create order:`, {
+                message: errorMessage,
+                stack: errorStack,
+                error: orderError
+            });
             return NextResponse.json(
                 { error: 'Failed to create order', details: errorMessage },
                 { status: 500 }
             );
         }
     } catch (error) {
-        console.error('Error creating Stripe checkout session:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+        
+        console.error(`[${requestId}] [CHECKOUT] ERROR: Failed to create Stripe checkout session:`, {
+            message: errorMessage,
+            stack: errorStack,
+            error: error
+        });
         
         // Provide more helpful error messages
         let userMessage = 'Failed to create checkout session';
@@ -158,8 +182,9 @@ export async function POST(request: NextRequest) {
             userMessage = 'Stripe configuration error: Missing API key. Please check environment variables.';
         } else if (errorMessage.includes('Invalid API Key')) {
             userMessage = 'Stripe configuration error: Invalid API key. Please verify your Stripe secret key.';
+        } else if (errorMessage.includes('SSL') || errorMessage.includes('wrong version number')) {
+            userMessage = 'Network error: SSL/TLS protocol issue. This may indicate a configuration problem.';
         }
-        console.error('Error creating Stripe checkout session:', errorMessage);
         
         return NextResponse.json(
             { error: userMessage, details: errorMessage },
