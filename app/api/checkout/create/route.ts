@@ -3,12 +3,22 @@ import Stripe from 'stripe';
 import { getCSTTimestamp } from '@/lib/utils';
 import { OrderInfo } from '@/lib/types';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-    apiVersion: '2025-11-17.clover',
-});
-
 export async function POST(request: NextRequest) {
     try {
+        // Validate Stripe secret key is available
+        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+        if (!stripeSecretKey) {
+            console.error('STRIPE_SECRET_KEY environment variable is not set');
+            return NextResponse.json(
+                { error: 'Stripe configuration error: Missing STRIPE_SECRET_KEY' },
+                { status: 500 }
+            );
+        }
+
+        // Initialize Stripe client
+        const stripe = new Stripe(stripeSecretKey, {
+            apiVersion: '2025-11-17.clover',
+        });
         const body = await request.json();
         const { meals, individualItems, subtotal, tax, total, customerEmail } = body;
 
