@@ -6,7 +6,12 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
-		"lint": "eslint"
+		"lint": "eslint",
+		"docs:api": "typedoc",
+		"docs:manual": "testcafe \"chrome:headless --kiosk --incognito --force-device-scale-factor=1.5\" node_modules/auto-docs/ -s public/docs/manual/pics",
+		"docs:files": "node node_modules/auto-docs/",
+		"docs:build": "npm run docs:api && npm run docs:files",
+		"docs:serve": "npx docsify-cli serve public/docs/manual"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^3.10.0",
@@ -80,14 +85,17 @@
 		"@types/react": "^19",
 		"@types/react-dom": "^19",
 		"@types/react-speech-recognition": "^3.9.6",
+		"auto-docs": "^0.3.0",
 		"baseline-browser-mapping": "^2.8.32",
 		"drizzle-kit": "^0.31.8",
 		"eslint": "^9",
 		"eslint-config-next": "16.0.0",
 		"postcss": "^8.5",
 		"tailwindcss": "^4.1.9",
+		"testcafe": "^3.7.2",
 		"tsx": "^4.20.6",
 		"tw-animate-css": "1.3.3",
+		"typedoc": "^0.28.15",
 		"typescript": "^5"
 	}
 }
