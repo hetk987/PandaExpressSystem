@@ -69,3 +69,46 @@ export function getCSTTimestamp(): string {
     // Don't append 'Z' - these are CST time values, not UTC
     return `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}`;
 }
+
+/**
+ * Generic sorting function for table data
+ * Handles strings (alphabetical), numbers, booleans, and null/undefined values
+ */
+export function sortData<T>(
+    data: T[],
+    column: keyof T,
+    direction: "asc" | "desc"
+): T[] {
+    return [...data].sort((a, b) => {
+        let aVal = a[column];
+        let bVal = b[column];
+
+        // Handle null/undefined - treat as empty/lowest value
+        if (aVal == null && bVal == null) return 0;
+        if (aVal == null) return direction === "asc" ? -1 : 1;
+        if (bVal == null) return direction === "asc" ? 1 : -1;
+
+        // Handle different types
+        if (typeof aVal === "string" && typeof bVal === "string") {
+            // Case-insensitive string comparison
+            const comparison = aVal.toLowerCase().localeCompare(bVal.toLowerCase());
+            return direction === "asc" ? comparison : -comparison;
+        }
+
+        if (typeof aVal === "number" && typeof bVal === "number") {
+            return direction === "asc" ? aVal - bVal : bVal - aVal;
+        }
+
+        if (typeof aVal === "boolean" && typeof bVal === "boolean") {
+            // false < true
+            const comparison = Number(aVal) - Number(bVal);
+            return direction === "asc" ? comparison : -comparison;
+        }
+
+        // Fallback: convert to string and compare
+        const aStr = String(aVal).toLowerCase();
+        const bStr = String(bVal).toLowerCase();
+        const comparison = aStr.localeCompare(bStr);
+        return direction === "asc" ? comparison : -comparison;
+    });
+}

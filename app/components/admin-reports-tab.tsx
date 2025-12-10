@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/app/components/ui/button";
-import { getTodayDateCST } from "@/lib/utils";
+import { getTodayDateCST, sortData } from "@/lib/utils";
 import {
     Accordion,
     AccordionContent,
@@ -94,6 +94,28 @@ export default function AdminReportsTab() {
     );
     const [restockLoading, setRestockLoading] = React.useState(false);
     const [restockError, setRestockError] = React.useState<string | null>(null);
+
+    // Sorting state for each table
+    const [productUsageSort, setProductUsageSort] = React.useState<{
+        column: keyof ProductUsageRow | null;
+        direction: "asc" | "desc";
+    }>({ column: null, direction: "asc" });
+    const [salesByItemSort, setSalesByItemSort] = React.useState<{
+        column: keyof SalesByItemRow | null;
+        direction: "asc" | "desc";
+    }>({ column: null, direction: "asc" });
+    const [xReportSort, setXReportSort] = React.useState<{
+        column: keyof HourlyRow | null;
+        direction: "asc" | "desc";
+    }>({ column: null, direction: "asc" });
+    const [zReportSort, setZReportSort] = React.useState<{
+        column: keyof HourlyRow | null;
+        direction: "asc" | "desc";
+    }>({ column: null, direction: "asc" });
+    const [restockSort, setRestockSort] = React.useState<{
+        column: keyof RestockRow | null;
+        direction: "asc" | "desc";
+    }>({ column: null, direction: "asc" });
 
     // Fetch functions
     async function fetchProductUsage() {
@@ -269,6 +291,96 @@ export default function AdminReportsTab() {
         }
     }
 
+    // Sort handlers for each table
+    function handleProductUsageSort(column: keyof ProductUsageRow) {
+        setProductUsageSort((prev) => ({
+            column,
+            direction:
+                prev.column === column && prev.direction === "asc"
+                    ? "desc"
+                    : "asc",
+        }));
+    }
+
+    function handleSalesByItemSort(column: keyof SalesByItemRow) {
+        setSalesByItemSort((prev) => ({
+            column,
+            direction:
+                prev.column === column && prev.direction === "asc"
+                    ? "desc"
+                    : "asc",
+        }));
+    }
+
+    function handleXReportSort(column: keyof HourlyRow) {
+        setXReportSort((prev) => ({
+            column,
+            direction:
+                prev.column === column && prev.direction === "asc"
+                    ? "desc"
+                    : "asc",
+        }));
+    }
+
+    function handleZReportSort(column: keyof HourlyRow) {
+        setZReportSort((prev) => ({
+            column,
+            direction:
+                prev.column === column && prev.direction === "asc"
+                    ? "desc"
+                    : "asc",
+        }));
+    }
+
+    function handleRestockSort(column: keyof RestockRow) {
+        setRestockSort((prev) => ({
+            column,
+            direction:
+                prev.column === column && prev.direction === "asc"
+                    ? "desc"
+                    : "asc",
+        }));
+    }
+
+    // Sorted data for each table
+    const sortedProductUsage = productUsageData
+        ? productUsageSort.column
+            ? sortData(
+                  productUsageData,
+                  productUsageSort.column,
+                  productUsageSort.direction
+              )
+            : productUsageData
+        : null;
+
+    const sortedSalesByItem = salesByItemData
+        ? salesByItemSort.column
+            ? sortData(
+                  salesByItemData,
+                  salesByItemSort.column,
+                  salesByItemSort.direction
+              )
+            : salesByItemData
+        : null;
+
+    const sortedXReport = xReportData
+        ? xReportSort.column
+            ? sortData(xReportData, xReportSort.column, xReportSort.direction)
+            : xReportData
+        : null;
+
+    const sortedZReport = zReportData
+        ? zReportSort.column
+            ? sortData(zReportData, zReportSort.column, zReportSort.direction)
+            : zReportData
+        : null;
+
+    const sortedRestock = restockData
+        ? restockSort.column
+            ? sortData(restockData, restockSort.column, restockSort.direction)
+            : restockData
+        : null;
+
     return (
         <div className="mt-6">
             <Accordion type="single" collapsible className="w-full">
@@ -334,8 +446,8 @@ export default function AdminReportsTab() {
                                 </p>
                             )}
 
-                            {productUsageData &&
-                                productUsageData.length > 0 && (
+                            {sortedProductUsage &&
+                                sortedProductUsage.length > 0 && (
                                     <Table>
                                         <TableCaption>
                                             Inventory usage for the selected
@@ -344,15 +456,51 @@ export default function AdminReportsTab() {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>
-                                                    Inventory Name
+                                                    <button
+                                                        onClick={() =>
+                                                            handleProductUsageSort(
+                                                                "inventoryName"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                                                    >
+                                                        Inventory Name
+                                                        {productUsageSort.column ===
+                                                            "inventoryName" && (
+                                                            <span>
+                                                                {productUsageSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
                                                 </TableHead>
                                                 <TableHead className="text-right">
-                                                    Total Used
+                                                    <button
+                                                        onClick={() =>
+                                                            handleProductUsageSort(
+                                                                "totalUsed"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                    >
+                                                        Total Used
+                                                        {productUsageSort.column ===
+                                                            "totalUsed" && (
+                                                            <span>
+                                                                {productUsageSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
                                                 </TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {productUsageData.map((row) => (
+                                            {sortedProductUsage.map((row) => (
                                                 <TableRow key={row.inventoryId}>
                                                     <TableCell>
                                                         {row.inventoryName}
@@ -368,8 +516,8 @@ export default function AdminReportsTab() {
                                     </Table>
                                 )}
 
-                            {productUsageData &&
-                                productUsageData.length === 0 && (
+                            {sortedProductUsage &&
+                                sortedProductUsage.length === 0 && (
                                     <p className="text-sm text-muted-foreground">
                                         No data for this period.
                                     </p>
@@ -440,46 +588,126 @@ export default function AdminReportsTab() {
                                 </p>
                             )}
 
-                            {salesByItemData && salesByItemData.length > 0 && (
-                                <Table>
-                                    <TableCaption>
-                                        Sales by item for the selected period
-                                    </TableCaption>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Recipe Name</TableHead>
-                                            <TableHead>Type</TableHead>
-                                            <TableHead className="text-right">
-                                                Quantity Sold
-                                            </TableHead>
-                                            <TableHead className="text-right">
-                                                Revenue ($)
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {salesByItemData.map((row) => (
-                                            <TableRow key={row.recipeId}>
-                                                <TableCell>
-                                                    {row.recipeName}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {row.recipeType}
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    {Number(row.totalQuantity)}
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    $
-                                                    {Number(
-                                                        row.totalRevenue
-                                                    ).toFixed(2)}
-                                                </TableCell>
+                            {sortedSalesByItem &&
+                                sortedSalesByItem.length > 0 && (
+                                    <Table>
+                                        <TableCaption>
+                                            Sales by item for the selected
+                                            period
+                                        </TableCaption>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleSalesByItemSort(
+                                                                "recipeName"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                                                    >
+                                                        Recipe Name
+                                                        {salesByItemSort.column ===
+                                                            "recipeName" && (
+                                                            <span>
+                                                                {salesByItemSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                </TableHead>
+                                                <TableHead>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleSalesByItemSort(
+                                                                "recipeType"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                                                    >
+                                                        Type
+                                                        {salesByItemSort.column ===
+                                                            "recipeType" && (
+                                                            <span>
+                                                                {salesByItemSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                </TableHead>
+                                                <TableHead className="text-right">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleSalesByItemSort(
+                                                                "totalQuantity"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                    >
+                                                        Quantity Sold
+                                                        {salesByItemSort.column ===
+                                                            "totalQuantity" && (
+                                                            <span>
+                                                                {salesByItemSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                </TableHead>
+                                                <TableHead className="text-right">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleSalesByItemSort(
+                                                                "totalRevenue"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                    >
+                                                        Revenue ($)
+                                                        {salesByItemSort.column ===
+                                                            "totalRevenue" && (
+                                                            <span>
+                                                                {salesByItemSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                </TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            )}
+                                        </TableHeader>
+                                        <TableBody>
+                                            {sortedSalesByItem.map((row) => (
+                                                <TableRow key={row.recipeId}>
+                                                    <TableCell>
+                                                        {row.recipeName}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {row.recipeType}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        {Number(
+                                                            row.totalQuantity
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        $
+                                                        {Number(
+                                                            row.totalRevenue
+                                                        ).toFixed(2)}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                )}
 
                             {salesByItemData &&
                                 salesByItemData.length === 0 && (
@@ -519,21 +747,59 @@ export default function AdminReportsTab() {
                                 </p>
                             )}
 
-                            {xReportData && xReportData.length > 0 && (
+                            {sortedXReport && sortedXReport.length > 0 && (
                                 <Table>
                                     <TableCaption>
                                         Hourly sales for the current day
                                     </TableCaption>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Hour</TableHead>
+                                            <TableHead>
+                                                <button
+                                                    onClick={() =>
+                                                        handleXReportSort(
+                                                            "hour"
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                                                >
+                                                    Hour
+                                                    {xReportSort.column ===
+                                                        "hour" && (
+                                                        <span>
+                                                            {xReportSort.direction ===
+                                                            "asc"
+                                                                ? "↑"
+                                                                : "↓"}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            </TableHead>
                                             <TableHead className="text-right">
-                                                Net Sales ($)
+                                                <button
+                                                    onClick={() =>
+                                                        handleXReportSort(
+                                                            "netSales"
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                >
+                                                    Net Sales ($)
+                                                    {xReportSort.column ===
+                                                        "netSales" && (
+                                                        <span>
+                                                            {xReportSort.direction ===
+                                                            "asc"
+                                                                ? "↑"
+                                                                : "↓"}
+                                                        </span>
+                                                    )}
+                                                </button>
                                             </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {xReportData.map((row) => (
+                                        {sortedXReport.map((row) => (
                                             <TableRow key={row.hour}>
                                                 <TableCell>
                                                     {row.hour}:00
@@ -547,7 +813,7 @@ export default function AdminReportsTab() {
                                 </Table>
                             )}
 
-                            {xReportData && xReportData.length === 0 && (
+                            {sortedXReport && sortedXReport.length === 0 && (
                                 <p className="text-sm text-muted-foreground">
                                     No sales data for today.
                                 </p>
@@ -584,7 +850,7 @@ export default function AdminReportsTab() {
                                 </p>
                             )}
 
-                            {zReportData && zReportData.length > 0 && (
+                            {sortedZReport && sortedZReport.length > 0 && (
                                 <>
                                     <Table>
                                         <TableCaption>
@@ -592,14 +858,52 @@ export default function AdminReportsTab() {
                                         </TableCaption>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Hour</TableHead>
+                                                <TableHead>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleZReportSort(
+                                                                "hour"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                                                    >
+                                                        Hour
+                                                        {zReportSort.column ===
+                                                            "hour" && (
+                                                            <span>
+                                                                {zReportSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
+                                                </TableHead>
                                                 <TableHead className="text-right">
-                                                    Net Sales ($)
+                                                    <button
+                                                        onClick={() =>
+                                                            handleZReportSort(
+                                                                "netSales"
+                                                            )
+                                                        }
+                                                        className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                    >
+                                                        Net Sales ($)
+                                                        {zReportSort.column ===
+                                                            "netSales" && (
+                                                            <span>
+                                                                {zReportSort.direction ===
+                                                                "asc"
+                                                                    ? "↑"
+                                                                    : "↓"}
+                                                            </span>
+                                                        )}
+                                                    </button>
                                                 </TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {zReportData.map((row) => (
+                                            {sortedZReport.map((row) => (
                                                 <TableRow key={row.hour}>
                                                     <TableCell>
                                                         {row.hour}:00
@@ -628,7 +932,7 @@ export default function AdminReportsTab() {
                                 </>
                             )}
 
-                            {zReportData && zReportData.length === 0 && (
+                            {sortedZReport && sortedZReport.length === 0 && (
                                 <p className="text-sm text-muted-foreground">
                                     No sales data for today.
                                 </p>
@@ -663,24 +967,80 @@ export default function AdminReportsTab() {
                                 </p>
                             )}
 
-                            {restockData && restockData.length > 0 && (
+                            {sortedRestock && sortedRestock.length > 0 && (
                                 <Table>
                                     <TableCaption>
                                         Items that need restocking
                                     </TableCaption>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Item Name</TableHead>
-                                            <TableHead className="text-right">
-                                                Current Stock
+                                            <TableHead>
+                                                <button
+                                                    onClick={() =>
+                                                        handleRestockSort(
+                                                            "name"
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                                                >
+                                                    Item Name
+                                                    {restockSort.column ===
+                                                        "name" && (
+                                                        <span>
+                                                            {restockSort.direction ===
+                                                            "asc"
+                                                                ? "↑"
+                                                                : "↓"}
+                                                        </span>
+                                                    )}
+                                                </button>
                                             </TableHead>
                                             <TableHead className="text-right">
-                                                Est. Daily Usage
+                                                <button
+                                                    onClick={() =>
+                                                        handleRestockSort(
+                                                            "currentStock"
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                >
+                                                    Current Stock
+                                                    {restockSort.column ===
+                                                        "currentStock" && (
+                                                        <span>
+                                                            {restockSort.direction ===
+                                                            "asc"
+                                                                ? "↑"
+                                                                : "↓"}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            </TableHead>
+                                            <TableHead className="text-right">
+                                                <button
+                                                    onClick={() =>
+                                                        handleRestockSort(
+                                                            "estimatedUsedPerDay"
+                                                        )
+                                                    }
+                                                    className="flex items-center gap-1 hover:text-primary cursor-pointer ml-auto"
+                                                >
+                                                    Est. Daily Usage
+                                                    {restockSort.column ===
+                                                        "estimatedUsedPerDay" && (
+                                                        <span>
+                                                            {restockSort.direction ===
+                                                            "asc"
+                                                                ? "↑"
+                                                                : "↓"}
+                                                        </span>
+                                                    )}
+                                                </button>
                                             </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {restockData.map((row) => (
+                                        {sortedRestock.map((row) => (
                                             <TableRow key={row.id}>
                                                 <TableCell>
                                                     {row.name}
@@ -697,7 +1057,7 @@ export default function AdminReportsTab() {
                                 </Table>
                             )}
 
-                            {restockData && restockData.length === 0 && (
+                            {sortedRestock && sortedRestock.length === 0 && (
                                 <p className="text-sm text-muted-foreground">
                                     All items are adequately stocked.
                                 </p>

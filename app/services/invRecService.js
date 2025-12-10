@@ -21,9 +21,11 @@ export const getIngredientsByRecipeId = async (recipeId) => {
         .select()
         .from(invRecJunc)
         .where(eq(invRecJunc.recipeId, recipeId));
-        for (const item of output) {
-            item.inventoryName = (await getInventoryById(item.inventoryId))[0].name;
-        }
+    for (const item of output) {
+        const inventoryItem = await getInventoryById(item.inventoryId);
+        item.inventoryName =
+            inventoryItem?.[0]?.name ?? `ID: ${item.inventoryId}`;
+    }
     console.log(output);
     return output;
 };

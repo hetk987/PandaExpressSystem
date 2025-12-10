@@ -24,6 +24,7 @@ import {
     TableCell,
 } from "@/app/components/ui/table";
 import { Recipe, Inventory } from "@/lib/types";
+import { sortData } from "@/lib/utils";
 
 type Ingredient = {
     id?: number;
@@ -45,6 +46,14 @@ export default function AdminRecipesTab() {
     const [newIngredientQty, setNewIngredientQty] = React.useState<number>(0);
     const [recLoading, setRecLoading] = React.useState(false);
     const [recError, setRecError] = React.useState<string | null>(null);
+    const [invLoading, setInvLoading] = React.useState(false);
+    const [invError, setInvError] = React.useState<string | null>(null);
+    const [sortColumn, setSortColumn] = React.useState<keyof Recipe | null>(
+        null
+    );
+    const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
+        "asc"
+    );
 
     async function fetchRecipes() {
         try {
@@ -68,6 +77,9 @@ export default function AdminRecipesTab() {
 
     async function fetchInventory() {
         try {
+            setInvLoading(true);
+            setInvError(null);
+
             const res = await fetch("/api/inventory");
             if (!res.ok) {
                 const text = await res.text();
@@ -77,7 +89,12 @@ export default function AdminRecipesTab() {
             const data = await res.json();
             setInventory(data ?? []);
         } catch (err: unknown) {
+            const errorMessage =
+                err instanceof Error ? err.message : "Unknown error";
+            setInvError(errorMessage);
             console.error("Failed to fetch inventory:", err);
+        } finally {
+            setInvLoading(false);
         }
     }
 
@@ -104,8 +121,11 @@ export default function AdminRecipesTab() {
         setSelectedRecipe({ ...rec });
         setRecError(null);
 
+        // Re-fetch inventory to ensure fresh data when dialog opens
+        await fetchInventory();
+
         // Fetch ingredients for this recipe
-        if (rec.id) {
+        if (rec.id !== undefined && rec.id !== null) {
             try {
                 setRecLoading(true);
                 const res = await fetch(`/api/inv-rec-junc/recipe/${rec.id}`);
@@ -163,24 +183,9 @@ export default function AdminRecipesTab() {
         setRecError(null);
     }
 
-    async function removeIngredient(index: number) {
-        const ingredient = ingredients[index];
-
-        // If it has an id, delete from database
-        if (ingredient.id && selectedRecipe?.id) {
-            try {
-                const res = await fetch(`/api/inv-rec-junc/${ingredient.id}`, {
-                    method: "DELETE",
-                });
-                if (!res.ok) {
-                    console.error("Failed to delete ingredient from database");
-                }
-            } catch (err) {
-                console.error("Error deleting ingredient:", err);
-            }
-        }
-
-        // Remove from local state
+    function removeIngredient(index: number) {
+        // Remove from local state only
+        // Deletion from database will be handled when saving the recipe
         setIngredients(ingredients.filter((_, i) => i !== index));
     }
 
@@ -213,22 +218,140 @@ export default function AdminRecipesTab() {
             // Use the returned ID, or fall back to existing ID for updates
             const recipeId = savedRecipe.id ?? id;
 
-            // Save ingredients
+            // For existing recipes, sync ingredients with database
+            let currentIngredientsInDb: Array<{
+                id: number;
+                inventoryId: number;
+            }> = [];
+            if (!isNew && recipeId !== undefined && recipeId !== null) {
+                // Fetch current ingredients from database
+                const currentIngredientsRes = await fetch(
+                    `/api/inv-rec-junc/recipe/${recipeId}`
+                );
+                if (currentIngredientsRes.ok) {
+                    currentIngredientsInDb =
+                        (await currentIngredientsRes.json()) ?? [];
+
+                    // Get IDs of ingredients currently in the UI
+                    const currentIngredientIds = new Set(
+                        ingredients
+                            .filter((ing) => ing.id != null)
+                            .map((ing) => ing.id)
+                    );
+
+                    // Delete ingredients that are in DB but not in current UI state
+                    for (const dbIngredient of currentIngredientsInDb) {
+                        if (!currentIngredientIds.has(dbIngredient.id)) {
+                            const deleteRes = await fetch(
+                                `/api/inv-rec-junc/${dbIngredient.id}`,
+                                {
+                                    method: "DELETE",
+                                }
+                            );
+                            if (!deleteRes.ok) {
+                                console.error(
+                                    `Failed to delete ingredient ${dbIngredient.id}`
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Create a map of inventoryId -> existing DB ingredient ID for quick lookup
+            const inventoryIdToDbId = new Map<number, number>();
+            for (const dbIng of currentIngredientsInDb) {
+                // If there are multiple entries for same inventoryId, keep the first one
+                // and mark others for deletion (they'll be duplicates)
+                if (!inventoryIdToDbId.has(dbIng.inventoryId)) {
+                    inventoryIdToDbId.set(dbIng.inventoryId, dbIng.id);
+                } else {
+                    // This is a duplicate - delete it
+                    const deleteRes = await fetch(
+                        `/api/inv-rec-junc/${dbIng.id}`,
+                        {
+                            method: "DELETE",
+                        }
+                    );
+                    if (!deleteRes.ok) {
+                        console.error(
+                            `Failed to delete duplicate ingredient ${dbIng.id}`
+                        );
+                    }
+                }
+            }
+
+            // Add/update ingredients
             for (const ingredient of ingredients) {
                 if (!ingredient.id) {
-                    // New ingredient
-                    const ingRes = await fetch("/api/inv-rec-junc", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            inventoryId: Number(ingredient.inventoryId),
-                            recipeId: Number(recipeId),
-                            inventoryQuantity: Number(ingredient.inventoryQuantity),
-                        }),
-                    });
+                    // New ingredient - check if it already exists in DB by inventoryId
+                    const existingDbId = inventoryIdToDbId.get(
+                        Number(ingredient.inventoryId)
+                    );
+
+                    if (existingDbId !== undefined) {
+                        // Update existing entry instead of creating duplicate
+                        const ingRes = await fetch(
+                            `/api/inv-rec-junc/${existingDbId}`,
+                            {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    inventoryId: Number(ingredient.inventoryId),
+                                    recipeId: Number(recipeId),
+                                    inventoryQuantity: Number(
+                                        ingredient.inventoryQuantity
+                                    ),
+                                }),
+                            }
+                        );
+                        if (!ingRes.ok) {
+                            const errData = await ingRes.text();
+                            throw new Error(
+                                `Failed to update ingredient: ${errData}`
+                            );
+                        }
+                    } else {
+                        // Truly new ingredient - add it
+                        const ingRes = await fetch("/api/inv-rec-junc", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                inventoryId: Number(ingredient.inventoryId),
+                                recipeId: Number(recipeId),
+                                inventoryQuantity: Number(
+                                    ingredient.inventoryQuantity
+                                ),
+                            }),
+                        });
+                        if (!ingRes.ok) {
+                            const errData = await ingRes.text();
+                            throw new Error(
+                                `Failed to save ingredient: ${errData}`
+                            );
+                        }
+                    }
+                } else {
+                    // Existing ingredient - update it
+                    const ingRes = await fetch(
+                        `/api/inv-rec-junc/${ingredient.id}`,
+                        {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                inventoryId: Number(ingredient.inventoryId),
+                                recipeId: Number(recipeId),
+                                inventoryQuantity: Number(
+                                    ingredient.inventoryQuantity
+                                ),
+                            }),
+                        }
+                    );
                     if (!ingRes.ok) {
                         const errData = await ingRes.text();
-                        throw new Error(`Failed to save ingredient: ${errData}`);
+                        throw new Error(
+                            `Failed to update ingredient: ${errData}`
+                        );
                     }
                 }
             }
@@ -270,6 +393,19 @@ export default function AdminRecipesTab() {
         }
     }
 
+    function handleSort(column: keyof Recipe) {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortColumn(column);
+            setSortDirection("asc");
+        }
+    }
+
+    const sortedRecipes = sortColumn
+        ? sortData(recipes, sortColumn, sortDirection)
+        : recipes;
+
     return (
         <div className="mt-6 space-y-4">
             <div className="flex justify-between items-center">
@@ -296,16 +432,76 @@ export default function AdminRecipesTab() {
                 <TableCaption className="sr-only">Create Recipes</TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Price/Serving</TableHead>
-                        <TableHead>Orders/Batch</TableHead>
-                        <TableHead>Premium</TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("name")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Name
+                                {sortColumn === "name" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("type")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Type
+                                {sortColumn === "type" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("pricePerServing")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Price/Serving
+                                {sortColumn === "pricePerServing" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("ordersPerBatch")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Orders/Batch
+                                {sortColumn === "ordersPerBatch" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("premium")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Premium
+                                {sortColumn === "premium" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {recipes.length === 0 && !recLoading && (
+                    {sortedRecipes.length === 0 && !recLoading && (
                         <TableRow>
                             <TableCell
                                 colSpan={6}
@@ -316,7 +512,7 @@ export default function AdminRecipesTab() {
                         </TableRow>
                     )}
 
-                    {recipes.map((rec) => (
+                    {sortedRecipes.map((rec) => (
                         <TableRow key={rec.id}>
                             <TableCell>{rec.name}</TableCell>
                             <TableCell>{rec.type ?? "-"}</TableCell>
@@ -368,6 +564,11 @@ export default function AdminRecipesTab() {
                             {recError && (
                                 <p className="text-sm text-red-500">
                                     {recError}
+                                </p>
+                            )}
+                            {invError && (
+                                <p className="text-sm text-red-500">
+                                    Inventory Error: {invError}
                                 </p>
                             )}
 
@@ -590,19 +791,35 @@ export default function AdminRecipesTab() {
                                                         ) || 0
                                                     )
                                                 }
+                                                disabled={invLoading}
                                             >
                                                 <option value={0}>
-                                                    Select item...
+                                                    {invLoading
+                                                        ? "Loading inventory..."
+                                                        : invError
+                                                        ? "Error loading inventory"
+                                                        : inventory.length === 0
+                                                        ? "No inventory items"
+                                                        : "Select item..."}
                                                 </option>
-                                                {inventory.map((inv) => (
-                                                    <option
-                                                        key={inv.id}
-                                                        value={inv.id}
-                                                    >
-                                                        {inv.name}
-                                                    </option>
-                                                ))}
+                                                {inventory
+                                                    .filter(
+                                                        (inv) => inv.id != null
+                                                    )
+                                                    .map((inv) => (
+                                                        <option
+                                                            key={inv.id}
+                                                            value={inv.id}
+                                                        >
+                                                            {inv.name}
+                                                        </option>
+                                                    ))}
                                             </select>
+                                            {invError && (
+                                                <p className="text-xs text-red-500 mt-1">
+                                                    {invError}
+                                                </p>
+                                            )}
                                         </div>
 
                                         <div className="space-y-1">

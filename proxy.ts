@@ -8,17 +8,23 @@ export default withAuth(
 
         // If trying to access manager route without being authenticated
         if (path.startsWith("/employee/manager") && !token) {
-            return NextResponse.redirect(new URL("/login", req.url));
+            const loginUrl = new URL("/login", req.url);
+            loginUrl.searchParams.set("callbackUrl", path);
+            return NextResponse.redirect(loginUrl);
         }
 
         // If trying to access kitchen route without being authenticated
         if (path.startsWith("/employee/kitchen") && !token) {
-            return NextResponse.redirect(new URL("/login", req.url));
+            const loginUrl = new URL("/login", req.url);
+            loginUrl.searchParams.set("callbackUrl", path);
+            return NextResponse.redirect(loginUrl);
         }
 
         // If trying to access cashier route without being authenticated
         if (path.startsWith("/employee/cashier") && !token) {
-            return NextResponse.redirect(new URL("/login", req.url));
+            const loginUrl = new URL("/login", req.url);
+            loginUrl.searchParams.set("callbackUrl", path);
+            return NextResponse.redirect(loginUrl);
         }
 
         return NextResponse.next();
