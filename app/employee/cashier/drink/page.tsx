@@ -45,15 +45,13 @@ export default function Home() {
         if (!selectedRecipe) return;
 
         await addItemWithToast(
-            () => {
-                addIndividualItem({
-                    recipeId: selectedRecipe.id!,
-                    recipeName: selectedRecipe.name,
-                    recipeType: "Drink",
-                    quantity: quantity,
-                    price: selectedRecipe.pricePerServing,
-                });
-            },
+            () => addIndividualItem({
+                recipeId: selectedRecipe.id!,
+                recipeName: selectedRecipe.name,
+                recipeType: "Drink",
+                quantity: quantity,
+                price: selectedRecipe.pricePerServing,
+            }),
             {
                 onSuccess: () => {
                     setSelectedRecipe(null);
@@ -111,15 +109,15 @@ export default function Home() {
         </div>
       
       {selectedRecipe && (
-        <div className="fixed bottom-20 left-0 right-0 bg-white border-t-2 border-gray-200 p-6 shadow-lg">
+        <div className="fixed bottom-0 left-0 right-96 bg-neutral-100 border-t-2 border-tamu-maroon p-6 shadow-lg">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div>
-                <h3 className="text-xl font-bold">{selectedRecipe.name}</h3>
-                <p className="text-gray-600">${selectedRecipe.pricePerServing.toFixed(2)} each</p>
+                <h3 className="text-xl font-bold text-neutral-900">{selectedRecipe.name}</h3>
+                <p className="text-neutral-600">${selectedRecipe.pricePerServing.toFixed(2)} each</p>
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium">Quantity:</label>
+                <label className="text-sm font-medium text-neutral-700">Quantity:</label>
                 <Input
                   type="number"
                   min="1"
@@ -130,11 +128,22 @@ export default function Home() {
               </div>
             </div>
             <div className="flex gap-4 items-center">
-              <p className="text-lg font-semibold">
+              <p className="text-lg font-semibold text-neutral-900">
                 Total: ${(selectedRecipe.pricePerServing * quantity).toFixed(2)}
               </p>
-              <Button onClick={handleAddToCart}>Add to Cart</Button>
-              <Button variant="outline" onClick={() => setSelectedRecipe(null)}>Cancel</Button>
+              <Button 
+                onClick={handleAddToCart}
+                className="bg-tamu-maroon hover:bg-tamu-maroon-dark text-white font-bold"
+              >
+                Add to Cart
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setSelectedRecipe(null)}
+                className="border-neutral-300 text-neutral-700 hover:bg-neutral-200"
+              >
+                Cancel
+              </Button>
             </div>
           </div>
         </div>

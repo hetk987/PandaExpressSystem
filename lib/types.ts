@@ -25,6 +25,7 @@ export type Order = {
     cashierId: number;
     orderInfo?: OrderInfo;
     isCompleted: boolean;
+    customerEmail?: string;
 }
 
 export type Inventory = {
