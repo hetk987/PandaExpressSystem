@@ -22,6 +22,7 @@ import {
     TableCell,
 } from "@/app/components/ui/table";
 import { Employee } from "@/lib/types";
+import { sortData } from "@/lib/utils";
 
 export default function AdminEmployeesTab() {
     const [employees, setEmployees] = React.useState<Employee[]>([]);
@@ -30,6 +31,12 @@ export default function AdminEmployeesTab() {
         React.useState<Employee | null>(null);
     const [empLoading, setEmpLoading] = React.useState(false);
     const [empError, setEmpError] = React.useState<string | null>(null);
+    const [sortColumn, setSortColumn] = React.useState<keyof Employee | null>(
+        null
+    );
+    const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
+        "asc"
+    );
 
     async function fetchEmployees() {
         try {
@@ -142,6 +149,19 @@ export default function AdminEmployeesTab() {
         }
     }
 
+    function handleSort(column: keyof Employee) {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortColumn(column);
+            setSortDirection("asc");
+        }
+    }
+
+    const sortedEmployees = sortColumn
+        ? sortData(employees, sortColumn, sortDirection)
+        : employees;
+
     return (
         <div className="mt-6 space-y-4">
             <div className="flex justify-between items-center">
@@ -168,16 +188,76 @@ export default function AdminEmployeesTab() {
                 </TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Salary</TableHead>
-                        <TableHead>Hours</TableHead>
-                        <TableHead>Employed</TableHead>
-                        <TableHead>Role ID</TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("name")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Name
+                                {sortColumn === "name" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("salary")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Salary
+                                {sortColumn === "salary" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("hours")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Hours
+                                {sortColumn === "hours" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("isEmployed")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Employed
+                                {sortColumn === "isEmployed" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("roleId")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Role ID
+                                {sortColumn === "roleId" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {employees.length === 0 && !empLoading && (
+                    {sortedEmployees.length === 0 && !empLoading && (
                         <TableRow>
                             <TableCell
                                 colSpan={6}
@@ -188,7 +268,7 @@ export default function AdminEmployeesTab() {
                         </TableRow>
                     )}
 
-                    {employees.map((emp) => (
+                    {sortedEmployees.map((emp) => (
                         <TableRow key={emp.id}>
                             <TableCell>{emp.name}</TableCell>
                             <TableCell>{emp.salary}</TableCell>
@@ -240,7 +320,10 @@ export default function AdminEmployeesTab() {
                                         id="emp-name"
                                         value={selectedEmployee.name}
                                         onChange={(e) =>
-                                            updateSelected("name", e.target.value)
+                                            updateSelected(
+                                                "name",
+                                                e.target.value
+                                            )
                                         }
                                     />
                                 </div>
@@ -260,7 +343,8 @@ export default function AdminEmployeesTab() {
                                                 "salary",
                                                 e.target.value === ""
                                                     ? 0
-                                                    : Number(e.target.value) || 0
+                                                    : Number(e.target.value) ||
+                                                          0
                                             )
                                         }
                                         placeholder="0"
@@ -282,7 +366,8 @@ export default function AdminEmployeesTab() {
                                                 "hours",
                                                 e.target.value === ""
                                                     ? 0
-                                                    : Number(e.target.value) || 0
+                                                    : Number(e.target.value) ||
+                                                          0
                                             )
                                         }
                                         placeholder="0"
@@ -304,7 +389,8 @@ export default function AdminEmployeesTab() {
                                                 "roleId",
                                                 e.target.value === ""
                                                     ? 1
-                                                    : Number(e.target.value) || 1
+                                                    : Number(e.target.value) ||
+                                                          1
                                             )
                                         }
                                         placeholder="1"
@@ -333,7 +419,10 @@ export default function AdminEmployeesTab() {
                                         id="emp-employed"
                                         checked={selectedEmployee.isEmployed}
                                         onCheckedChange={(checked) =>
-                                            updateSelected("isEmployed", checked)
+                                            updateSelected(
+                                                "isEmployed",
+                                                checked
+                                            )
                                         }
                                     />
                                     <Label htmlFor="emp-employed">
@@ -380,4 +469,3 @@ export default function AdminEmployeesTab() {
         </div>
     );
 }
-

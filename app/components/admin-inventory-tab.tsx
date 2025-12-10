@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/app/components/ui/button";
-import { getCSTTimestamp } from "@/lib/utils";
+import { getCSTTimestamp, sortData } from "@/lib/utils";
 import {
     Dialog,
     DialogContent,
@@ -34,6 +34,12 @@ export default function AdminInventoryTab() {
     const [restockQuantity, setRestockQuantity] = React.useState<number>(0);
     const [invLoading, setInvLoading] = React.useState(false);
     const [invError, setInvError] = React.useState<string | null>(null);
+    const [sortColumn, setSortColumn] = React.useState<
+        keyof InventoryItem | null
+    >(null);
+    const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
+        "asc"
+    );
 
     async function fetchInventory() {
         try {
@@ -200,6 +206,19 @@ export default function AdminInventoryTab() {
         }
     }
 
+    function handleSort(column: keyof InventoryItem) {
+        if (sortColumn === column) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+        } else {
+            setSortColumn(column);
+            setSortDirection("asc");
+        }
+    }
+
+    const sortedInventory = sortColumn
+        ? sortData(inventory, sortColumn, sortDirection)
+        : inventory;
+
     return (
         <div className="mt-6 space-y-4">
             <div className="flex justify-between items-center">
@@ -224,15 +243,65 @@ export default function AdminInventoryTab() {
                 <TableCaption className="sr-only">Buy Inventory</TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Current Stock</TableHead>
-                        <TableHead>Batch Cost</TableHead>
-                        <TableHead>Est. Daily Use</TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("name")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Name
+                                {sortColumn === "name" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("currentStock")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Current Stock
+                                {sortColumn === "currentStock" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("batchPurchaseCost")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Batch Cost
+                                {sortColumn === "batchPurchaseCost" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() =>
+                                    handleSort("estimatedUsedPerDay")
+                                }
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Est. Daily Use
+                                {sortColumn === "estimatedUsedPerDay" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {inventory.length === 0 && !invLoading && (
+                    {sortedInventory.length === 0 && !invLoading && (
                         <TableRow>
                             <TableCell
                                 colSpan={5}
@@ -243,7 +312,7 @@ export default function AdminInventoryTab() {
                         </TableRow>
                     )}
 
-                    {inventory.map((inv) => (
+                    {sortedInventory.map((inv) => (
                         <TableRow key={inv.id}>
                             <TableCell>{inv.name}</TableCell>
                             <TableCell>{inv.currentStock}</TableCell>

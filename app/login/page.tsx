@@ -3,11 +3,17 @@
 import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/app/components/ui/button";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/app/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { UserCircle, Lock, Delete } from "lucide-react";
-import {useSearchParams} from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 function LoginContent() {
     const [pin, setPin] = useState("");
@@ -16,14 +22,16 @@ function LoginContent() {
 
     const params = useSearchParams();
     const oauthError = params.get("error");
+    const callbackUrl = params.get("callbackUrl") || "/employee/kitchen";
 
-    const oauthMessage = oauthError === "AccessDenied"
-        ? "Your Google account is not registered as an employee."
-        : oauthError === "OAuthAccountNotLinked"
-        ? "This Google account is not linked to an employee profile."
-        : oauthError === "Callback"
-        ? "Google login failed. Please try again."
-        : null;
+    const oauthMessage =
+        oauthError === "AccessDenied"
+            ? "Your Google account is not registered as an employee."
+            : oauthError === "OAuthAccountNotLinked"
+            ? "This Google account is not linked to an employee profile."
+            : oauthError === "Callback"
+            ? "Google login failed. Please try again."
+            : null;
 
     const onPinSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,7 +41,7 @@ function LoginContent() {
         const res = await signIn("credentials", {
             password: pin,
             redirect: false,
-            callbackUrl: "/employee/kitchen",
+            callbackUrl: callbackUrl,
         });
 
         setLoading(false);
@@ -41,7 +49,7 @@ function LoginContent() {
         if (res?.error) {
             setError("Invalid PIN");
         } else {
-            window.location.href = "/employee/kitchen";
+            window.location.href = callbackUrl;
         }
     };
 
@@ -79,7 +87,9 @@ function LoginContent() {
                         </p>
                     )}
                     <Button
-                        onClick={() => signIn("google", { callbackUrl: "/employee/kitchen" })}
+                        onClick={() =>
+                            signIn("google", { callbackUrl: callbackUrl })
+                        }
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-lg rounded-xl"
                     >
                         Sign in with Google
@@ -89,7 +99,10 @@ function LoginContent() {
 
                     <form onSubmit={onPinSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="pin" className="font-semibold text-neutral-900">
+                            <Label
+                                htmlFor="pin"
+                                className="font-semibold text-neutral-900"
+                            >
                                 PIN Number
                             </Label>
 
@@ -174,25 +187,27 @@ function LoginContent() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
-                <Card className="w-full max-w-md border-2 shadow-lg">
-                    <CardHeader className="space-y-4 text-center">
-                        <div className="flex justify-center">
-                            <div className="rounded-full bg-neutral-900/10 p-6">
-                                <UserCircle className="h-16 w-16 text-neutral-900" />
+        <Suspense
+            fallback={
+                <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
+                    <Card className="w-full max-w-md border-2 shadow-lg">
+                        <CardHeader className="space-y-4 text-center">
+                            <div className="flex justify-center">
+                                <div className="rounded-full bg-neutral-900/10 p-6">
+                                    <UserCircle className="h-16 w-16 text-neutral-900" />
+                                </div>
                             </div>
-                        </div>
-                        <CardTitle className="text-3xl font-bold text-neutral-900">
-                            Employee Login
-                        </CardTitle>
-                        <CardDescription className="text-neutral-600">
-                            Loading...
-                        </CardDescription>
-                    </CardHeader>
-                </Card>
-            </div>
-        }>
+                            <CardTitle className="text-3xl font-bold text-neutral-900">
+                                Employee Login
+                            </CardTitle>
+                            <CardDescription className="text-neutral-600">
+                                Loading...
+                            </CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
+            }
+        >
             <LoginContent />
         </Suspense>
     );
