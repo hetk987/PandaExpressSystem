@@ -70,7 +70,7 @@ export default function KitchenPage() {
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-3">
                 <div className="flex items-center justify-between w-full">
                     <div className="flex gap-2 flex-wrap">
-                        {mealTypes.map((type) => (
+                        {mealTypes.filter(type => type != "Drink" && type != "A La Carte").map((type) => (
                             <button
                                 key={type}
                                 onClick={() => setSelectedMealType(type)}
