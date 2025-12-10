@@ -138,3 +138,16 @@ export const mealTypes = pgTable("meal_types", {
 	price: real().notNull(),
 	imageFilePath: text(),
 });
+
+export const zReportRuns = pgTable("z_report_runs", {
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "z_report_runs_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	reportDate: text().notNull(), // YYYY-MM-DD format
+	runTimestamp: text().notNull(), // ISO timestamp string
+	runBy: integer(), // Optional employee ID who ran the report
+}, (table) => [
+	foreignKey({
+		columns: [table.runBy],
+		foreignColumns: [employees.id],
+		name: "z_report_runs_runBy_fkey"
+	}),
+]);

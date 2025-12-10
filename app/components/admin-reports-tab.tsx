@@ -87,6 +87,12 @@ export default function AdminReportsTab() {
     const [zReportLoading, setZReportLoading] = React.useState(false);
     const [zReportError, setZReportError] = React.useState<string | null>(null);
     const [zReportResetLoading, setZReportResetLoading] = React.useState(false);
+    const [zReportHasBeenRunToday, setZReportHasBeenRunToday] =
+        React.useState(false);
+    const [zReportLastRunInfo, setZReportLastRunInfo] = React.useState<{
+        timestamp: string;
+        runBy: number | null;
+    } | null>(null);
 
     // Restock Report state
     const [restockData, setRestockData] = React.useState<RestockRow[] | null>(
@@ -227,7 +233,9 @@ export default function AdminReportsTab() {
                 throw new Error(text || "Failed to fetch Z-report");
             }
 
-            const data = await res.json();
+            const response = await res.json();
+            // Handle new response format with status info
+            const data = response.data || response; // Support both old and new format
             const normalized: HourlyRow[] = (data ?? []).map(
                 (row: { hour: number; netSales: number }) => ({
                     hour: Number(row.hour),
@@ -235,6 +243,12 @@ export default function AdminReportsTab() {
                 })
             );
             setZReportData(normalized);
+
+            // Update status if available
+            if (response.hasBeenRunToday !== undefined) {
+                setZReportHasBeenRunToday(response.hasBeenRunToday);
+                setZReportLastRunInfo(response.lastRunInfo || null);
+            }
         } catch (err: unknown) {
             setZReportError(
                 err instanceof Error ? err.message : "Unknown error"
@@ -252,16 +266,29 @@ export default function AdminReportsTab() {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to reset Z-report");
+                const errorData = await res
+                    .json()
+                    .catch(async () => ({ error: await res.text() }));
+                throw new Error(errorData.error || "Failed to reset Z-report");
             }
 
+            const result = await res.json();
             alert("Z-Report has been reset for the day");
+
+            // Update status after successful reset
+            setZReportHasBeenRunToday(true);
+            setZReportLastRunInfo({
+                timestamp: result.timestamp,
+                runBy: null,
+            });
+
+            // Refresh the report data
+            await fetchZReport();
         } catch (err: unknown) {
-            alert(
-                "Failed to reset Z-report: " +
-                    (err instanceof Error ? err.message : "Unknown error")
-            );
+            const errorMessage =
+                err instanceof Error ? err.message : "Unknown error";
+            alert("Failed to reset Z-report: " + errorMessage);
+            setZReportError(errorMessage);
         } finally {
             setZReportResetLoading(false);
         }
@@ -850,6 +877,27 @@ export default function AdminReportsTab() {
                                 </p>
                             )}
 
+                            {zReportHasBeenRunToday && (
+                                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                    <p className="text-sm text-yellow-800 font-medium">
+                                        ⚠️ Z-Report has already been run today
+                                    </p>
+                                    {zReportLastRunInfo && (
+                                        <p className="text-xs text-yellow-700 mt-1">
+                                            Last run:{" "}
+                                            {new Date(
+                                                zReportLastRunInfo.timestamp
+                                            ).toLocaleString()}
+                                        </p>
+                                    )}
+                                    <p className="text-xs text-yellow-700 mt-1">
+                                        The Z-Report can only be run once per
+                                        day. It resets totals and should only be
+                                        run at the end of the business day.
+                                    </p>
+                                </div>
+                            )}
+
                             {sortedZReport && sortedZReport.length > 0 && (
                                 <>
                                     <Table>
@@ -921,11 +969,16 @@ export default function AdminReportsTab() {
                                     <div className="flex justify-end">
                                         <Button
                                             onClick={resetZReport}
-                                            disabled={zReportResetLoading}
+                                            disabled={
+                                                zReportResetLoading ||
+                                                zReportHasBeenRunToday
+                                            }
                                             variant="destructive"
                                         >
                                             {zReportResetLoading
                                                 ? "Resetting..."
+                                                : zReportHasBeenRunToday
+                                                ? "Already Run Today"
                                                 : "Reset Z-Report (End of Day)"}
                                         </Button>
                                     </div>
