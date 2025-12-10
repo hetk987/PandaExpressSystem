@@ -78,6 +78,7 @@ export default function Home() {
 
     return (
         <div className="flex flex-col">
+            <h1 className="sr-only">Entrees</h1>
             <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
                 {recipes
                     .filter((r) => r.type === "Entree")

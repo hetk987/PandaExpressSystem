@@ -274,6 +274,7 @@ export default function Build({
 
     return (
         <div className="flex flex-row h-full bg-gradient-to-br from-neutral-50 via-white to-neutral-100">
+            <h1 className="sr-only">{mealName}</h1>
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto">
                 {/* Header with progress */}
@@ -464,7 +465,7 @@ export default function Build({
             </div>
 
             {/* Right Sidebar - Selection Summary */}
-            <div className="w-80 h-full border-l border-neutral-200/50 bg-gradient-to-b from-white to-neutral-50/50 backdrop-blur-sm flex flex-col">
+            <aside className="w-80 h-full border-l border-neutral-200/50 bg-gradient-to-b from-white to-neutral-50/50 backdrop-blur-sm flex flex-col" aria-label="Meal selection summary">
                 {/* Sidebar Header */}
                 <div className="p-6 border-b border-neutral-200/50">
                     <div className="flex items-center gap-3 mb-2">
@@ -836,7 +837,7 @@ export default function Build({
                         ← Back to Meals
                     </Button>
                 </div>
-            </div>
+            </aside>
         </div>
     );
 }
