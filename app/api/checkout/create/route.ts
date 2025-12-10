@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getCSTTimestamp } from '@/lib/utils';
 import { OrderInfo } from '@/lib/types';
+import { createOrder } from '@/app/services/orderService';
 
 // Validate Stripe secret key
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -104,12 +105,9 @@ export async function POST(request: NextRequest) {
 
         // Create the order in the database first (with isCompleted: false)
         // This allows us to pass only the order ID in Stripe metadata instead of the full order data
-        const orderResponse = await fetch(`${request.nextUrl.origin}/api/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        // Direct service call avoids HTTP/HTTPS protocol issues in production
+        try {
+            const order = await createOrder({
                 tax: tax,
                 totalCost: total,
                 orderTime: orderTime,
@@ -117,42 +115,39 @@ export async function POST(request: NextRequest) {
                 orderInfo: orderInfo,
                 isCompleted: false,
                 customerEmail: customerEmail || undefined,
-            }),
-        });
+            });
 
-        if (!orderResponse.ok) {
-            const error = await orderResponse.json();
-            console.error('Failed to create order:', error);
+            const orderId = order.id;
+
+            // Get base URL for callbacks
+            // Priority: NEXTAUTH_URL > origin header > fallback
+            const baseUrl = 
+                process.env.NEXTAUTH_URL || 
+                request.headers.get('origin') || 
+                request.nextUrl.origin ||
+                'http://localhost:3000';
+
+            // Create Stripe checkout session with only order ID in metadata
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: lineItems,
+                mode: 'payment',
+                success_url: `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${baseUrl}/api/checkout/cancel`,
+                metadata: {
+                    orderId: orderId.toString(),
+                },
+            });
+
+            return NextResponse.json({ url: session.url }, { status: 200 });
+        } catch (orderError) {
+            console.error('Failed to create order:', orderError);
+            const errorMessage = orderError instanceof Error ? orderError.message : 'Unknown error';
             return NextResponse.json(
-                { error: 'Failed to create order', details: error },
+                { error: 'Failed to create order', details: errorMessage },
                 { status: 500 }
             );
         }
-
-        const order = await orderResponse.json();
-        const orderId = order.id;
-
-        // Get base URL for callbacks
-        // Priority: NEXTAUTH_URL > origin header > fallback
-        const baseUrl = 
-            process.env.NEXTAUTH_URL || 
-            request.headers.get('origin') || 
-            request.nextUrl.origin ||
-            'http://localhost:3000';
-
-        // Create Stripe checkout session with only order ID in metadata
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: lineItems,
-            mode: 'payment',
-            success_url: `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${baseUrl}/api/checkout/cancel`,
-            metadata: {
-                orderId: orderId.toString(),
-            },
-        });
-
-        return NextResponse.json({ url: session.url }, { status: 200 });
     } catch (error) {
         console.error('Error creating Stripe checkout session:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -164,6 +159,7 @@ export async function POST(request: NextRequest) {
         } else if (errorMessage.includes('Invalid API Key')) {
             userMessage = 'Stripe configuration error: Invalid API key. Please verify your Stripe secret key.';
         }
+        console.error('Error creating Stripe checkout session:', errorMessage);
         
         return NextResponse.json(
             { error: userMessage, details: errorMessage },
