@@ -8,11 +8,16 @@ import { createOrder } from '@/app/services/orderService';
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY environment variable is not set');
 }
-console.log('Stripe KEY YES')
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+
+// Detect and log Stripe mode (test vs live)
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const isTestMode = stripeKey.startsWith('sk_test_');
+const isLiveMode = stripeKey.startsWith('sk_live_');
+console.log(`[STRIPE] Mode: ${isTestMode ? 'TEST MODE' : isLiveMode ? 'LIVE MODE' : 'UNKNOWN'} (key prefix: ${stripeKey.substring(0, 8)}...)`);
+
+const stripe = new Stripe(stripeKey, {
     apiVersion: '2025-11-17.clover',
 });
-console.log('Stripe initialized')
 export async function POST(request: NextRequest) {
     const requestId = Date.now().toString(36);
     console.log(`[${requestId}] [CHECKOUT] Starting checkout session creation`);
@@ -27,7 +32,8 @@ export async function POST(request: NextRequest) {
                 { status: 500 }
             );
         }
-        console.log(`[${requestId}] [CHECKOUT] Stripe key validated (key exists: ${stripeSecretKey ? 'yes' : 'no'})`);
+        const keyMode = stripeSecretKey.startsWith('sk_test_') ? 'TEST' : stripeSecretKey.startsWith('sk_live_') ? 'LIVE' : 'UNKNOWN';
+        console.log(`[${requestId}] [CHECKOUT] Stripe key validated - Mode: ${keyMode}, Key exists: ${stripeSecretKey ? 'yes' : 'no'}`);
 
         const body = await request.json();
         const { meals, individualItems, subtotal, tax, total, customerEmail } = body;
@@ -130,11 +136,7 @@ export async function POST(request: NextRequest) {
 
             // Get base URL for callbacks
             // Priority: NEXTAUTH_URL > origin header > fallback
-            const baseUrl = 
-                process.env.NEXTAUTH_URL || 
-                request.headers.get('origin') || 
-                request.nextUrl.origin ||
-                'http://localhost:3000';
+            const baseUrl = process.env.NEXTAUTH_URL!;
             
             console.log(`[${requestId}] [CHECKOUT] Base URL resolved: ${baseUrl}`);
             console.log(`[${requestId}] [CHECKOUT] Creating Stripe checkout session with ${lineItems.length} line items...`);
