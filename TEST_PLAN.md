@@ -780,41 +780,11 @@ This document outlines the test functions used to verify each view in the Panda 
 
 ### Expected Code Coverage
 
-Based on this test plan, we would expect **approximately 75-85% code coverage** for the following reasons:
+Based on this test plan, we would expect **approximately 75-85% code coverage**. We are making sure to test every single major function which in turn also calls the various API routes, event handlers, stat management and utility functions.
 
-1. **Function/Method Coverage**: The tests verify that major functions and methods are called:
+We've also done extensive amount of edge case testing. Some types of edge case testing includes empty data, invalid input, network failures, concurrent operations and missing data scenarios.
 
-    - API route handlers (GET, POST, PUT, DELETE)
-    - Component event handlers (onClick, onSubmit, onChange)
-    - State management functions (addMeal, removeItem, etc.)
-    - Utility functions (price formatting, date calculations)
-
-2. **Edge Cases Covered**: The test plan includes extensive edge case testing:
-
-    - Empty data states (empty arrays, null values)
-    - Invalid input validation (negative numbers, non-numeric, empty strings)
-    - Network failures and API errors
-    - Boundary conditions (zero, maximum values, very large numbers)
-    - Concurrent operations (rapid clicks, simultaneous actions)
-    - Missing data scenarios (null images, undefined fields)
-
-3. **Difficult Edge Cases to Plan For**:
-
-    - **Race Conditions**: Multiple users modifying the same data simultaneously
-    - **Browser-Specific Issues**: Different browser behaviors for TTS, speech recognition
-    - **Timezone Edge Cases**: Date calculations across timezones, daylight saving time
-    - **Stripe Integration Edge Cases**: Payment webhook failures, partial payments
-    - **Session Management**: Expired sessions during long operations, concurrent sessions
-    - **Image Loading Failures**: Network issues loading images, corrupted image files
-    - **Accessibility Edge Cases**: Screen reader compatibility, keyboard navigation edge cases
-    - **Real-Time Updates**: WebSocket disconnections, missed updates during refresh intervals
-
-4. **Coverage Gaps**:
-    - **Error Recovery Flows**: Some error paths may not be fully tested
-    - **Performance Edge Cases**: Very large datasets, memory leaks
-    - **Integration Points**: Third-party service failures (Stripe, OAuth providers)
-    - **Accessibility Testing**: Requires manual testing with assistive technologies
-    - **Cross-Browser Compatibility**: Some features may behave differently across browsers
+Some of the more difficult edge cases to check for were related to race conditions where two different browsers were trying to change the same data. Another tough edge case was all of the third-party endpoints since they all had their own nuances. 
 
 ### Verification Approach
 
@@ -826,62 +796,13 @@ The test plan verifies function calls through:
 -   **UI Updates**: Verifying visual changes indicate function execution
 -   **Side Effects**: Checking database updates, external API calls, navigation
 
-However, **unit-level function coverage** would require additional unit tests with mocking to verify every function branch is executed.
-
 ---
 
 ## Regression Testing Effectiveness
 
-### Would this be an effective test plan for regression testing?
+This current set up would work really well for regression testing. However, the one thing that we are missing that will make regression testing really effective is in-depth unit testing with mock data. Since our data is being pulled straight from the database the testing software is struggling to get the dynamic data and test the function individually. One thing that we would also need to set up is github action which could run automated tests as soon as a commit or push is made. This type of set up would ensure that we have working software throughout the sprint.
 
-**Yes, with some considerations:**
-
-#### Strengths:
-
-1. **Comprehensive View Coverage**: Tests cover all major views and user flows
-2. **Edge Case Focus**: Extensive edge case testing helps catch regressions in error handling
-3. **Integration Testing**: Tests verify end-to-end flows, catching integration issues
-4. **User-Centric**: Tests focus on user-visible functionality, ensuring features work as expected
-
-#### Limitations for Regression Testing:
-
-1. **Missing Unit Tests**: This plan focuses on integration/E2E tests. For effective regression testing, we'd also need:
-
-    - Unit tests for utility functions, calculations, validations
-    - Component unit tests for isolated component behavior
-    - API route unit tests with mocked dependencies
-
-2. **Test Execution Time**: E2E tests are slower. For quick regression feedback, unit tests are faster.
-
-3. **Test Maintenance**: E2E tests are more brittle - UI changes require test updates. Unit tests are more stable.
-
-4. **Coverage Gaps**: Some internal functions, error paths, and utility functions may not be covered.
-
-#### Recommendations for Regression Testing:
-
-1. **Add Unit Tests**: Complement E2E tests with unit tests for:
-
-    - Price calculations, tax calculations
-    - Form validation functions
-    - Data transformation utilities
-    - Date/time calculations
-
-2. **Automated Test Suite**: Run tests automatically on:
-
-    - Every commit (smoke tests)
-    - Pull requests (full suite)
-    - Nightly builds (comprehensive)
-
-3. **Test Data Management**: Maintain consistent test data for reliable regression testing
-
-4. **Performance Baselines**: Add performance tests to catch performance regressions
-
-5. **Visual Regression Testing**: Consider screenshot comparison for UI regressions
-
-#### Conclusion:
-
-This test plan provides a **solid foundation for regression testing** but should be **complemented with unit tests** for comprehensive coverage. The combination of E2E tests (this plan) and unit tests would provide effective regression testing when adding new features.
-
+<!-- 
 ---
 
 ## Test Implementation Approach
@@ -1218,4 +1139,4 @@ describe("Orders API", () => {
 
 ---
 
-_Test Plan Document - CSCE 331 Project 3 Team 41_
+_Test Plan Document - CSCE 331 Project 3 Team 41_ -->
