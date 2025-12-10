@@ -4,11 +4,9 @@
     "private": true,
     "scripts": {
         "dev": "next dev",
-        "prebuild": "npm install --include=optional lightningcss || true",
         "build": "next build",
         "start": "next start",
         "lint": "eslint",
-        "postinstall": "npm rebuild lightningcss || true",
         "docs:api": "typedoc",
         "docs:manual": "testcafe \"chrome:headless --kiosk --incognito --force-device-scale-factor=1.5\" node_modules/auto-docs/ -s public/docs/manual/pics",
         "docs:files": "node node_modules/auto-docs/",
@@ -81,7 +79,6 @@
         "zod": "3.25.76"
     },
     "devDependencies": {
-        "@tailwindcss/postcss": "^4.1.9",
         "@types/node": "^22",
         "@types/pg": "^8.15.5",
         "@types/react": "^19",
@@ -92,9 +89,8 @@
         "drizzle-kit": "^0.31.8",
         "eslint": "^9",
         "eslint-config-next": "16.0.0",
-        "lightningcss": "^1.30.2",
         "postcss": "^8.5",
-        "tailwindcss": "^4.1.9",
+        "tailwindcss": "^3.4.17",
         "testcafe": "^3.7.2",
         "tsx": "^4.20.6",
         "tw-animate-css": "1.3.3",
