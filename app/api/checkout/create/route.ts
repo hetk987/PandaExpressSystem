@@ -3,6 +3,15 @@ import Stripe from 'stripe';
 import { getCSTTimestamp } from '@/lib/utils';
 import { OrderInfo } from '@/lib/types';
 
+// Validate Stripe secret key
+if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: '2025-11-17.clover',
+});
+
 export async function POST(request: NextRequest) {
     try {
         // Validate Stripe secret key is available
@@ -15,10 +24,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Initialize Stripe client
-        const stripe = new Stripe(stripeSecretKey, {
-            apiVersion: '2025-11-17.clover',
-        });
         const body = await request.json();
         const { meals, individualItems, subtotal, tax, total, customerEmail } = body;
 
@@ -128,7 +133,12 @@ export async function POST(request: NextRequest) {
         const orderId = order.id;
 
         // Get base URL for callbacks
-        const baseUrl = process.env.NEXTAUTH_URL || request.headers.get('origin') || 'http://localhost:3000';
+        // Priority: NEXTAUTH_URL > origin header > fallback
+        const baseUrl = 
+            process.env.NEXTAUTH_URL || 
+            request.headers.get('origin') || 
+            request.nextUrl.origin ||
+            'http://localhost:3000';
 
         // Create Stripe checkout session with only order ID in metadata
         const session = await stripe.checkout.sessions.create({
@@ -146,8 +156,17 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Error creating Stripe checkout session:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        
+        // Provide more helpful error messages
+        let userMessage = 'Failed to create checkout session';
+        if (errorMessage.includes('STRIPE_SECRET_KEY')) {
+            userMessage = 'Stripe configuration error: Missing API key. Please check environment variables.';
+        } else if (errorMessage.includes('Invalid API Key')) {
+            userMessage = 'Stripe configuration error: Invalid API key. Please verify your Stripe secret key.';
+        }
+        
         return NextResponse.json(
-            { error: 'Failed to create checkout session', details: errorMessage },
+            { error: userMessage, details: errorMessage },
             { status: 500 }
         );
     }
