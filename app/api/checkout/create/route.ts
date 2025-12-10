@@ -135,10 +135,37 @@ export async function POST(request: NextRequest) {
             console.log(`[${requestId}] [CHECKOUT] Order created successfully - ID: ${orderId}`);
 
             // Get base URL for callbacks
-            // Priority: NEXTAUTH_URL > origin header > fallback
-            const baseUrl = process.env.NEXTAUTH_URL!;
+            // Priority: NEXTAUTH_URL > request origin > fallback
+            // In production, we need to ensure we use HTTPS and the correct domain
+            let baseUrl = process.env.NEXTAUTH_URL;
+            
+            // If NEXTAUTH_URL is not set, use the request origin
+            if (!baseUrl) {
+                const origin = request.headers.get('origin') || request.nextUrl.origin;
+                baseUrl = origin;
+                console.log(`[${requestId}] [CHECKOUT] WARNING: NEXTAUTH_URL not set, using request origin: ${baseUrl}`);
+            }
+            
+            // Ensure we have a valid URL (should never be undefined at this point)
+            if (!baseUrl) {
+                throw new Error('Unable to determine base URL for Stripe callbacks. Please set NEXTAUTH_URL environment variable.');
+            }
+            
+            // Ensure the URL doesn't have a trailing slash
+            baseUrl = baseUrl.replace(/\/$/, '');
+            
+            // Validate that we're not using localhost in production
+            if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+                console.error(`[${requestId}] [CHECKOUT] ERROR: Base URL is localhost in production! This will cause Stripe redirect issues.`);
+                console.error(`[${requestId}] [CHECKOUT] Please set NEXTAUTH_URL to your production URL: https://panda-pos-nrtf.onrender.com`);
+            }
+            
+            const successUrl = `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+            const cancelUrl = `${baseUrl}/api/checkout/cancel`;
             
             console.log(`[${requestId}] [CHECKOUT] Base URL resolved: ${baseUrl}`);
+            console.log(`[${requestId}] [CHECKOUT] Success URL: ${successUrl}`);
+            console.log(`[${requestId}] [CHECKOUT] Cancel URL: ${cancelUrl}`);
             console.log(`[${requestId}] [CHECKOUT] Creating Stripe checkout session with ${lineItems.length} line items...`);
 
             // Create Stripe checkout session with only order ID in metadata
@@ -146,8 +173,8 @@ export async function POST(request: NextRequest) {
                 payment_method_types: ['card'],
                 line_items: lineItems,
                 mode: 'payment',
-                success_url: `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${baseUrl}/api/checkout/cancel`,
+                success_url: successUrl,
+                cancel_url: cancelUrl,
                 metadata: {
                     orderId: orderId.toString(),
                 },
