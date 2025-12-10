@@ -63,10 +63,8 @@ const MealCard = (props: {
                 )}
             </ItemHeader>
 
-            {/* Content footer with glass effect */}
-            <ItemContent className="relative bg-transparent text-white flex items-center justify-center p-3 min-h-[60px]">
-                {/* Glass overlay for text area */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            {/* Content footer with maroon gradient background */}
+            <ItemContent className="relative bg-maroon-gradient text-white flex items-center justify-center p-3 min-h-[60px]">
                 <ItemTitle
                     className={cn(
                         "relative z-10 text-sm font-semibold text-center leading-tight",
