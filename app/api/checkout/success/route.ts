@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         
         // Ensure we have a valid URL
         if (!baseUrl) {
-            baseUrl = 'https://panda-pos-nrtf.onrender.com'; // Fallback to production URL
+            baseUrl = 'https://project-3-team-41-zbyt.onrender.com/'; // Fallback to production URL
         }
         
         // Ensure the URL doesn't have a trailing slash
