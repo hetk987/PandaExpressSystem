@@ -2,38 +2,52 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getCSTTimestamp } from '@/lib/utils';
 import { OrderInfo } from '@/lib/types';
+import { createOrder } from '@/app/services/orderService';
 
 // Validate Stripe secret key
 if (!process.env.STRIPE_SECRET_KEY) {
     throw new Error('STRIPE_SECRET_KEY environment variable is not set');
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+// Detect and log Stripe mode (test vs live)
+const stripeKey = process.env.STRIPE_SECRET_KEY;
+const isTestMode = stripeKey.startsWith('sk_test_');
+const isLiveMode = stripeKey.startsWith('sk_live_');
+console.log(`[STRIPE] Mode: ${isTestMode ? 'TEST MODE' : isLiveMode ? 'LIVE MODE' : 'UNKNOWN'} (key prefix: ${stripeKey.substring(0, 8)}...)`);
+
+const stripe = new Stripe(stripeKey, {
     apiVersion: '2025-11-17.clover',
 });
-
 export async function POST(request: NextRequest) {
+    const requestId = Date.now().toString(36);
+    console.log(`[${requestId}] [CHECKOUT] Starting checkout session creation`);
+    
     try {
         // Validate Stripe secret key is available
         const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
         if (!stripeSecretKey) {
-            console.error('STRIPE_SECRET_KEY environment variable is not set');
+            console.error(`[${requestId}] [CHECKOUT] ERROR: STRIPE_SECRET_KEY environment variable is not set`);
             return NextResponse.json(
                 { error: 'Stripe configuration error: Missing STRIPE_SECRET_KEY' },
                 { status: 500 }
             );
         }
+        const keyMode = stripeSecretKey.startsWith('sk_test_') ? 'TEST' : stripeSecretKey.startsWith('sk_live_') ? 'LIVE' : 'UNKNOWN';
+        console.log(`[${requestId}] [CHECKOUT] Stripe key validated - Mode: ${keyMode}, Key exists: ${stripeSecretKey ? 'yes' : 'no'}`);
 
         const body = await request.json();
         const { meals, individualItems, subtotal, tax, total, customerEmail } = body;
+        console.log(`[${requestId}] [CHECKOUT] Request body received - meals: ${meals?.length || 0}, items: ${individualItems?.length || 0}, total: $${total}`);
 
         // Validate required fields
         if (!meals || !individualItems || subtotal === undefined || tax === undefined || total === undefined) {
+            console.error(`[${requestId}] [CHECKOUT] ERROR: Missing required fields`);
             return NextResponse.json(
                 { error: 'Missing required fields: meals, individualItems, subtotal, tax, total' },
                 { status: 400 }
             );
         }
+        console.log(`[${requestId}] [CHECKOUT] Request validation passed`);
 
         // Build line items for Stripe
         const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
@@ -104,12 +118,10 @@ export async function POST(request: NextRequest) {
 
         // Create the order in the database first (with isCompleted: false)
         // This allows us to pass only the order ID in Stripe metadata instead of the full order data
-        const orderResponse = await fetch(`${request.nextUrl.origin}/api/orders`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        // Direct service call avoids HTTP/HTTPS protocol issues in production
+        console.log(`[${requestId}] [CHECKOUT] Creating order in database...`);
+        try {
+            const order = await createOrder({
                 tax: tax,
                 totalCost: total,
                 orderTime: orderTime,
@@ -117,45 +129,81 @@ export async function POST(request: NextRequest) {
                 orderInfo: orderInfo,
                 isCompleted: false,
                 customerEmail: customerEmail || undefined,
-            }),
-        });
+            });
 
-        if (!orderResponse.ok) {
-            const error = await orderResponse.json();
-            console.error('Failed to create order:', error);
+            const orderId = order.id;
+            console.log(`[${requestId}] [CHECKOUT] Order created successfully - ID: ${orderId}`);
+
+            // Get base URL for callbacks
+            // Priority: NEXTAUTH_URL > request origin > fallback
+            // In production, we need to ensure we use HTTPS and the correct domain
+            let baseUrl = process.env.NEXTAUTH_URL;
+            
+            // If NEXTAUTH_URL is not set, use the request origin
+            if (!baseUrl) {
+                const origin = request.headers.get('origin') || request.nextUrl.origin;
+                baseUrl = origin;
+                console.log(`[${requestId}] [CHECKOUT] WARNING: NEXTAUTH_URL not set, using request origin: ${baseUrl}`);
+            }
+            
+            // Ensure we have a valid URL (should never be undefined at this point)
+            if (!baseUrl) {
+                throw new Error('Unable to determine base URL for Stripe callbacks. Please set NEXTAUTH_URL environment variable.');
+            }
+            
+            // Ensure the URL doesn't have a trailing slash
+            baseUrl = baseUrl.replace(/\/$/, '');
+            
+            // Validate that we're not using localhost in production
+            if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+                console.error(`[${requestId}] [CHECKOUT] ERROR: Base URL is localhost in production! This will cause Stripe redirect issues.`);
+                console.error(`[${requestId}] [CHECKOUT] Please set NEXTAUTH_URL to your production URL: https://panda-pos-nrtf.onrender.com`);
+            }
+            
+            const successUrl = `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+            const cancelUrl = `${baseUrl}/api/checkout/cancel`;
+            
+            console.log(`[${requestId}] [CHECKOUT] Base URL resolved: ${baseUrl}`);
+            console.log(`[${requestId}] [CHECKOUT] Success URL: ${successUrl}`);
+            console.log(`[${requestId}] [CHECKOUT] Cancel URL: ${cancelUrl}`);
+            console.log(`[${requestId}] [CHECKOUT] Creating Stripe checkout session with ${lineItems.length} line items...`);
+
+            // Create Stripe checkout session with only order ID in metadata
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: lineItems,
+                mode: 'payment',
+                success_url: successUrl,
+                cancel_url: cancelUrl,
+                metadata: {
+                    orderId: orderId.toString(),
+                },
+            });
+
+            console.log(`[${requestId}] [CHECKOUT] Stripe session created successfully - Session ID: ${session.id}`);
+            return NextResponse.json({ url: session.url }, { status: 200 });
+        } catch (orderError) {
+            const errorMessage = orderError instanceof Error ? orderError.message : 'Unknown error';
+            const errorStack = orderError instanceof Error ? orderError.stack : 'No stack trace';
+            console.error(`[${requestId}] [CHECKOUT] ERROR: Failed to create order:`, {
+                message: errorMessage,
+                stack: errorStack,
+                error: orderError
+            });
             return NextResponse.json(
-                { error: 'Failed to create order', details: error },
+                { error: 'Failed to create order', details: errorMessage },
                 { status: 500 }
             );
         }
-
-        const order = await orderResponse.json();
-        const orderId = order.id;
-
-        // Get base URL for callbacks
-        // Priority: NEXTAUTH_URL > origin header > fallback
-        const baseUrl = 
-            process.env.NEXTAUTH_URL || 
-            request.headers.get('origin') || 
-            request.nextUrl.origin ||
-            'http://localhost:3000';
-
-        // Create Stripe checkout session with only order ID in metadata
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: lineItems,
-            mode: 'payment',
-            success_url: `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${baseUrl}/api/checkout/cancel`,
-            metadata: {
-                orderId: orderId.toString(),
-            },
-        });
-
-        return NextResponse.json({ url: session.url }, { status: 200 });
     } catch (error) {
-        console.error('Error creating Stripe checkout session:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+        
+        console.error(`[${requestId}] [CHECKOUT] ERROR: Failed to create Stripe checkout session:`, {
+            message: errorMessage,
+            stack: errorStack,
+            error: error
+        });
         
         // Provide more helpful error messages
         let userMessage = 'Failed to create checkout session';
@@ -163,6 +211,8 @@ export async function POST(request: NextRequest) {
             userMessage = 'Stripe configuration error: Missing API key. Please check environment variables.';
         } else if (errorMessage.includes('Invalid API Key')) {
             userMessage = 'Stripe configuration error: Invalid API key. Please verify your Stripe secret key.';
+        } else if (errorMessage.includes('SSL') || errorMessage.includes('wrong version number')) {
+            userMessage = 'Network error: SSL/TLS protocol issue. This may indicate a configuration problem.';
         }
         
         return NextResponse.json(
