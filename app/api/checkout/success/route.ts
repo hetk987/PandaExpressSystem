@@ -50,8 +50,26 @@ export async function GET(request: NextRequest) {
         // Optionally, we could update it to mark payment as complete, but for now
         // we'll leave it as is since isCompleted refers to kitchen completion, not payment
 
+        // Get base URL for redirect - use same logic as checkout/create
+        // Priority: NEXTAUTH_URL > request origin > fallback
+        let baseUrl = process.env.NEXTAUTH_URL;
+        
+        // If NEXTAUTH_URL is not set, use the request origin
+        if (!baseUrl) {
+            const origin = request.headers.get('origin') || request.nextUrl.origin;
+            baseUrl = origin;
+        }
+        
+        // Ensure we have a valid URL
+        if (!baseUrl) {
+            baseUrl = 'https://panda-pos-nrtf.onrender.com'; // Fallback to production URL
+        }
+        
+        // Ensure the URL doesn't have a trailing slash
+        baseUrl = baseUrl.replace(/\/$/, '');
+
         // Redirect to logout page
-        return NextResponse.redirect(new URL('/logout', request.nextUrl.origin));
+        return NextResponse.redirect(new URL('/logout', baseUrl));
     } catch (error) {
         console.error('Error processing successful payment:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
