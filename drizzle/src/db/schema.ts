@@ -136,7 +136,7 @@ export const employees = pgTable("employees", {
 ]);
 
 export const recipes = pgTable("recipes", {
-	name: text().notNull(),
+	name: text().notNull().unique(),
 	image: text(),
 	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	pricePerServing: real().notNull(),
