@@ -12,7 +12,7 @@ export const orders = pgTable("orders", {
 	cashierId: integer().notNull(),
 	isCompleted: boolean().notNull(),
 	orderInfo: jsonb(),
-	customerEmail: text(),  // Optional email for order notifications
+	customerEmail: text(),
 }, (table) => [
 	foreignKey({
 		columns: [table.cashierId],
@@ -22,7 +22,7 @@ export const orders = pgTable("orders", {
 ]);
 
 export const inventory = pgTable("inventory", {
-	name: text().notNull(),
+	name: text().notNull().unique(),
 	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "inventory_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
 	batchPurchaseCost: real().notNull(),
 	currentStock: integer().notNull(),
@@ -90,6 +90,30 @@ export const recOrderJunc = pgTable("rec_order_junc", {
 	}),
 ]);
 
+export const zReportRuns = pgTable("z_report_runs", {
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "z_report_runs_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	reportDate: text().notNull(),
+	runTimestamp: text().notNull(),
+	runBy: integer(),
+}, (table) => [
+	foreignKey({
+		columns: [table.runBy],
+		foreignColumns: [employees.id],
+		name: "z_report_runs_runBy_fkey"
+	}),
+]);
+
+export const recipes = pgTable("recipes", {
+	name: text().notNull().unique(),
+	image: text(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	pricePerServing: real().notNull(),
+	ordersPerBatch: integer().notNull(),
+	type: recipeType(),
+	premium: boolean().default(false),
+	seasonal: boolean().default(false),
+});
+
 export const roles = pgTable("roles", {
 	name: text().notNull(),
 	canDiscount: boolean().notNull(),
@@ -120,16 +144,6 @@ export const employees = pgTable("employees", {
 	check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
 ]);
 
-export const recipes = pgTable("recipes", {
-	name: text().notNull(),
-	image: text(),
-	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	pricePerServing: real().notNull(),
-	ordersPerBatch: integer().notNull(),
-	type: recipeType(),
-	premium: boolean().default(false),
-});
-
 export const mealTypes = pgTable("meal_types", {
 	typeName: text().primaryKey().notNull(),
 	sides: integer().notNull(),
@@ -138,16 +152,3 @@ export const mealTypes = pgTable("meal_types", {
 	price: real().notNull(),
 	imageFilePath: text(),
 });
-
-export const zReportRuns = pgTable("z_report_runs", {
-	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "z_report_runs_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
-	reportDate: text().notNull(), // YYYY-MM-DD format
-	runTimestamp: text().notNull(), // ISO timestamp string
-	runBy: integer(), // Optional employee ID who ran the report
-}, (table) => [
-	foreignKey({
-		columns: [table.runBy],
-		foreignColumns: [employees.id],
-		name: "z_report_runs_runBy_fkey"
-	}),
-]);

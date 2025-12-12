@@ -23,8 +23,9 @@ import {
     TableRow,
     TableCell,
 } from "@/app/components/ui/table";
-import { Recipe, Inventory } from "@/lib/types";
+import { Recipe, Inventory, RecipeType } from "@/lib/types";
 import { sortData } from "@/lib/utils";
+import { parseApiError } from "@/app/components/admin-error-utils";
 
 type Ingredient = {
     id?: number;
@@ -210,8 +211,10 @@ export default function AdminRecipesTab() {
             );
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to save recipe");
+                const parsed = await parseApiError(res);
+                setRecError(parsed.message);
+                toast.error(parsed.message);
+                return;
             }
 
             const savedRecipe = await res.json();
@@ -360,7 +363,10 @@ export default function AdminRecipesTab() {
             setRecDialogOpen(false);
             toast.success("Recipe saved successfully!");
         } catch (err: unknown) {
-            setRecError(err instanceof Error ? err.message : "Unknown error");
+            const message =
+                err instanceof Error ? err.message : "Unknown error";
+            setRecError(message);
+            toast.error(message);
         } finally {
             setRecLoading(false);
         }
@@ -379,15 +385,20 @@ export default function AdminRecipesTab() {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to delete recipe");
+                const parsed = await parseApiError(res);
+                setRecError(parsed.message);
+                toast.error(parsed.message);
+                return;
             }
 
             await fetchRecipes();
             setRecDialogOpen(false);
             toast.success("Recipe deleted successfully!");
         } catch (err: unknown) {
-            setRecError(err instanceof Error ? err.message : "Unknown error");
+            const message =
+                err instanceof Error ? err.message : "Unknown error";
+            setRecError(message);
+            toast.error(message);
         } finally {
             setRecLoading(false);
         }
@@ -658,10 +669,8 @@ export default function AdminRecipesTab() {
                                                     "type",
                                                     e.target.value === ""
                                                         ? null
-                                                        : (e.target.value as
-                                                              | "Side"
-                                                              | "Entree"
-                                                              | "Drink")
+                                                        : (e.target
+                                                              .value as RecipeType)
                                                 )
                                             }
                                         >
@@ -671,6 +680,9 @@ export default function AdminRecipesTab() {
                                                 Entree
                                             </option>
                                             <option value="Drink">Drink</option>
+                                            <option value="Appetizer">
+                                                Appetizer
+                                            </option>
                                         </select>
                                     </div>
 

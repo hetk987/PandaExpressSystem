@@ -13,7 +13,7 @@ export async function GET(
         }
 
         const recipe = await getRecipeById(id);
-        
+
         // Check if resource exists
         if (!recipe || (Array.isArray(recipe) && recipe.length === 0)) {
             return NextResponse.json(
@@ -81,9 +81,9 @@ export async function PUT(
                 { status: 400 }
             );
         }
-        if (body.type !== undefined && !['Side', 'Entree', 'Drink'].includes(body.type)) {
+        if (body.type !== undefined && !['Side', 'Entree', 'Drink', 'Appetizer'].includes(body.type)) {
             return NextResponse.json(
-                { error: 'type must be one of: Side, Entree, Drink' },
+                { error: 'type must be one of: Side, Entree, Drink, Appetizer' },
                 { status: 400 }
             );
         }
@@ -129,7 +129,7 @@ export async function DELETE(
         return NextResponse.json({ message: 'Recipe deleted successfully' }, { status: 200 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        
+
         // Handle database constraint errors
         if (errorMessage.includes('foreign key') || errorMessage.includes('violates foreign key')) {
             return NextResponse.json(

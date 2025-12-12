@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
 import { getCSTTimestamp, sortData } from "@/lib/utils";
 import {
@@ -22,6 +23,7 @@ import {
     TableCell,
 } from "@/app/components/ui/table";
 import { Inventory } from "@/lib/types";
+import { parseApiError } from "@/app/components/admin-error-utils";
 
 type InventoryItem = Inventory;
 
@@ -118,14 +120,19 @@ export default function AdminInventoryTab() {
             );
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to save inventory item");
+                const parsed = await parseApiError(res);
+                setInvError(parsed.message);
+                toast.error(parsed.message);
+                return;
             }
 
             await fetchInventory();
             setInvDialogOpen(false);
         } catch (err: unknown) {
-            setInvError(err instanceof Error ? err.message : "Unknown error");
+            const message =
+                err instanceof Error ? err.message : "Unknown error";
+            setInvError(message);
+            toast.error(message);
         } finally {
             setInvLoading(false);
         }
@@ -151,8 +158,10 @@ export default function AdminInventoryTab() {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to restock inventory");
+                const parsed = await parseApiError(res);
+                setInvError(parsed.message);
+                toast.error(parsed.message);
+                return;
             }
 
             // Create expense record
@@ -193,14 +202,19 @@ export default function AdminInventoryTab() {
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Failed to delete inventory item");
+                const parsed = await parseApiError(res);
+                setInvError(parsed.message);
+                toast.error(parsed.message);
+                return;
             }
 
             await fetchInventory();
             setInvDialogOpen(false);
         } catch (err: unknown) {
-            setInvError(err instanceof Error ? err.message : "Unknown error");
+            const message =
+                err instanceof Error ? err.message : "Unknown error";
+            setInvError(message);
+            toast.error(message);
         } finally {
             setInvLoading(false);
         }

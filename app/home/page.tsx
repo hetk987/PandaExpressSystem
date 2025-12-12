@@ -1,9 +1,8 @@
 "use client";
 
 import MealCard from "../components/app-mealcard";
-import { useSession } from "next-auth/react";
 import { useAccessibilityStyles } from "@/hooks/use-accessibility-styles";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import { ManagerGuard } from "@/app/components/manager-guard";
 
 const options = [
     { href: "build", title: "Build Your Own" },
@@ -14,40 +13,23 @@ const options = [
 ];
 
 export default function Home() {
-    const { data: session, status } = useSession();
     const { textClasses } = useAccessibilityStyles();
 
-    if (status === "loading") {
-        return (
-            <div className="min-h-screen flex flex-col items-center bg-neutral-50 p-10 w-full">
-                <Skeleton className="h-12 w-64 mb-8" />
-                <div className="grid grid-cols-5 gap-10 w-full max-w-6xl">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <Skeleton key={i} className="h-48 w-full rounded-lg" />
+    return (
+        <ManagerGuard>
+            <div className="flex flex-col">
+                <h1 className="sr-only">Menu Options</h1>
+                <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
+                    {options.map((item, i) => (
+                        <a href={`/home/${item.href}`} key={i}>
+                            <MealCard
+                                name={item.title}
+                                image={"/images/image.png"}
+                            />
+                        </a>
                     ))}
                 </div>
             </div>
-        );
-    }
-
-    if (!session) {
-        return (
-            <div className="min-h-screen flex items-center justify-center text-gray-600">
-                Redirecting to login...
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex flex-col">
-            <h1 className="sr-only">Menu Options</h1>
-            <div className="grid grid-cols-5 gap-10 p-10 w-full mb-10">
-                {options.map((item, i) => (
-                    <a href={`/home/${item.href}`} key={i}>
-                        <MealCard name={item.title} image={"/images/image.png"}/>
-                    </a>
-                ))}
-            </div>
-        </div>
+        </ManagerGuard>
     );
 }

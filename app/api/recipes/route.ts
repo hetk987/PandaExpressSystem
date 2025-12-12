@@ -53,9 +53,9 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-        if (body.type !== undefined && !['Side', 'Entree', 'Drink'].includes(body.type)) {
+        if (body.type !== undefined && !['Side', 'Entree', 'Drink', 'Appetizer'].includes(body.type)) {
             return NextResponse.json(
-                { error: 'type must be one of: Side, Entree, Drink' },
+                { error: 'type must be one of: Side, Entree, Drink, Appetizer' },
                 { status: 400 }
             );
         }

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { employees, orders, inventory, expenses, recipes, cooked, invRecJunc, recOrderJunc, roles } from "./schema";
+import { employees, orders, inventory, expenses, recipes, cooked, invRecJunc, recOrderJunc, zReportRuns, roles } from "./schema";
 
 export const ordersRelations = relations(orders, ({one, many}) => ({
 	employee: one(employees, {
@@ -11,6 +11,7 @@ export const ordersRelations = relations(orders, ({one, many}) => ({
 
 export const employeesRelations = relations(employees, ({one, many}) => ({
 	orders: many(orders),
+	zReportRuns: many(zReportRuns),
 	role: one(roles, {
 		fields: [employees.roleId],
 		references: [roles.id]
@@ -61,6 +62,13 @@ export const recOrderJuncRelations = relations(recOrderJunc, ({one}) => ({
 	order: one(orders, {
 		fields: [recOrderJunc.orderId],
 		references: [orders.id]
+	}),
+}));
+
+export const zReportRunsRelations = relations(zReportRuns, ({one}) => ({
+	employee: one(employees, {
+		fields: [zReportRuns.runBy],
+		references: [employees.id]
 	}),
 }));
 
