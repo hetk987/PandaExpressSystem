@@ -4,9 +4,10 @@ import { sum, sql, and, gte, lte, eq } from "drizzle-orm";
 
 export const getSalesReport = async (startDate, endDate) => {
     // Convert dates: start at beginning of start day, end at end of end day (inclusive)
-    // Parse as UTC to match database timestamps
-    const start = new Date(startDate + "T00:00:00.000Z");
-    const end = new Date(endDate + "T23:59:59.999Z");
+    // orderTime is stored in CST format (no timezone), so we need to create CST timestamps
+    // Format: YYYY-MM-DDTHH:mm:ss (CST time, no 'Z' suffix)
+    const start = startDate + "T00:00:00";
+    const end = endDate + "T23:59:59";
 
     const salesReport = await db
         .select({
@@ -20,17 +21,18 @@ export const getSalesReport = async (startDate, endDate) => {
         .where(
             and(
                 eq(orders.isCompleted, true),
-                gte(orders.orderTime, start.toISOString()),
-                lte(orders.orderTime, end.toISOString())
+                gte(orders.orderTime, start),
+                lte(orders.orderTime, end)
             )
         );
     return salesReport;
 };
 
 export const getHourlySalesReport = async (startDate, endDate) => {
+    // orderTime is stored in CST format (no timezone), so extract hour directly
     const hourlySalesReport = await db
         .select({
-            hour: sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`.as(
+            hour: sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`.as(
                 "hour"
             ),
             netSales: sum(orders.totalCost),
@@ -44,29 +46,33 @@ export const getHourlySalesReport = async (startDate, endDate) => {
             )
         )
         .groupBy(
-            sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`
+            sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`
         );
     return hourlySalesReport;
 };
 
 export const getHourlySales = async (day, startHour, endHour) => {
     // Build time window: [day@startHour, day@(endHour+1))  (end-exclusive)
-    // Parse as UTC date by adding 'T00:00:00Z' suffix
-    const startDate = new Date(day + "T00:00:00Z");
-    // Use UTC methods to set the hour
-    startDate.setUTCHours(startHour, 0, 0, 0);
-
-    const endDate = new Date(day + "T00:00:00Z");
+    // orderTime is stored in CST format (no timezone), so we create CST timestamps
+    // Format: YYYY-MM-DDTHH:mm:ss (CST time, no 'Z' suffix)
+    const formatHour = (h) => String(h).padStart(2, '0');
+    const startDate = `${day}T${formatHour(startHour)}:00:00`;
+    
+    let endDate;
     if (endHour === 23) {
-        endDate.setUTCDate(endDate.getUTCDate() + 1);
-        endDate.setUTCHours(0, 0, 0, 0);
+        // Next day at 00:00:00
+        const nextDay = new Date(day + "T00:00:00");
+        nextDay.setDate(nextDay.getDate() + 1);
+        const nextDayStr = nextDay.toISOString().split('T')[0];
+        endDate = `${nextDayStr}T00:00:00`;
     } else {
-        endDate.setUTCHours(endHour + 1, 0, 0, 0);
+        endDate = `${day}T${formatHour(endHour + 1)}:00:00`;
     }
 
     const hourlySalesData = await db
         .select({
-            hour: sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`.as(
+            // Extract hour directly from CST timestamp (orderTime is already in CST format)
+            hour: sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`.as(
                 "hour"
             ),
             netSales: sum(orders.totalCost),
@@ -75,12 +81,12 @@ export const getHourlySales = async (day, startHour, endHour) => {
         .where(
             and(
                 eq(orders.isCompleted, true),
-                gte(orders.orderTime, startDate.toISOString()),
-                lte(orders.orderTime, endDate.toISOString())
+                gte(orders.orderTime, startDate),
+                lte(orders.orderTime, endDate)
             )
         )
         .groupBy(
-            sql`EXTRACT(HOUR FROM (${orders.orderTime}::timestamp AT TIME ZONE 'UTC' AT TIME ZONE 'America/Chicago'))`
+            sql`EXTRACT(HOUR FROM ${orders.orderTime}::timestamp)`
         );
 
     // Collect into a map so we can zero-fill missing hours

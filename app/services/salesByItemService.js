@@ -4,9 +4,10 @@ import { sql, and, gte, lte, eq, sum } from "drizzle-orm";
 
 export const getSalesByItem = async (startDate, endDate) => {
     // Convert dates: start at beginning of start day, end at end of end day (inclusive)
-    // Parse as UTC to match database timestamps
-    const start = new Date(startDate + "T00:00:00.000Z");
-    const end = new Date(endDate + "T23:59:59.999Z");
+    // orderTime is stored in CST format (no timezone), so we need to create CST timestamps
+    // Format: YYYY-MM-DDTHH:mm:ss (CST time, no 'Z' suffix)
+    const start = startDate + "T00:00:00";
+    const end = endDate + "T23:59:59";
 
     // Query: orders -> recOrderJunc -> recipes
     // Group by recipe.id
@@ -28,8 +29,8 @@ export const getSalesByItem = async (startDate, endDate) => {
         .where(
             and(
                 eq(orders.isCompleted, true),
-                gte(orders.orderTime, start.toISOString()),
-                lte(orders.orderTime, end.toISOString())
+                gte(orders.orderTime, start),
+                lte(orders.orderTime, end)
             )
         )
         .groupBy(recipes.id, recipes.name, recipes.type);
