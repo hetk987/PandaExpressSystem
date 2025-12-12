@@ -128,6 +128,7 @@ export const recipes = pgTable("recipes", {
 	ordersPerBatch: integer().notNull(),
 	type: recipeType(),
 	premium: boolean().default(false),
+	seasonal: boolean().default(false),
 });
 
 export const mealTypes = pgTable("meal_types", {

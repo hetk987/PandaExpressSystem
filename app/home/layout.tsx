@@ -78,12 +78,22 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             kind: "meal" as const,
             name: meal.mealType,
             components: [
-                ...meal.selections.entrees.map((e) => e.recipeName),
-                ...meal.selections.sides.map((s) => s.recipeName),
-                ...meal.selections.drinks.map((d) => d.recipeName),
+                ...meal.selections.entrees.map((e) => ({
+                    name: e.recipeName,
+                    premium: Boolean(e.premium),
+                })),
+                ...meal.selections.sides.map((s) => ({
+                    name: s.recipeName,
+                    premium: Boolean(s.premium),
+                })),
+                ...meal.selections.drinks.map((d) => ({
+                    name: d.recipeName,
+                    premium: Boolean(d.premium),
+                })),
             ],
             quantity: meal.quantity,
             price: meal.price,
+            premiumUpcharge: meal.premiumUpcharge ?? 0,
         }));
 
         const individualItemDisplay = individualItems.map((item, index) => ({
@@ -92,6 +102,8 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             name: item.recipeName,
             quantity: item.quantity,
             price: item.price,
+            premiumUpcharge: 0,
+            components: [],
         }));
 
         return [...mealItems, ...individualItemDisplay];
@@ -565,10 +577,10 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                                                 x
                                                                             </span>
                                                                         </div>
-                                                                        <div
-                                                                            className={`text-right font-medium ${textClasses}`}
-                                                                        >
-                                                                            <span>
+                                                                        <div className="text-right">
+                                                                            <span
+                                                                                className={`font-medium ${textClasses}`}
+                                                                            >
                                                                                 $
                                                                                 {(
                                                                                     item.price *
@@ -587,15 +599,23 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                                                             {item.components.map(
                                                                                 (
                                                                                     c
+                                                                                ,
+                                                                                    idx
                                                                                 ) => (
                                                                                     <li
-                                                                                        key={
-                                                                                            c
-                                                                                        }
+                                                                                        key={`${c.name}-${idx}`}
+                                                                                        className="flex items-center gap-2"
                                                                                     >
-                                                                                        {
-                                                                                            c
-                                                                                        }
+                                                                                        <span>
+                                                                                            {
+                                                                                                c.name
+                                                                                            }
+                                                                                        </span>
+                                                                                        {c.premium && (
+                                                                                            <span className="text-xs text-amber-200">
+                                                                                                +$1.15
+                                                                                            </span>
+                                                                                        )}
                                                                                     </li>
                                                                                 )
                                                                             )}
