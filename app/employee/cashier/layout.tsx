@@ -9,6 +9,7 @@ import { CartProvider, useCart } from "@/app/providers/cart-provider";
 import { OrderInfo } from "@/lib/types";
 import { toast } from "sonner";
 import { fetchWeatherApi } from "openmeteo";
+import Link from "next/link";
 
 function CheckoutContent({ children }: { children: React.ReactNode }) {
     const { meals, individualItems, clearCart, removeMeal, removeIndividualItem } = useCart();
@@ -148,6 +149,12 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                 {/* Order Header */}
                 <div className="bg-tamu-maroon text-white p-3 flex items-center justify-between">
                     <h2 className="text-lg font-bold">Current Order</h2>
+                    <Link
+                        href="/employee/kitchen"
+                        className="px-3 py-1.5 bg-white hover:bg-white/90 text-tamu-maroon rounded-lg transition text-sm font-semibold"
+                    >
+                        Kitchen
+                    </Link>
                 </div>
 
                 {/* Order Items */}

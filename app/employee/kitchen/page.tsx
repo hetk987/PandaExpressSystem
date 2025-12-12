@@ -8,6 +8,7 @@ import { KitchenDrawer } from "@/app/components/app-kitchen-drawer";
 import type { Order, Cooked } from "@/lib/types";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import {signOut} from "next-auth/react";
+import Link from "next/link";
 
 export default function KitchenPage() {
     const [selectedMealType, setSelectedMealType] = useState<string>("All");
@@ -86,12 +87,26 @@ export default function KitchenPage() {
                             </button>
                         ))}
                     </div>
-                    <button
-                        onClick={() => signOut({ callbackUrl: "/login" })}
-                        className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800 transition"
-                    >
-                        Logout
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/employee/manager"
+                            className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800 transition"
+                        >
+                            Manager
+                        </Link>
+                        <Link
+                            href="/employee/cashier"
+                            className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800 transition"
+                        >
+                            Cashier
+                        </Link>
+                        <button
+                            onClick={() => signOut({ callbackUrl: "/login" })}
+                            className="px-4 py-2 bg-black text-white rounded-lg shadow hover:bg-gray-800 transition"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </div>
 
