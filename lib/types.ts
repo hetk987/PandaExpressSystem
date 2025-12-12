@@ -80,6 +80,7 @@ export type Recipe = {
     ordersPerBatch: number;
     type: RecipeType | null;
     premium: boolean;
+    seasonal?: boolean;
 }
 
 export type RecipeType = "Side" | "Entree" | "Drink" | "Appetizer";
@@ -87,6 +88,8 @@ export type RecipeType = "Side" | "Entree" | "Drink" | "Appetizer";
 export type RecipeSelection = {
     recipeId: number;
     recipeName: string;
+    premium?: boolean;
+    seasonal?: boolean;
 };
 
 export type MealSelections = {
@@ -100,6 +103,7 @@ export type MealOrder = {
     quantity: number;
     price: number;
     selections: MealSelections;
+    premiumUpcharge?: number;
 };
 
 export type IndividualItem = {

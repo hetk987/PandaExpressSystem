@@ -128,6 +128,29 @@ export default function Build({
         return Math.round((completed / total) * 100);
     }, [mealtype, mealSelections]);
 
+    const premiumSelections = useMemo(() => {
+        const allSelections = [
+            ...mealSelections.entrees,
+            ...mealSelections.sides,
+            ...mealSelections.drinks,
+        ];
+        return allSelections.filter((recipe) => recipe?.premium).length;
+    }, [mealSelections]);
+
+    const premiumUpcharge = useMemo(
+        () => premiumSelections * 1.15,
+        [premiumSelections]
+    );
+
+    const mealUnitPrice = useMemo(() => {
+        if (!mealtype) return 0;
+        return Number((mealtype.price + premiumUpcharge).toFixed(2));
+    }, [mealtype, premiumUpcharge]);
+
+    const totalPrice = useMemo(() => {
+        return Number((mealUnitPrice * quantity).toFixed(2));
+    }, [mealUnitPrice, quantity]);
+
     const handleRecipeClick = (recipe: Recipe) => {
         if (!selection) return;
 
@@ -196,14 +219,17 @@ export default function Build({
             entrees: mealSelections.entrees.map((r) => ({
                 recipeId: r.id!,
                 recipeName: r.name,
+                premium: r.premium,
             })),
             sides: mealSelections.sides.map((r) => ({
                 recipeId: r.id!,
                 recipeName: r.name,
+                premium: r.premium,
             })),
             drinks: mealSelections.drinks.map((r) => ({
                 recipeId: r.id!,
                 recipeName: r.name,
+                premium: r.premium,
             })),
         };
 
@@ -211,7 +237,8 @@ export default function Build({
             () => addMeal({
                 mealType: mealtype.typeName,
                 quantity: quantity,
-                price: mealtype.price,
+                price: mealUnitPrice,
+                premiumUpcharge: premiumUpcharge,
                 selections: selections,
             }),
             {
@@ -278,7 +305,7 @@ export default function Build({
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto">
                 {/* Header with progress */}
-                <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-neutral-200/50 px-8 py-4">
+                <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-200/50 px-8 py-4">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                             {(() => {
@@ -348,6 +375,8 @@ export default function Build({
                                     <MealCard
                                         name={item.name}
                                         image={item.image}
+                                        premium={item.premium}
+                                        seasonal={item.seasonal}
                                     />
                                 </button>
                             ))}
@@ -379,8 +408,7 @@ export default function Build({
                                                     textClasses
                                                 )}
                                             >
-                                                ${mealtype?.price.toFixed(2)}{" "}
-                                                each
+                                                ${mealUnitPrice.toFixed(2)} each
                                             </p>
                                         </div>
                                     </div>
@@ -415,18 +443,30 @@ export default function Build({
 
                                         <div className="h-8 w-px bg-neutral-200" />
 
-                                        <p
-                                            className={cn(
-                                                "text-xl font-bold text-neutral-900 min-w-[80px]",
-                                                textClasses
+                                        <div className="flex flex-col items-end">
+                                            <p
+                                                className={cn(
+                                                    "text-xl font-bold text-neutral-900 min-w-[80px]",
+                                                    textClasses
+                                                )}
+                                            >
+                                                $
+                                                {mealtype &&
+                                                    totalPrice.toFixed(2)}
+                                            </p>
+                                            {premiumSelections > 0 && (
+                                                <span
+                                                    className={cn(
+                                                        "text-xs text-neutral-500",
+                                                        textClasses
+                                                    )}
+                                                >
+                                                    Includes $
+                                                    {premiumUpcharge.toFixed(2)}{" "}
+                                                    premium add-on
+                                                </span>
                                             )}
-                                        >
-                                            $
-                                            {mealtype &&
-                                                (
-                                                    mealtype.price * quantity
-                                                ).toFixed(2)}
-                                        </p>
+                                        </div>
                                     </div>
 
                                     <div className="flex gap-3">
@@ -487,7 +527,7 @@ export default function Build({
                                     textClasses
                                 )}
                             >
-                                ${mealtype?.price.toFixed(2)}
+                                ${mealUnitPrice.toFixed(2)}
                             </p>
                         </div>
                     </div>

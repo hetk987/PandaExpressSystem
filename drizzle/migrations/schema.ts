@@ -144,6 +144,17 @@ export const employees = pgTable("employees", {
 	check("employees_isEmployed_check", sql`"isEmployed" = ANY (ARRAY[true, false])`),
 ]);
 
+export const recipes = pgTable("recipes", {
+	name: text().notNull(),
+	image: text(),
+	id: integer().primaryKey().generatedByDefaultAsIdentity({ name: "recipes_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647, cache: 1 }),
+	pricePerServing: real().notNull(),
+	ordersPerBatch: integer().notNull(),
+	type: recipeType(),
+	premium: boolean().default(false),
+	seasonal: boolean().default(false),
+});
+
 export const mealTypes = pgTable("meal_types", {
 	typeName: text().primaryKey().notNull(),
 	sides: integer().notNull(),

@@ -112,6 +112,7 @@ export default function AdminRecipesTab() {
             type: null,
             image: "",
             premium: false,
+            seasonal: false,
         });
         setIngredients([]);
         setRecError(null);
@@ -508,6 +509,19 @@ export default function AdminRecipesTab() {
                                 )}
                             </button>
                         </TableHead>
+                        <TableHead>
+                            <button
+                                onClick={() => handleSort("seasonal")}
+                                className="flex items-center gap-1 hover:text-primary cursor-pointer"
+                            >
+                                Seasonal
+                                {sortColumn === "seasonal" && (
+                                    <span>
+                                        {sortDirection === "asc" ? "↑" : "↓"}
+                                    </span>
+                                )}
+                            </button>
+                        </TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -540,6 +554,15 @@ export default function AdminRecipesTab() {
                                     }`}
                                 >
                                     {rec.premium ? "Premium" : "Standard"}
+                                </span>
+                            </TableCell>
+                            <TableCell>
+                                <span
+                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                        rec.seasonal ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                                    }`}
+                                >
+                                    {rec.seasonal ? "Seasonal" : "Standard"}
                                 </span>
                             </TableCell>
                             <TableCell className="text-right">
@@ -700,6 +723,33 @@ export default function AdminRecipesTab() {
                                                 )
                                             }
                                         />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <Label htmlFor="rec-seasonal">Seasonal Item</Label>
+                                        <div className="flex items-center gap-3 h-10">
+                                            <Switch
+                                                id="rec-seasonal"
+                                                checked={selectedRecipe.seasonal}
+                                                onCheckedChange={(checked) =>
+                                                    updateSelectedRecipe(
+                                                        "seasonal",
+                                                        checked
+                                                    )
+                                                }
+                                            />
+                                            <span
+                                                className={`text-sm ${
+                                                    selectedRecipe.seasonal
+                                                    ? "text-green-600 dark:text-green-400 font-medium"
+                                                    : "text-muted-foreground"
+                                                }`}
+                                            >
+                                                {selectedRecipe.seasonal
+                                                    ? "Seasonal"
+                                                    : "Standard"}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     <div className="space-y-1">

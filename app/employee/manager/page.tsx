@@ -2,6 +2,7 @@
 
 import AdminTabsCard from "@/app/components/admin-tabs-card";
 import Image from "next/image";
+import Link from "next/link";
 import { ManagerGuard } from "@/app/components/manager-guard";
 
 export default function Page() {

@@ -79,12 +79,22 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             kind: "meal" as const,
             name: meal.mealType,
             components: [
-                ...meal.selections.entrees.map((e) => e.recipeName),
-                ...meal.selections.sides.map((s) => s.recipeName),
-                ...meal.selections.drinks.map((d) => d.recipeName),
+                ...meal.selections.entrees.map((e) => ({
+                    name: e.recipeName,
+                    premium: Boolean(e.premium),
+                })),
+                ...meal.selections.sides.map((s) => ({
+                    name: s.recipeName,
+                    premium: Boolean(s.premium),
+                })),
+                ...meal.selections.drinks.map((d) => ({
+                    name: d.recipeName,
+                    premium: Boolean(d.premium),
+                })),
             ],
             quantity: meal.quantity,
             price: meal.price,
+            premiumUpcharge: meal.premiumUpcharge ?? 0,
         }));
 
         const individualItemDisplay = individualItems.map((item, index) => ({
@@ -93,6 +103,8 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
             name: item.recipeName,
             quantity: item.quantity,
             price: item.price,
+            premiumUpcharge: 0,
+            components: [],
         }));
 
         return [...mealItems, ...individualItemDisplay];
@@ -529,97 +541,120 @@ function CheckoutContent({ children }: { children: React.ReactNode }) {
                                     </SheetTitle>
                                 </SheetHeader>
 
-                                <div className="flex flex-col gap-4 p-4">
-                                    <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
-                                        {orderItems.length === 0 ? (
-                                            <div className="px-4 py-8 text-center text-white/70">
-                                                <p className={textClasses}>
-                                                    Your cart is empty
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <div className="divide-y divide-white/10">
-                                                {orderItems.map((item) => (
-                                                    <div
-                                                        key={item.id}
-                                                        className="px-4 py-3 relative"
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-2">
-                                                                <span
-                                                                    className={`font-semibold ${textClasses}`}
-                                                                >
-                                                                    {item.kind ===
-                                                                    "meal"
-                                                                        ? item.name
-                                                                        : "Individual A-la-carte"}
-                                                                </span>
-                                                                <span
-                                                                    className={`text-xs text-white/70 ${textClasses}`}
-                                                                >
-                                                                    {
-                                                                        item.quantity
-                                                                    }
-                                                                    x
-                                                                </span>
-                                                            </div>
-                                                            <div
-                                                                className={`text-right font-medium ${textClasses}`}
-                                                            >
-                                                                <span>
-                                                                    $
-                                                                    {(
-                                                                        item.price *
-                                                                        item.quantity
-                                                                    ).toFixed(
-                                                                        2
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        {item.kind ===
-                                                            "meal" && (
-                                                            <ul
-                                                                className={`mt-1 list-disc list-inside text-sm text-white/85 ${textClasses}`}
-                                                            >
-                                                                {item.components.map(
-                                                                    (c) => (
-                                                                        <li
-                                                                            key={
-                                                                                c
-                                                                            }
-                                                                        >
-                                                                            {c}
-                                                                        </li>
-                                                                    )
-                                                                )}
-                                                            </ul>
-                                                        )}
-                                                        {item.kind ===
-                                                            "ala" && (
-                                                            <div
-                                                                className={`mt-1 text-sm text-white/85 ${textClasses}`}
-                                                            >
-                                                                {item.name}
-                                                            </div>
-                                                        )}
-                                                        <Button
-                                                            onClick={() =>
-                                                                handleRemoveItem(
-                                                                    item
-                                                                )
+                                        <div className="flex flex-col gap-4 p-4">
+                                            <div className="max-h-64 overflow-y-auto rounded-md bg-white/5">
+                                                {orderItems.length === 0 ? (
+                                                    <div className="px-4 py-8 text-center text-white/70">
+                                                        <p
+                                                            className={
+                                                                textClasses
                                                             }
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
+                                                            Your cart is empty
+                                                        </p>
                                                     </div>
-                                                ))}
+                                                ) : (
+                                                    <div className="divide-y divide-white/10">
+                                                        {orderItems.map(
+                                                            (item) => (
+                                                                <div
+                                                                    key={
+                                                                        item.id
+                                                                    }
+                                                                    className="px-4 py-3 relative"
+                                                                >
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span
+                                                                                className={`font-semibold ${textClasses}`}
+                                                                            >
+                                                                                {item.kind ===
+                                                                                "meal"
+                                                                                    ? item.name
+                                                                                    : "Individual A-la-carte"}
+                                                                            </span>
+                                                                            <span
+                                                                                className={`text-xs text-white/70 ${textClasses}`}
+                                                                            >
+                                                                                {
+                                                                                    item.quantity
+                                                                                }
+
+                                                                                x
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="text-right">
+                                                                            <span
+                                                                                className={`font-medium ${textClasses}`}
+                                                                            >
+                                                                                $
+                                                                                {(
+                                                                                    item.price *
+                                                                                    item.quantity
+                                                                                ).toFixed(
+                                                                                    2
+                                                                                )}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    {item.kind ===
+                                                                        "meal" && (
+                                                                        <ul
+                                                                            className={`mt-1 list-disc list-inside text-sm text-white/85 ${textClasses}`}
+                                                                        >
+                                                                            {item.components.map(
+                                                                                (
+                                                                                    c
+                                                                                ,
+                                                                                    idx
+                                                                                ) => (
+                                                                                    <li
+                                                                                        key={`${c.name}-${idx}`}
+                                                                                        className="flex items-center gap-2"
+                                                                                    >
+                                                                                        <span>
+                                                                                            {
+                                                                                                c.name
+                                                                                            }
+                                                                                        </span>
+                                                                                        {c.premium && (
+                                                                                            <span className="text-xs text-amber-200">
+                                                                                                +$1.15
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </li>
+                                                                                )
+                                                                            )}
+                                                                        </ul>
+                                                                    )}
+                                                                    {item.kind ===
+                                                                        "ala" && (
+                                                                        <div
+                                                                            className={`mt-1 text-sm text-white/85 ${textClasses}`}
+                                                                        >
+                                                                            {
+                                                                                item.name
+                                                                            }
+                                                                        </div>
+                                                                    )}
+                                                                    <Button
+                                                                        onClick={() =>
+                                                                            handleRemoveItem(
+                                                                                item
+                                                                            )
+                                                                        }
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="absolute bottom-2 right-2 h-6 w-6 text-white/70 hover:text-white hover:bg-white/20 cursor-pointer"
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
-                                    </div>
 
                                     <div className="space-y-2 rounded-md bg-white/5 p-4">
                                         <div

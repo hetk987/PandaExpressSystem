@@ -6,8 +6,7 @@ import { CartProvider, useCart } from "@/app/providers/cart-provider";
 import Image from "next/image";
 import { CheckCircle, Copy, Check } from "lucide-react";
 
-function LogoutContent({ params }: { params: Promise<{ id: string }> }) {
-    const { id: orderId } = use(params);
+function LogoutContent({ id: orderId }: { id: string }) {
     const router = useRouter();
     const [loaded, setLoaded] = useState(false);
     const [showCheckmark, setShowCheckmark] = useState(false);
@@ -209,9 +208,10 @@ export default function LogoutPage({
 }: {
     params: Promise<{ id: string }>;
 }) {
+    const { id } = use(params);
     return (
         <CartProvider>
-            <LogoutContent params={params} />
+            <LogoutContent id={id} />
         </CartProvider>
     );
 }
