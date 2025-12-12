@@ -234,13 +234,14 @@ export default function Build({
         };
 
         const success = await addMealWithToast(
-            () => addMeal({
-                mealType: mealtype.typeName,
-                quantity: quantity,
-                price: mealUnitPrice,
-                premiumUpcharge: premiumUpcharge,
-                selections: selections,
-            }),
+            () =>
+                addMeal({
+                    mealType: mealtype.typeName,
+                    quantity: quantity,
+                    price: mealUnitPrice,
+                    premiumUpcharge: premiumUpcharge,
+                    selections: selections,
+                }),
             {
                 onSuccess: () => {
                     // Reset selections and quantity
@@ -363,24 +364,102 @@ export default function Build({
 
                 {/* Recipe Grid */}
                 <div className="p-8">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                        {recipes
-                            .filter((r) => r.type === currentMenu)
-                            .map((item, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => handleRecipeClick(item)}
-                                    className="cursor-pointer transition-transform duration-200 active:scale-95"
-                                >
-                                    <MealCard
-                                        name={item.name}
-                                        image={item.image}
-                                        premium={item.premium}
-                                        seasonal={item.seasonal}
-                                    />
-                                </button>
-                            ))}
-                    </div>
+                    {currentMenu === "Entree" &&
+                    mealtype &&
+                    mealtype.sides > 0 ? (
+                        // Show both Entrees and Sides when in Entree section
+                        <div className="space-y-12">
+                            {/* Entrees Section */}
+                            <div>
+                                <div className="flex items-center gap-2 mb-6">
+                                    <ChefHat className="size-5 text-tamu-maroon" />
+                                    <h3
+                                        className={cn(
+                                            "text-xl font-bold text-neutral-900",
+                                            textClasses
+                                        )}
+                                    >
+                                        Entrees
+                                    </h3>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                    {recipes
+                                        .filter((r) => r.type === "Entree")
+                                        .map((item, i) => (
+                                            <button
+                                                key={`entree-${i}`}
+                                                onClick={() =>
+                                                    handleRecipeClick(item)
+                                                }
+                                                className="cursor-pointer transition-transform duration-200 active:scale-95"
+                                            >
+                                                <MealCard
+                                                    name={item.name}
+                                                    image={item.image}
+                                                    premium={item.premium}
+                                                    seasonal={item.seasonal}
+                                                />
+                                            </button>
+                                        ))}
+                                </div>
+                            </div>
+
+                            {/* Sides Section */}
+                            <div>
+                                <div className="flex items-center gap-2 mb-6">
+                                    <Salad className="size-5 text-tamu-maroon" />
+                                    <h3
+                                        className={cn(
+                                            "text-xl font-bold text-neutral-900",
+                                            textClasses
+                                        )}
+                                    >
+                                        Sides Substitute
+                                    </h3>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                    {recipes
+                                        .filter((r) => r.type === "Side")
+                                        .map((item, i) => (
+                                            <button
+                                                key={`side-${i}`}
+                                                onClick={() =>
+                                                    handleRecipeClick(item)
+                                                }
+                                                className="cursor-pointer transition-transform duration-200 active:scale-95"
+                                            >
+                                                <MealCard
+                                                    name={item.name}
+                                                    image={item.image}
+                                                    premium={item.premium}
+                                                    seasonal={item.seasonal}
+                                                />
+                                            </button>
+                                        ))}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        // Show single section for Side, Drink, or Entree without sides
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                            {recipes
+                                .filter((r) => r.type === currentMenu)
+                                .map((item, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handleRecipeClick(item)}
+                                        className="cursor-pointer transition-transform duration-200 active:scale-95"
+                                    >
+                                        <MealCard
+                                            name={item.name}
+                                            image={item.image}
+                                            premium={item.premium}
+                                            seasonal={item.seasonal}
+                                        />
+                                    </button>
+                                ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Bottom Action Bar - Only when complete */}
@@ -505,7 +584,10 @@ export default function Build({
             </div>
 
             {/* Right Sidebar - Selection Summary */}
-            <aside className="w-80 h-full border-l border-neutral-200/50 bg-gradient-to-b from-white to-neutral-50/50 backdrop-blur-sm flex flex-col" aria-label="Meal selection summary">
+            <aside
+                className="w-80 h-full border-l border-neutral-200/50 bg-gradient-to-b from-white to-neutral-50/50 backdrop-blur-sm flex flex-col"
+                aria-label="Meal selection summary"
+            >
                 {/* Sidebar Header */}
                 <div className="p-6 border-b border-neutral-200/50">
                     <div className="flex items-center gap-3 mb-2">
