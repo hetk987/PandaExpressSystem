@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getCSTTimestamp } from '@/lib/utils';
-import { OrderInfo } from '@/lib/types';
-import { createOrder } from '@/app/services/orderService';
 
 // Validate Stripe secret key
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -107,94 +104,78 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Prepare order info
-        const orderInfo: OrderInfo = {
+        // Prepare order data to store in Stripe metadata
+        // We'll create the order only after successful payment
+        const orderData = {
             meals: meals,
             individualItems: individualItems,
+            tax: tax,
+            total: total,
+            customerEmail: customerEmail || undefined,
         };
 
-        const orderTime = getCSTTimestamp();
-        const cashierId = 2; // Default cashier ID for customer orders
-
-        // Create the order in the database first (with isCompleted: false)
-        // This allows us to pass only the order ID in Stripe metadata instead of the full order data
-        // Direct service call avoids HTTP/HTTPS protocol issues in production
-        console.log(`[${requestId}] [CHECKOUT] Creating order in database...`);
-        try {
-            const order = await createOrder({
-                tax: tax,
-                totalCost: total,
-                orderTime: orderTime,
-                cashierId: cashierId,
-                orderInfo: orderInfo,
-                isCompleted: false,
-                customerEmail: customerEmail || undefined,
-            });
-
-            const orderId = order.id;
-            console.log(`[${requestId}] [CHECKOUT] Order created successfully - ID: ${orderId}`);
-
-            // Get base URL for callbacks
-            // Priority: NEXTAUTH_URL > request origin > fallback
-            // In production, we need to ensure we use HTTPS and the correct domain
-            let baseUrl = process.env.NEXTAUTH_URL;
-            
-            // If NEXTAUTH_URL is not set, use the request origin
-            if (!baseUrl) {
-                const origin = request.headers.get('origin') || request.nextUrl.origin;
-                baseUrl = origin;
-                console.log(`[${requestId}] [CHECKOUT] WARNING: NEXTAUTH_URL not set, using request origin: ${baseUrl}`);
-            }
-            
-            // Ensure we have a valid URL (should never be undefined at this point)
-            if (!baseUrl) {
-                throw new Error('Unable to determine base URL for Stripe callbacks. Please set NEXTAUTH_URL environment variable.');
-            }
-            
-            // Ensure the URL doesn't have a trailing slash
-            baseUrl = baseUrl.replace(/\/$/, '');
-            
-            // Validate that we're not using localhost in production
-            if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
-                console.error(`[${requestId}] [CHECKOUT] ERROR: Base URL is localhost in production! This will cause Stripe redirect issues.`);
-                console.error(`[${requestId}] [CHECKOUT] Please set NEXTAUTH_URL to your production URL: https://panda-pos-nrtf.onrender.com`);
-            }
-            
-            const successUrl = `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
-            const cancelUrl = `${baseUrl}/api/checkout/cancel`;
-            
-            console.log(`[${requestId}] [CHECKOUT] Base URL resolved: ${baseUrl}`);
-            console.log(`[${requestId}] [CHECKOUT] Success URL: ${successUrl}`);
-            console.log(`[${requestId}] [CHECKOUT] Cancel URL: ${cancelUrl}`);
-            console.log(`[${requestId}] [CHECKOUT] Creating Stripe checkout session with ${lineItems.length} line items...`);
-
-            // Create Stripe checkout session with only order ID in metadata
-            const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
-                line_items: lineItems,
-                mode: 'payment',
-                success_url: successUrl,
-                cancel_url: cancelUrl,
-                metadata: {
-                    orderId: orderId.toString(),
-                },
-            });
-
-            console.log(`[${requestId}] [CHECKOUT] Stripe session created successfully - Session ID: ${session.id}`);
-            return NextResponse.json({ url: session.url }, { status: 200 });
-        } catch (orderError) {
-            const errorMessage = orderError instanceof Error ? orderError.message : 'Unknown error';
-            const errorStack = orderError instanceof Error ? orderError.stack : 'No stack trace';
-            console.error(`[${requestId}] [CHECKOUT] ERROR: Failed to create order:`, {
-                message: errorMessage,
-                stack: errorStack,
-                error: orderError
-            });
+        // Store order data as JSON string in Stripe metadata
+        // Stripe metadata has a 500 character limit per key, so we'll use a single key
+        const orderDataJson = JSON.stringify(orderData);
+        
+        // Check if order data exceeds Stripe metadata limits
+        if (orderDataJson.length > 500) {
+            console.error(`[${requestId}] [CHECKOUT] ERROR: Order data too large for Stripe metadata (${orderDataJson.length} chars, max 500)`);
             return NextResponse.json(
-                { error: 'Failed to create order', details: errorMessage },
-                { status: 500 }
+                { error: 'Order data too large. Please reduce the number of items.' },
+                { status: 400 }
             );
         }
+
+        // Get base URL for callbacks
+        // Priority: NEXTAUTH_URL > request origin > fallback
+        // In production, we need to ensure we use HTTPS and the correct domain
+        let baseUrl = process.env.NEXTAUTH_URL;
+        
+        // If NEXTAUTH_URL is not set, use the request origin
+        if (!baseUrl) {
+            const origin = request.headers.get('origin') || request.nextUrl.origin;
+            baseUrl = origin;
+            console.log(`[${requestId}] [CHECKOUT] WARNING: NEXTAUTH_URL not set, using request origin: ${baseUrl}`);
+        }
+        
+        // Ensure we have a valid URL (should never be undefined at this point)
+        if (!baseUrl) {
+            throw new Error('Unable to determine base URL for Stripe callbacks. Please set NEXTAUTH_URL environment variable.');
+        }
+        
+        // Ensure the URL doesn't have a trailing slash
+        baseUrl = baseUrl.replace(/\/$/, '');
+        
+        // Validate that we're not using localhost in production
+        if (baseUrl.includes('localhost') && process.env.NODE_ENV === 'production') {
+            console.error(`[${requestId}] [CHECKOUT] ERROR: Base URL is localhost in production! This will cause Stripe redirect issues.`);
+            console.error(`[${requestId}] [CHECKOUT] Please set NEXTAUTH_URL to your production URL: https://panda-pos-nrtf.onrender.com`);
+        }
+        
+        const successUrl = `${baseUrl}/api/checkout/success?session_id={CHECKOUT_SESSION_ID}`;
+        const cancelUrl = `${baseUrl}/api/checkout/cancel`;
+        
+        console.log(`[${requestId}] [CHECKOUT] Base URL resolved: ${baseUrl}`);
+        console.log(`[${requestId}] [CHECKOUT] Success URL: ${successUrl}`);
+        console.log(`[${requestId}] [CHECKOUT] Cancel URL: ${cancelUrl}`);
+        console.log(`[${requestId}] [CHECKOUT] Creating Stripe checkout session with ${lineItems.length} line items...`);
+
+        // Create Stripe checkout session with order data in metadata
+        // Order will be created only after successful payment
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: lineItems,
+            mode: 'payment',
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            metadata: {
+                orderData: orderDataJson,
+            },
+        });
+
+        console.log(`[${requestId}] [CHECKOUT] Stripe session created successfully - Session ID: ${session.id}`);
+        return NextResponse.json({ url: session.url }, { status: 200 });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         const errorStack = error instanceof Error ? error.stack : 'No stack trace';
