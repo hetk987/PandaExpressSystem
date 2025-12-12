@@ -87,7 +87,12 @@ export default function Home() {
                             onClick={() => handleRecipeClick(item)}
                             className="cursor-pointer"
                         >
-                            <MealCard name={item.name} image={item.image} />
+                            <MealCard
+                                name={item.name}
+                                image={item.image}
+                                premium={item.premium}
+                                seasonal={item.seasonal}
+                            />
                         </button>
                     ))}
             </div>
