@@ -89,6 +89,7 @@ export type RecipeSelection = {
     recipeId: number;
     recipeName: string;
     premium?: boolean;
+    seasonal?: boolean;
 };
 
 export type MealSelections = {
