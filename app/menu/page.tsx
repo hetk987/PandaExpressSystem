@@ -4,6 +4,7 @@ import type { Recipe, MealType } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { ManagerGuard } from "@/app/components/manager-guard";
+import { cn } from "@/lib/utils";
 
 export default function KitchenPage() {
     const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -60,28 +61,89 @@ export default function KitchenPage() {
 
     const price = (n: number) => n.toFixed(2);
 
-    const itemCard = (name: string, cost: number, image: string | null) => (
-        <div className="group relative bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.05] border border-stone-100">
-            <div className="relative w-full h-40 bg-gradient-to-br from-stone-50 to-stone-100 overflow-hidden">
-                <img
-                    src={
-                        image ||
-                        "/placeholder.svg?height=160&width=160&query=food"
-                    }
-                    alt={name}
-                    className="w-full h-full object-contain object-center p-2 transition-transform duration-300 group-hover:scale-110"
-                />
-                <div className="absolute top-0 right-0 bg-[#ce123d] text-white px-3 py-1 text-xs font-bold rounded-bl-lg">
-                    ${price(cost)}
-                </div>
-            </div>
-            <div className="p-3 bg-white">
-                <p className="text-sm font-bold text-stone-900 line-clamp-2 leading-tight">
-                    {name}
-                </p>
+    // Side badge component that expands on hover (expands right into the card)
+    const SideBadge = ({
+        text,
+        fullText,
+        color,
+    }: {
+        text: string;
+        fullText: string;
+        color: string;
+    }) => (
+        <div className="group/badge flex items-center">
+            <div
+                className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded-r-md shadow-lg",
+                    color,
+                    "text-white text-xs font-extrabold",
+                    "transition-all duration-300 ease-out",
+                    "w-6 group-hover/badge:w-20",
+                    "overflow-hidden"
+                )}
+            >
+                <span className="text-sm shrink-0 group-hover/badge:hidden">
+                    {text}
+                </span>
+                <span className="whitespace-nowrap opacity-0 group-hover/badge:opacity-100 transition-opacity duration-300">
+                    {fullText}
+                </span>
             </div>
         </div>
     );
+
+    const itemCard = (
+        name: string,
+        cost: number,
+        image: string | null,
+        premium: boolean = false,
+        seasonal: boolean = false
+    ) => {
+        const isPremium = Boolean(premium);
+        const isSeasonal = Boolean(seasonal);
+
+        return (
+            <div className="group relative bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.05] border border-stone-100">
+                <div className="relative w-full h-40 bg-gradient-to-br from-stone-50 to-stone-100 overflow-hidden">
+                    <img
+                        src={
+                            image ||
+                            "/placeholder.svg?height=160&width=160&query=food"
+                        }
+                        alt={name}
+                        className="w-full h-full object-contain object-center p-2 transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <div className="absolute top-0 right-0 bg-[#ce123d] text-white px-3 py-1 text-xs font-bold rounded-bl-lg z-10">
+                        ${price(cost)}
+                    </div>
+                    {/* Side badges container - positioned on left side, expand right into card */}
+                    {(isPremium || isSeasonal) && (
+                        <div className="absolute left-0 top-0 z-10 flex flex-col gap-1">
+                            {isSeasonal && (
+                                <SideBadge
+                                    text="🎄"
+                                    fullText="Seasonal"
+                                    color="bg-green-600"
+                                />
+                            )}
+                            {isPremium && (
+                                <SideBadge
+                                    text="P"
+                                    fullText="Premium"
+                                    color="bg-amber-500"
+                                />
+                            )}
+                        </div>
+                    )}
+                </div>
+                <div className="p-3 bg-white">
+                    <p className="text-sm font-bold text-stone-900 line-clamp-2 leading-tight">
+                        {name}
+                    </p>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <ManagerGuard>
@@ -187,7 +249,9 @@ export default function KitchenPage() {
                                         {itemCard(
                                             r.name,
                                             r.pricePerServing,
-                                            r.image
+                                            r.image,
+                                            r.premium ?? false,
+                                            r.seasonal ?? false
                                         )}
                                     </div>
                                 ))}
@@ -212,7 +276,9 @@ export default function KitchenPage() {
                                             {itemCard(
                                                 r.name,
                                                 r.pricePerServing,
-                                                r.image
+                                                r.image,
+                                                r.premium ?? false,
+                                                r.seasonal ?? false
                                             )}
                                         </div>
                                     ))}
@@ -235,7 +301,9 @@ export default function KitchenPage() {
                                             {itemCard(
                                                 r.name,
                                                 r.pricePerServing,
-                                                r.image
+                                                r.image,
+                                                r.premium ?? false,
+                                                r.seasonal ?? false
                                             )}
                                         </div>
                                     ))}
