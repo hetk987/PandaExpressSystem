@@ -31,6 +31,12 @@ export default function Page() {
                                     </p>
                                 </div>
                             </div>
+                            <Link
+                                href="/employee/kitchen"
+                                className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-md hover:bg-muted/50"
+                            >
+                                Kitchen
+                            </Link>
                         </div>
                     </div>
                 </header>
