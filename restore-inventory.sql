@@ -51,3 +51,5 @@ ON CONFLICT ("name") DO UPDATE
 SET "batchPurchaseCost" = EXCLUDED."batchPurchaseCost",
     "currentStock" = EXCLUDED."currentStock",
     "estimatedUsedPerDay" = EXCLUDED."estimatedUsedPerDay";
+
+
