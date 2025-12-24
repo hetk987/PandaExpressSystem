@@ -61,8 +61,35 @@ function LoginContent() {
 
     const resetPin = () => setPin("");
 
+    // Check if demo mode is enabled
+    // Show sticky note if NEXT_PUBLIC_DEMO_MODE is "true" or NEXT_PUBLIC_DEMO_PIN is set
+    const demoPinEnv = process.env.NEXT_PUBLIC_DEMO_PIN;
+    const demoModeEnv = process.env.NEXT_PUBLIC_DEMO_MODE;
+    const demoPin = demoPinEnv || "9999";
+    const isDemoMode = demoModeEnv === "true" || (demoPinEnv !== undefined && demoPinEnv !== "");
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6">
+        <div className="min-h-screen flex items-center justify-center bg-neutral-100 p-6 relative">
+            {/* Demo PIN Sticky Note */}
+            {isDemoMode && (
+                <div className="absolute top-6 right-6 z-10 transform rotate-[-3deg] hover:rotate-0 transition-transform duration-200">
+                    <div className="bg-yellow-200 shadow-lg border-2 border-yellow-300 rounded-lg p-4 max-w-[200px] relative">
+                        {/* Sticky note tape effect */}
+                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-12 h-4 bg-yellow-300/50 rounded-sm"></div>
+                        <div className="space-y-2">
+                            <p className="text-xs font-bold text-yellow-900 uppercase tracking-wide">
+                                Demo Mode
+                            </p>
+                            <div className="border-t border-yellow-400/30 pt-2">
+                                <p className="text-xs text-yellow-800 mb-1">Demo PIN:</p>
+                                <p className="text-2xl font-mono font-bold text-yellow-900 text-center bg-yellow-100 rounded px-2 py-1">
+                                    {demoPin}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <Card className="w-full max-w-md border-2 shadow-lg">
                 <CardHeader className="space-y-4 text-center">
                     <div className="flex justify-center">
