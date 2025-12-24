@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { verifyGoogleEmail } from "@/app/services/authService";
+import { verifyGoogleEmail, verifyLoginPassword } from "@/app/services/authService";
 
 const handler = NextAuth({
     providers: [
@@ -15,17 +15,12 @@ const handler = NextAuth({
             credentials: { password: { label: "PIN", type: "password" } },
             async authorize(credentials) {
                 const pin = credentials?.password;
+                if (!pin) return null;
 
-                const res = await fetch(process.env.NEXTAUTH_URL + "/api/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ password: pin }),
-                });
+                const user = await verifyLoginPassword(pin);
+                if (!user) return null;
 
-                const data = await res.json();
-                if (!res.ok) return null;
-
-                return { id: data.id, name: data.name, roleId: data.roleId };
+                return { id: user.id, name: user.name, roleId: user.roleId };
             },
         }),
     ],
