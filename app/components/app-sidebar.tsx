@@ -18,7 +18,10 @@ import {
   ChefHat,
   Accessibility,
   Sparkles,
-  MessageCircle
+  MessageCircle,
+  LogIn,
+  BookOpen,
+  Menu
 } from "lucide-react"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
@@ -185,13 +188,102 @@ export function AppSidebar({
                   }
                 />
               </SidebarMenuItem>
+
+              {/* Menu Page Link */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  tooltip="View Full Menu"
+                  isActive={pathname === "/menu"}
+                  size="lg"
+                  className={cn(
+                    "relative text-white/90 rounded-xl transition-all duration-300 ease-out",
+                    "hover:text-white hover:bg-white/12 hover:shadow-lg hover:scale-[1.02]",
+                    "hover:border-white/20",
+                    "backdrop-blur-sm border border-transparent",
+                    "data-[active=true]:bg-white/18 data-[active=true]:text-white",
+                    "data-[active=true]:border-white/25 data-[active=true]:shadow-[0_0_20px_rgba(255,255,255,0.15)]",
+                    "data-[active=true]:scale-[1.02]",
+                    textClasses
+                  )}
+                >
+                  <a href="/menu" className="flex items-center gap-3">
+                    <div className={cn(
+                      "flex items-center justify-center size-9 rounded-lg transition-all duration-300",
+                      pathname === "/menu"
+                        ? "bg-white/20 shadow-inner" 
+                        : "bg-white/5 group-hover:bg-white/15"
+                    )}>
+                      <Menu className="size-5" />
+                    </div>
+                    <span className="font-medium">Full Menu</span>
+                    {pathname === "/menu" && (
+                      <div className="absolute right-3 size-2 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
+                    )}
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Docs Page Link */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  tooltip="Documentation"
+                  isActive={pathname === "/docs"}
+                  size="lg"
+                  className={cn(
+                    "relative text-white/90 rounded-xl transition-all duration-300 ease-out",
+                    "hover:text-white hover:bg-white/12 hover:shadow-lg hover:scale-[1.02]",
+                    "hover:border-white/20",
+                    "backdrop-blur-sm border border-transparent",
+                    "data-[active=true]:bg-white/18 data-[active=true]:text-white",
+                    "data-[active=true]:border-white/25 data-[active=true]:shadow-[0_0_20px_rgba(255,255,255,0.15)]",
+                    "data-[active=true]:scale-[1.02]",
+                    textClasses
+                  )}
+                >
+                  <a href="/docs" className="flex items-center gap-3">
+                    <div className={cn(
+                      "flex items-center justify-center size-9 rounded-lg transition-all duration-300",
+                      pathname === "/docs"
+                        ? "bg-white/20 shadow-inner" 
+                        : "bg-white/5 group-hover:bg-white/15"
+                    )}>
+                      <BookOpen className="size-5" />
+                    </div>
+                    <span className="font-medium">Documentation</span>
+                    {pathname === "/docs" && (
+                      <div className="absolute right-3 size-2 rounded-full bg-white/80 shadow-[0_0_8px_rgba(255,255,255,0.6)]" />
+                    )}
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
       {/* Footer with subtle glass effect */}
-      <SidebarFooter className="border-t border-white/10 bg-white/5 backdrop-blur-sm py-3 h-20 flex items-center justify-center">
+      <SidebarFooter className="border-t border-white/10 bg-white/5 backdrop-blur-sm py-3 flex flex-col items-center justify-center gap-2">
+        {/* Employee Login Button - Small */}
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              size="sm"
+              className={cn(
+                "text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-300",
+                "backdrop-blur-sm border border-white/20",
+                textClasses
+              )}
+            >
+              <a href="/login" className="flex items-center gap-2 px-3 py-1.5">
+                <LogIn className="size-4" />
+                <span className="text-xs font-medium">Employee</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="sm" className="hover:bg-transparent">
